@@ -1989,6 +1989,7 @@ function renderModal(){
   else if(tipo==='registrarBonificacion') contenido=modalBonificacion(id,extra);
   else if(tipo==='ajustarSaldo') contenido=modalAjustarSaldo(id,extra);
   else if(tipo==='abono') contenido=modalAbono(id);
+  else if(tipo==='detalleDeudaCliente') contenido=modalDetalleDeudaCliente(id);
   else if(tipo==='abrirTurno') contenido=modalAbrirTurno();
   else if(tipo==='cerrarTurno') contenido=modalCerrarTurno(id);
   else if(tipo==='nuevoGasto') contenido=modalGasto();
@@ -2842,6 +2843,109 @@ function modalAbono(clienteId){
       <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
       <button class="btn btn-success" onclick="confirmarAbono('${clienteId}')">Registrar cobro</button>
     </div>`;
+}
+
+  function modalDetalleDeudaCliente(clienteId){
+  const c = state.clientes.find(x=>x.id===clienteId);
+  if(!c) return '<div class="empty">Cliente no encontrado</div>';
+
+  const deudaIni = deudaInicialCliente(clienteId);
+  const deudaVtas = deudaVentasCliente(clienteId);
+  const deudaTotal = num2(deudaIni + deudaVtas);
+  const vencida = deudaVencida(clienteId);
+  const pendientes = ventasPendientesCliente(clienteId);
+  const abonos = state.abonos
+    .filter(a => a.clienteId===clienteId && !a.anulado)
+    .slice().reverse();
+
+  return `
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Detalle de deuda · ${esc(c.nombre)}</div>
+        <div class="card-subtitle">${esc(c.comunidad||'')}${c.tel?' · Tel. '+esc(c.tel):''}</div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+
+    <div class="deuda-banner" style="margin-bottom:16px">
+      <div>
+        <div class="deuda-banner-label">Deuda total</div>
+        ${vencida>0
+          ? `<div class="deuda-banner-sub">${money(vencida)} vencido</div>`
+          : `<div class="deuda-banner-sub">Sin vencidos</div>`}
+      </div>
+      <div class="deuda-banner-value">${money(deudaTotal)}</div>
+    </div>
+
+    <div style="background:var(--surface-soft);border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid var(--line-soft)">
+      <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Composición</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line-soft)">
+        <span>Deuda vieja (capital)</span>
+        <b style="font-variant-numeric:tabular-nums;color:${deudaIni>0?'var(--accent)':'var(--muted)'}">${money(deudaIni)}</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0">
+        <span>Ventas a crédito pendientes (${pendientes.length})</span>
+        <b style="font-variant-numeric:tabular-nums;color:${deudaVtas>0?'var(--info)':'var(--muted)'}">${money(deudaVtas)}</b>
+      </div>
+    </div>
+
+    ${pendientes.length>0 ? `
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Facturas pendientes</div>
+      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px">
+        <table style="width:100%;margin:0">
+          <thead style="background:var(--surface-soft)"><tr>
+            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Venta</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Fecha</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Vence</th>
+            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Total</th>
+            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Saldo</th>
+          </tr></thead>
+          <tbody>
+            ${pendientes.map(v=>{
+              const vencidaV = v.vencimiento && v.vencimiento < HOY();
+              return `<tr style="border-top:1px solid var(--line-soft)">
+                <td style="padding:8px 12px;font-weight:600">${esc(v.id)}</td>
+                <td style="padding:8px 12px">${fFecha(v.fecha)}</td>
+                <td style="padding:8px 12px;color:${vencidaV?'var(--danger)':'inherit'}">
+                  ${fFecha(v.vencimiento)}
+                  ${vencidaV?'<span class="badge badge-danger" style="margin-left:4px">Vencida</span>':''}
+                </td>
+                <td style="padding:8px 12px;text-align:right">${money(v.total)}</td>
+                <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--danger)">${money(saldoVenta(v))}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : ''}
+
+    ${abonos.length>0 ? `
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Últimos cobros (${abonos.length})</div>
+      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;max-height:220px;overflow-y:auto">
+        <table style="width:100%;margin:0">
+          <thead style="background:var(--surface-soft);position:sticky;top:0"><tr>
+            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Fecha</th>
+            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Cobrador</th>
+            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Monto</th>
+          </tr></thead>
+          <tbody>
+            ${abonos.slice(0,30).map(a=>`
+              <tr style="border-top:1px solid var(--line-soft)">
+                <td style="padding:8px 12px">${fFecha(a.fecha)} ${a.hora||''}</td>
+                <td style="padding:8px 12px"><span class="badge badge-cobrador">${esc(a.usuarioNombre||'—')}</span></td>
+                <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--success)">+ ${money(a.monto)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : ''}
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal()">Cerrar</button>
+      ${deudaTotal>0 ? `<button class="btn btn-success" onclick="cerrarModal(); setTimeout(()=>abrirModal('abono','${clienteId}'),100)">Registrar cobro</button>` : ''}
+    </div>
+  `;
 }
 
 function leerVentasSeleccionadasAbono(clienteId){
@@ -4369,17 +4473,87 @@ function viewResumenCobrador(){
   const totHist=num2(mis.reduce((a,x)=>a+x.monto,0));
   const clientesConDeuda=state.clientes.filter(c=>deudaCliente(c.id)>0).length;
   const clientesVencidos=state.clientes.filter(c=>deudaVencida(c.id)>0).length;
+
+  // NUEVO: deudores ordenados por urgencia (vencido primero, después por monto)
+  const deudoresUrgentes = state.clientes
+    .filter(c => deudaCliente(c.id) > 0.001)
+    .sort((a,b) => deudaVencida(b.id) - deudaVencida(a.id) || deudaCliente(b.id) - deudaCliente(a.id))
+    .slice(0, 8);
+
+  // NUEVO: totales para el pie de la tabla
+  const totalPorCobrar = num2(deudoresUrgentes.reduce((a,c)=>a+deudaCliente(c.id),0));
+  const totalVencido = num2(deudoresUrgentes.reduce((a,c)=>a+deudaVencida(c.id),0));
+
   return `
   <div class="page-head"><div class="page-eyebrow">Hoy · ${fFecha(h)}</div><h1 class="page-title">Mi resumen de cobranzas</h1></div>
+
   <div class="cob-hero">
     <div><div class="cob-hero-label">Cobrado hoy</div><div class="cob-hero-value">${money(totHoy)}</div><div class="cob-hero-sub">${cobHoy.length} cobro(s)</div></div>
     <div><div class="cob-hero-label">Cobrado este mes</div><div class="cob-hero-value">${money(totMes)}</div><div class="cob-hero-sub">${nombreMes(mesActual())}</div></div>
   </div>
+
   <div class="kpi-grid">
     <div class="kpi"><div class="kpi-label">Histórico</div><div class="kpi-value is-success">${money(totHist)}</div></div>
     <div class="kpi"><div class="kpi-label">Clientes con deuda</div><div class="kpi-value">${clientesConDeuda}</div><div class="kpi-meta">${clientesVencidos} vencidos</div></div>
     <div class="kpi"><div class="kpi-label">Promedio</div><div class="kpi-value">${mis.length>0?money(num2(totHist/mis.length)):money(0)}</div></div>
     <div class="kpi"><div class="kpi-label">Total cobros</div><div class="kpi-value">${mis.length}</div></div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Deudores para visitar hoy</div>
+        <div class="card-subtitle">Ordenados por deuda vencida · mostrando ${deudoresUrgentes.length} de ${clientesConDeuda}</div>
+      </div>
+      ${deudoresUrgentes.length>0?`
+        <button class="btn btn-outline btn-sm" onclick="ir('clientes')">Ver todos</button>
+      `:''}
+    </div>
+
+    ${deudoresUrgentes.length===0
+      ? '<div class="empty">Sin deudas pendientes. ¡Todo al día!</div>'
+      : `
+      <div class="table-wrap"><table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Comunidad</th>
+            <th>Teléfono</th>
+            <th class="num">Debe</th>
+            <th class="num">Vencido</th>
+            <th class="num">Facturas</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${deudoresUrgentes.map(c=>{
+            const d = deudaCliente(c.id);
+            const v = deudaVencida(c.id);
+            const facturas = ventasPendientesCliente(c.id).length;
+            return `<tr>
+              <td class="bold">${esc(c.nombre)}</td>
+              <td>${esc(c.comunidad||'—')}</td>
+              <td style="font-size:12px;color:var(--muted)">${esc(c.tel||'—')}</td>
+              <td class="num bold" style="color:var(--danger)">${money(d)}</td>
+              <td class="num" style="color:${v>0?'var(--danger)':'var(--muted)'};font-weight:${v>0?'600':'400'}">${v>0?money(v):'—'}</td>
+              <td class="num">${facturas>0?`<span class="tag-pill">${facturas}</span>`:'—'}</td>
+              <td class="num" style="white-space:nowrap">
+                <button class="btn-ghost" style="padding:3px 8px;font-size:12px" onclick="abrirModal('detalleDeudaCliente','${c.id}')">Ver detalle</button>
+                <button class="btn btn-success btn-sm" onclick="abrirModal('abono','${c.id}')">Cobrar</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+        <tfoot>
+          <tr style="border-top:2px solid var(--line);background:var(--surface-soft)">
+            <td colspan="3" style="padding:10px 8px;font-weight:600">Subtotal (${deudoresUrgentes.length} deudores)</td>
+            <td class="num" style="padding:10px 8px;font-weight:700;color:var(--danger)">${money(totalPorCobrar)}</td>
+            <td class="num" style="padding:10px 8px;font-weight:700;color:var(--danger)">${totalVencido>0?money(totalVencido):'—'}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table></div>
+    `}
   </div>`;
 }
 function viewResumenGeneral(){
@@ -5349,19 +5523,27 @@ function viewClientes(){
   ${deudaInicialCliente(c.id) > 0.001 ? `<span class="badge badge-accent" title="Deuda vieja cargada en capital inicial">Capital: ${money(deudaInicialCliente(c.id))}</span>` : ''}
 </div>
             </div>
-            <div style="text-align:right;flex-shrink:0">
+<div style="text-align:right;flex-shrink:0">
   <div class="cliente-debe-label">Debe</div>
   <div class="cliente-debe-value" style="color:${deuda>0?'var(--danger)':'var(--success)'}">${money(deuda)}</div>
-  ${deudaInicialCliente(c.id) > 0.001 && deudaVentasCliente(c.id) > 0.001 ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">Vieja ${money(deudaInicialCliente(c.id))} · Ventas ${money(deudaVentasCliente(c.id))}</div>` : ''}
+  ${deuda>0 && (deudaInicialCliente(c.id)>0.001 || pend.length>0) ? `
+    <div style="font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4">
+      ${deudaInicialCliente(c.id)>0.001 ? `Vieja ${money(deudaInicialCliente(c.id))}` : ''}
+      ${deudaInicialCliente(c.id)>0.001 && pend.length>0 ? ' · ' : ''}
+      ${pend.length>0 ? `${pend.length} factura(s) ${money(deudaVentasCliente(c.id))}` : ''}
+    </div>
+  ` : ''}
   ${venc>0?`<div class="cliente-vencido-txt">${money(venc)} vencido</div>`:''}
 </div>
           </div>
-          <div class="cliente-acciones">
-            ${deuda>0?`<button class="btn btn-success btn-sm" onclick="abrirModal('abono','${c.id}')">Registrar cobro</button>`:''}
-            <button class="btn btn-outline btn-sm" onclick="toggleCliente('${c.id}')">${abierto?'Ocultar':'Historial'}</button>
-            ${esAdmin()?`<button class="btn btn-outline btn-sm" onclick="abrirModal('editarCliente','${c.id}')">Editar</button>`:''}
-            ${esAdmin()?`<button class="btn-ghost" style="font-size:12px;color:var(--danger);padding:5px 8px" onclick="accionEliminarCliente('${c.id}')" title="${sePuedeEliminar?'Eliminar cliente':'Tiene movimientos'}">Eliminar</button>`:''}
-          </div>
+         
+<div class="cliente-acciones">
+  ${deuda>0?`<button class="btn btn-success btn-sm" onclick="abrirModal('abono','${c.id}')">Registrar cobro</button>`:''}
+  <button class="btn btn-primary btn-sm" onclick="abrirModal('detalleDeudaCliente','${c.id}')">Ver detalle</button>
+  <button class="btn btn-outline btn-sm" onclick="toggleCliente('${c.id}')">${abierto?'Ocultar':'Ver rápido'}</button>
+  ${esAdmin()?`<button class="btn btn-outline btn-sm" onclick="abrirModal('editarCliente','${c.id}')">Editar</button>`:''}
+  ${esAdmin()?`<button class="btn-ghost" style="font-size:12px;color:var(--danger);padding:5px 8px" onclick="accionEliminarCliente('${c.id}')" title="${sePuedeEliminar?'Eliminar cliente':'Tiene movimientos'}">Eliminar</button>`:''}
+</div>
           ${abierto?`<div class="cliente-historial">
             <div style="background:var(--surface-soft);border-radius:8px;padding:12px;margin-bottom:14px;border:1px solid var(--line-soft)">
               <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Detalle de la deuda</div>
