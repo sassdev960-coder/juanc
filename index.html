@@ -1601,7 +1601,9 @@ const ui = {
   cuentaAbierta:null, buscarBanco:'',
   buscarProductoInv:'', buscarProductoConfig:'', buscarProveedor:'',
   buscarUsuario:'', buscarCobranza:'', buscarVentaHist:'', buscarCategoria:'',
-  recargaMontoLibre: null
+  recargaMontoLibre: null,
+  cajaMovMostrar: 100,          // paginación de movimientos de caja
+  cajaBonifPeriodo: mesActual() // período del resumen de bonificaciones
 };
 
 /* ================================================================
@@ -1757,6 +1759,45 @@ function gananciaVenta(v){ return num2(v.items.reduce((a,i)=>a+gananciaItem(i),0
 function gananciaVentas(vs){ return num2(vs.reduce((a,v)=>a+gananciaVenta(v),0)); }
 function bonificacionesPeriodo(desde,hasta){
   return num2((state.ajustesBolsa||[]).filter(a=>a.motivoTipo==='bonificacion'&&a.fecha>=desde&&a.fecha<=hasta).reduce((a,x)=>a+x.delta,0));
+}
+/* Calcula bonificaciones del período desagregadas:
+   - Tarjetas = margen de ganancia (precio - costo) de items físicos con "tarjeta" en nombre
+   - Recargas = ajustesBolsa con motivoTipo==='bonificacion', separado por tipo paso/paquete */
+function calcularBonificacionesDesagregadas(mes){
+  const ventas = state.ventas.filter(v => mesDe(v.fecha) === mes);
+  const porProducto = {};
+  let subtotalTarjetas = 0;
+
+  ventas.forEach(v => {
+    (v.items || []).forEach(it => {
+      if(it.esRecarga) return; // solo físicos
+      const esTarjeta = /tarjeta/i.test(it.nombre || '');
+      if(!esTarjeta) return;
+      const ganancia = num2((Number(it.precioUnit) - Number(it.costoUnit)) * Number(it.cantidad));
+      const key = it.productoId || it.nombre;
+      if(!porProducto[key]){
+        porProducto[key] = { nombre: it.nombre, unidades: 0, ganancia: 0, precio: Number(it.precioUnit) };
+      }
+      porProducto[key].unidades += Number(it.cantidad);
+      porProducto[key].ganancia = num2(porProducto[key].ganancia + ganancia);
+      subtotalTarjetas = num2(subtotalTarjetas + ganancia);
+    });
+  });
+
+  const recargas = { paso: 0, paquete: 0, total: 0 };
+  (state.ajustesBolsa || []).forEach(a => {
+    if(a.motivoTipo !== 'bonificacion') return;
+    if(mesDe(a.fecha) !== mes) return;
+    if(a.tipo === 'paso') recargas.paso = num2(recargas.paso + a.delta);
+    else if(a.tipo === 'paquete') recargas.paquete = num2(recargas.paquete + a.delta);
+    recargas.total = num2(recargas.total + a.delta);
+  });
+
+  return {
+    tarjetas: { porProducto, subtotal: subtotalTarjetas },
+    recargas,
+    total: num2(subtotalTarjetas + recargas.total)
+  };
 }
 
 const saldoCuenta = c => num2(c.montoTotal-(c.pagado||0));
@@ -1996,7 +2037,7 @@ function renderNav(){
     ${items.map(t=>`<button class="nav-item ${vista===t.id?'active':''}" onclick="ir('${t.id}')"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${ICONS[t.id]}</svg>${t.label}</button>`).join('')}
   `).join('');
 }
-function ir(v){ vista=v; ui.modal=null; ui.clientesMostrar=CLIENTES_POR_PAGINA; $('sidebar').classList.remove('open'); render(); window.scrollTo({top:0,behavior:'instant'}); }
+function ir(v){ vista=v; ui.modal=null; ui.clientesMostrar=CLIENTES_POR_PAGINA; resetCajaMovMostrar(); $('sidebar').classList.remove('open'); render(); window.scrollTo({top:0,behavior:'instant'}); }
 function renderUsuarioSelector(){
   const sel=$('usuarioSel'); if(!sel) return;
   sel.innerHTML=state.usuarios.filter(u=>u.activo!==false).map(u=>{
@@ -2017,6 +2058,7 @@ function cambiarUsuario(id){
   ui.buscarProductoInv=''; ui.buscarProductoConfig=''; ui.buscarProveedor='';
   ui.buscarUsuario=''; ui.buscarGasto=''; ui.buscarCobranza=''; ui.buscarVentaHist='';
   ui.buscarCategoria=''; ui.buscarBanco=''; ui.clientesMostrar=CLIENTES_POR_PAGINA;
+  resetCajaMovMostrar();
   $('avatarIni').textContent=iniciales(u.nombre);
   $('avatarIni').style.background=u.color||'#8a6d3b';
   $('rolLbl').textContent=u.rol==='admin'?'Administrador':u.rol==='cajero'?'Cajero':'Cobrador';
@@ -2069,6 +2111,7 @@ function renderModal(){
     
   else if(tipo==='movimientoBanco') contenido=modalMovimientoBanco(id);
   else if(tipo==='montoLibreRecarga') contenido=modalMontoLibreRecarga(id);
+  else if(tipo==='verBonificaciones') contenido=modalVerBonificaciones();
   else if(tipo==='cantidadProducto') contenido=modalCantidadProducto(id);   // ← NUEVA
   root.innerHTML=`<div class="modal-overlay" onclick="if(event.target===this) cerrarModal()"><div class="modal${tipo==='confirmar'?' modal-alert':''}">${contenido}</div></div>`;
   if(tipo==='abono') setTimeout(()=>{const el=$('m-abono-monto')||$('m-abono-entregado'); if(el){el.focus(); el.select();}},50);
@@ -2953,6 +2996,94 @@ function agruparItemsDeudaCliente(clienteId){
     a.orden - b.orden ||
     b.subtotal - a.subtotal
   );
+}
+
+function modalVerBonificaciones(){
+  const mes = ui.cajaBonifPeriodo || mesActual();
+  const b = calcularBonificacionesDesagregadas(mes);
+  const tarjetas = Object.values(b.tarjetas.porProducto).sort((a,b)=>b.ganancia - a.ganancia);
+  return `
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Bonificaciones desagregadas</div>
+        <div class="card-subtitle">${nombreMes(mes)}</div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+
+    <div class="field" style="margin-bottom:16px">
+      <label>Período</label>
+      <input type="month" value="${mes}" onchange="ui.cajaBonifPeriodo=this.value; cerrarModal(); setTimeout(()=>abrirModal('verBonificaciones'),80)">
+    </div>
+
+    <div style="background:var(--info-soft);border-radius:10px;padding:16px;border:1px solid #d1e0ec;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--info);margin-bottom:4px">
+        Bonificación Tarjetas (margen)
+      </div>
+      <div style="font-size:28px;font-weight:700;color:var(--info);font-variant-numeric:tabular-nums">
+        ${money(b.tarjetas.subtotal)}
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:4px">
+        ${tarjetas.length} tipo(s) · ${tarjetas.reduce((a,t)=>a+t.unidades,0)} unidades vendidas
+      </div>
+    </div>
+
+    ${tarjetas.length>0 ? `
+      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px">
+        <table style="width:100%;margin:0">
+          <thead style="background:var(--surface-soft)"><tr>
+            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Tarjeta</th>
+            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Precio</th>
+            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Unidades</th>
+            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Ganancia</th>
+          </tr></thead>
+          <tbody>
+            ${tarjetas.map(t=>`
+              <tr style="border-top:1px solid var(--line-soft)">
+                <td style="padding:8px 12px;font-weight:500">${esc(t.nombre)}</td>
+                <td style="padding:8px 12px;text-align:right;font-size:12px;color:var(--muted)">${money(t.precio)}</td>
+                <td style="padding:8px 12px;text-align:right">${t.unidades}</td>
+                <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--info)">+ ${money(t.ganancia)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="background:var(--surface-soft);font-weight:600;border-top:2px solid var(--line)">
+              <td colspan="3" style="padding:10px 12px">Subtotal tarjetas</td>
+              <td style="padding:10px 12px;text-align:right;color:var(--info);font-size:14px">+ ${money(b.tarjetas.subtotal)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    ` : '<div class="empty" style="padding:12px">Sin ventas de tarjetas en este período.</div>'}
+
+    <div style="background:var(--warning-soft);border-radius:10px;padding:16px;border:1px solid #ecdcae;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--warning);margin-bottom:4px">
+        Bonificación Recargas (manuales)
+      </div>
+      <div style="font-size:28px;font-weight:700;color:var(--warning);font-variant-numeric:tabular-nums">
+        ${money(b.recargas.total)}
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:4px">
+        Recargas al paso ${money(b.recargas.paso)} · Paquetes ${money(b.recargas.paquete)}
+      </div>
+    </div>
+
+    <div class="summary-row highlight" style="margin-top:16px">
+      <span class="label">TOTAL bonificaciones del período</span>
+      <span class="value" style="color:var(--success);font-size:20px">${money(b.total)}</span>
+    </div>
+
+    <div class="alert alert-info" style="margin-top:16px">
+      <div>
+        <strong>Tarjetas:</strong> margen de ganancia (precio venta − costo).<br>
+        <strong>Recargas:</strong> bonificaciones cargadas manualmente en <em>Caja → Bolsas</em> cuando el operador avisa por SMS.
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal()">Cerrar</button>
+    </div>`;
 }
 
 function modalDetalleDeudaCliente(clienteId){
@@ -4611,6 +4742,13 @@ function renderConservarFoco(id){
   if(!nuevo) return;
   nuevo.focus({preventScroll:true});
 }
+function verMasMovimientosCaja(){
+  ui.cajaMovMostrar += 100;
+  render();
+}
+function resetCajaMovMostrar(){
+  ui.cajaMovMostrar = 100;
+}
 function render(){
   reconciliarMovimientosVentasCaja();
   save(); renderNav(); renderUsuarioSelector();
@@ -5251,17 +5389,55 @@ function restablecerSistema(){
     </table></div>
   </div>`:''}
   `:''}
+  ${esAdmin() ? (() => {
+    const mesBonif = ui.cajaBonifPeriodo || mesActual();
+    const b = calcularBonificacionesDesagregadas(mesBonif);
+    return `
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Bonificaciones · ${nombreMes(mesBonif)}</div>
+          <div class="card-subtitle">Tarjetas (margen) + Recargas (manuales)</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="abrirModal('verBonificaciones')">Ver desglose completo</button>
+      </div>
+      <div class="grid-2" style="margin-bottom:16px">
+        <div style="background:var(--info-soft);border-radius:10px;padding:16px;border:1px solid #d1e0ec">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--info);margin-bottom:4px">Bonificación tarjetas</div>
+          <div style="font-size:26px;font-weight:700;color:var(--info);font-variant-numeric:tabular-nums">${money(b.tarjetas.subtotal)}</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">Margen · ${Object.keys(b.tarjetas.porProducto).length} tipo(s)</div>
+        </div>
+        <div style="background:var(--warning-soft);border-radius:10px;padding:16px;border:1px solid #ecdcae">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--warning);margin-bottom:4px">Bonificación recargas</div>
+          <div style="font-size:26px;font-weight:700;color:var(--warning);font-variant-numeric:tabular-nums">${money(b.recargas.total)}</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px">Manuales: paso ${money(b.recargas.paso)} · paq. ${money(b.recargas.paquete)}</div>
+        </div>
+      </div>
+      <div class="summary-row highlight">
+        <span class="label">TOTAL bonificaciones del período</span>
+        <span class="value" style="color:var(--success);font-size:18px">${money(b.total)}</span>
+      </div>
+    </div>
+    `;
+  })() : ''}
   <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
     <div class="kpi"><div class="kpi-label">Ingresos hoy</div><div class="kpi-value is-success">+ ${money(ingHoy)}</div></div>
     <div class="kpi"><div class="kpi-label">Egresos hoy</div><div class="kpi-value is-danger">${money(egrHoy)}</div></div>
     <div class="kpi"><div class="kpi-label">Neto del día</div><div class="kpi-value" style="color:${(ingHoy+egrHoy)>=0?'var(--success)':'var(--danger)'}">${money(num2(ingHoy+egrHoy))}</div></div>
   </div>
   <div class="card">
-    <div class="card-head"><div><div class="card-title">Movimientos</div><div class="card-subtitle">${mov.length} movimiento(s)</div></div></div>
+    <div class="card-head">
+      <div>
+        <div class="card-title">Movimientos</div>
+        <div class="card-subtitle">
+          Mostrando ${Math.min(ui.cajaMovMostrar, mov.length)} de ${mov.length} movimiento(s)
+        </div>
+      </div>
+    </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Fecha</th><th>Tipo</th>${esAdmin()?'<th>Usuario</th>':''}<th>Descripción</th><th>Método</th><th class="num">Monto</th>${esAdmin()?'<th></th>':''}</tr></thead>
       <tbody>
-      ${mov.slice(0,100).map(m=>{
+      ${mov.slice(0, ui.cajaMovMostrar).map(m=>{
         const lbl={aporte:'Aporte',retiro:'Retiro',venta:'Venta',abono:'Cobro',anulacion_abono:'Anulación de cobro',compra:'Compra',recarga_reposicion:'Reponer bolsa',bonificacion:'Bonificación',gasto:'Gasto',pago_cuenta:'Pago cuenta'}[m.tipo]||m.tipo;
         const cls=m.monto>0?'badge-success':'badge-danger';
         const puede=esAdmin()&&(m.tipo==='aporte'||m.tipo==='retiro')&&!m.referencia&&!mesCerrado(m.fecha);
@@ -5283,6 +5459,17 @@ function restablecerSistema(){
       }).join('')||`<tr><td colspan="${esAdmin()?7:5}" class="empty">Sin movimientos.</td></tr>`}
       </tbody>
     </table></div>
+    ${mov.length > ui.cajaMovMostrar ? `
+      <div style="text-align:center;padding:16px 0 4px">
+        <button class="btn btn-outline" onclick="verMasMovimientosCaja()">
+          Ver más (${mov.length - ui.cajaMovMostrar} restantes)
+        </button>
+      </div>
+    ` : (mov.length > 0 ? `
+      <div style="text-align:center;padding:14px 0 4px;color:var(--muted);font-size:12px">
+        Todos los movimientos mostrados (${mov.length})
+      </div>
+    ` : '')}
   </div>`;
 }
   
