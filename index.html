@@ -1495,6 +1495,74 @@ const $ = id => document.getElementById(id);
 const HOY = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const horaActual = () => { const d=new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
 const money = n => 'Bs ' + (Number(n)||0).toLocaleString('es-BO',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function copiarResumenDeuda(clienteId){
+  const c = state.clientes.find(x=>x.id===clienteId);
+  if(!c) return;
+  const pendientes = ventasPendientesCliente(clienteId);
+  const deudaIni = deudaInicialCliente(clienteId);
+  const deudaVtas = deudaVentasCliente(clienteId);
+  const total = num2(deudaIni + deudaVtas);
+  const consolidado = agruparItemsDeudaCliente(clienteId);
+
+  const lineas = [];
+  lineas.push(`*Estado de cuenta · ${c.nombre}*`);
+  if(c.comunidad) lineas.push(c.comunidad);
+  lineas.push(`Fecha: ${fFecha(HOY())}`);
+  lineas.push('');
+
+  if(deudaIni > 0.001){
+    lineas.push(`• Deuda anterior: ${money(deudaIni)}`);
+  }
+
+  if(consolidado.length > 0){
+    lineas.push('*Detalle de compras pendientes:*');
+    const grupos = {};
+    consolidado.forEach(it=>{
+      if(!grupos[it.grupo]) grupos[it.grupo] = [];
+      grupos[it.grupo].push(it);
+    });
+    Object.entries(grupos).forEach(([grupo, items])=>{
+      lineas.push(`_${grupo}_`);
+      items.forEach(it=>{
+        if(it.grupo==='Recargas'){
+          lineas.push(`  · ${it.nombre} ${money(it.subtotal)}`);
+        } else {
+          lineas.push(`  · ${it.nombre} × ${it.cantidad} = ${money(it.subtotal)}`);
+        }
+      });
+    });
+  }
+
+  lineas.push('');
+  lineas.push(`*TOTAL A COBRAR: ${money(total)}*`);
+
+  if(pendientes.length > 0){
+    lineas.push('');
+    lineas.push(`_${pendientes.length} factura(s) pendiente(s)_`);
+  }
+
+  const texto = lineas.join('\n');
+  const txt = `\n_Generado por SIMGest · ${fFecha(HOY())}_`;
+
+  if(navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(texto + txt)
+      .then(()=>toast('Resumen copiado. Pegalo en WhatsApp.','ok'))
+      .catch(()=>fallbackCopiar(texto + txt));
+  } else {
+    fallbackCopiar(texto + txt);
+  }
+}
+
+function fallbackCopiar(texto){
+  const ta = document.createElement('textarea');
+  ta.value = texto;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); toast('Resumen copiado','ok'); }
+  catch(e){ toast('No se pudo copiar','err'); }
+  document.body.removeChild(ta);
+}
 const num2 = n => +(Number(n)||0).toFixed(2);
 const addDias = (f,n) => { const d=new Date(f+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
 const fFecha = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; };
@@ -2845,24 +2913,74 @@ function modalAbono(clienteId){
     </div>`;
 }
 
-  function modalDetalleDeudaCliente(clienteId){
+/* Clasifica un item de venta en un grupo legible para el cobrador */
+function categoriaItemVenta(it){
+  const nombre = normalizar(it.nombre||'');
+  if(it.esRecarga) return { grupo:'Recargas', orden:1 };
+  if(/env[ii]o|guia|guía|transporte|flete|delivery/.test(nombre)) return { grupo:'Envíos y guías', orden:2 };
+  if(/chip|sim/.test(nombre)) return { grupo:'Chips', orden:3 };
+  if(/tarjeta/.test(nombre)) return { grupo:'Tarjetas', orden:4 };
+  return { grupo:'Otros productos', orden:5 };
+}
+
+/* Agrupa los items de todas las facturas pendientes del cliente */
+function agruparItemsDeudaCliente(clienteId){
+  const pendientes = ventasPendientesCliente(clienteId);
+  const map = new Map();
+  pendientes.forEach(v=>{
+    (v.items||[]).forEach(it=>{
+      const cat = categoriaItemVenta(it);
+      const key = `${it.productoId||it.nombre}|${it.precioUnit}`;
+      if(!map.has(key)){
+        map.set(key, {
+          nombre: it.nombre,
+          unidad: it.unidad,
+          precioUnit: num2(it.precioUnit),
+          cantidad: 0,
+          subtotal: 0,
+          grupo: cat.grupo,
+          orden: cat.orden,
+          facturas: new Set()
+        });
+      }
+      const g = map.get(key);
+      g.cantidad = num2(g.cantidad + it.cantidad);
+      g.subtotal = num2(g.subtotal + it.subtotal);
+      g.facturas.add(v.id);
+    });
+  });
+  return Array.from(map.values()).sort((a,b)=>
+    a.orden - b.orden ||
+    b.subtotal - a.subtotal
+  );
+}
+
+function modalDetalleDeudaCliente(clienteId){
   const c = state.clientes.find(x=>x.id===clienteId);
   if(!c) return '<div class="empty">Cliente no encontrado</div>';
 
-  const deudaIni = deudaInicialCliente(clienteId);
+  const deudaIni  = deudaInicialCliente(clienteId);
   const deudaVtas = deudaVentasCliente(clienteId);
-  const deudaTotal = num2(deudaIni + deudaVtas);
-  const vencida = deudaVencida(clienteId);
-  const pendientes = ventasPendientesCliente(clienteId);
-  const abonos = state.abonos
+  const deudaTotal= num2(deudaIni + deudaVtas);
+  const vencida   = deudaVencida(clienteId);
+  const pendientes= ventasPendientesCliente(clienteId);
+  const abonos    = state.abonos
     .filter(a => a.clienteId===clienteId && !a.anulado)
     .slice().reverse();
+  const consolidado = agruparItemsDeudaCliente(clienteId);
+
+  const porGrupo = {};
+  consolidado.forEach(item=>{
+    if(!porGrupo[item.grupo]) porGrupo[item.grupo] = { items:[], total:0 };
+    porGrupo[item.grupo].items.push(item);
+    porGrupo[item.grupo].total = num2(porGrupo[item.grupo].total + item.subtotal);
+  });
 
   return `
     <div class="modal-head">
       <div>
         <div class="modal-title">Detalle de deuda · ${esc(c.nombre)}</div>
-        <div class="card-subtitle">${esc(c.comunidad||'')}${c.tel?' · Tel. '+esc(c.tel):''}</div>
+        <div class="card-subtitle">${esc(c.comunidad||'')}${c.tel?' · Tel. '+esc(c.tel):''} · Plazo ${c.plazo}d</div>
       </div>
       <button class="modal-close" onclick="cerrarModal()">×</button>
     </div>
@@ -2889,39 +3007,96 @@ function modalAbono(clienteId){
       </div>
     </div>
 
-    ${pendientes.length>0 ? `
-      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Facturas pendientes</div>
-      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px">
-        <table style="width:100%;margin:0">
-          <thead style="background:var(--surface-soft)"><tr>
-            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Venta</th>
-            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Fecha</th>
-            <th style="text-align:left;padding:8px 12px;font-size:10.5px">Vence</th>
-            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Total</th>
-            <th style="text-align:right;padding:8px 12px;font-size:10.5px">Saldo</th>
-          </tr></thead>
-          <tbody>
-            ${pendientes.map(v=>{
-              const vencidaV = v.vencimiento && v.vencimiento < HOY();
-              return `<tr style="border-top:1px solid var(--line-soft)">
-                <td style="padding:8px 12px;font-weight:600">${esc(v.id)}</td>
-                <td style="padding:8px 12px">${fFecha(v.fecha)}</td>
-                <td style="padding:8px 12px;color:${vencidaV?'var(--danger)':'inherit'}">
-                  ${fFecha(v.vencimiento)}
-                  ${vencidaV?'<span class="badge badge-danger" style="margin-left:4px">Vencida</span>':''}
-                </td>
-                <td style="padding:8px 12px;text-align:right">${money(v.total)}</td>
-                <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--danger)">${money(saldoVenta(v))}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
+    ${consolidado.length>0 ? `
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">
+        ¿De qué debe? · Consolidado de todas las facturas
       </div>
-    ` : ''}
+      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px">
+        ${Object.entries(porGrupo).map(([grupo, data])=>`
+          <div style="background:var(--surface-soft);padding:8px 12px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center">
+            <strong style="font-size:12px;text-transform:uppercase;letter-spacing:.8px">${esc(grupo)}</strong>
+            <span style="font-size:13px;font-weight:700;color:var(--ink)">${money(data.total)}</span>
+          </div>
+          <table style="width:100%;margin:0">
+            <tbody>
+              ${data.items.map(it=>{
+                const esRecarga = it.grupo==='Recargas';
+                const cant = esRecarga
+                  ? `Bs ${num2(it.precioUnit).toLocaleString('es-BO',{minimumFractionDigits:2})}`
+                  : `${it.cantidad} ${unidadAbrev(it.unidad||'unidad')}`;
+                return `<tr style="border-bottom:1px solid var(--line-soft)">
+                  <td style="padding:8px 12px;font-size:12.5px">${esc(it.nombre)}</td>
+                  <td style="padding:8px 12px;text-align:right;font-size:12px;color:var(--muted);white-space:nowrap">${cant} × ${money(it.precioUnit)}</td>
+                  <td style="padding:8px 12px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap">${money(it.subtotal)}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        `).join('')}
+        <div style="background:var(--surface-soft);padding:10px 12px;display:flex;justify-content:space-between;border-top:2px solid var(--line)">
+          <strong>Total facturado pendiente</strong>
+          <strong style="color:var(--danger);font-size:14px">${money(deudaVtas)}</strong>
+        </div>
+      </div>
+    `:''}
+
+    ${pendientes.length>0 ? `
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">
+        Facturas pendientes (${pendientes.length})
+      </div>
+      <div style="margin-bottom:16px">
+        ${pendientes.map(v=>{
+          const vencidaV = v.vencimiento && v.vencimiento < HOY();
+          return `
+          <div style="border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden;${vencidaV?'border-left:3px solid var(--danger)':''}">
+            <div style="background:var(--surface-soft);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+              <div>
+                <strong style="font-size:13px">${esc(v.id)}</strong>
+                <span style="font-size:11.5px;color:var(--muted);margin-left:8px">
+                  ${fFecha(v.fecha)} · Vence ${fFecha(v.vencimiento)}
+                  ${vencidaV?`<span class="badge badge-danger" style="margin-left:6px">VENCIDA</span>`:''}
+                </span>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:11px;color:var(--muted)">Debe</div>
+                <div style="font-size:15px;font-weight:700;color:var(--danger);font-variant-numeric:tabular-nums">${money(saldoVenta(v))}</div>
+              </div>
+            </div>
+            <table style="width:100%;margin:0">
+              <tbody>
+                ${(v.items||[]).map(it=>{
+                  const esRecarga = it.esRecarga;
+                  const cant = esRecarga
+                    ? `Bs ${num2(it.precioUnit).toLocaleString('es-BO',{minimumFractionDigits:2})}`
+                    : `${it.cantidad} ${unidadAbrev(it.unidad||'unidad')}`;
+                  return `<tr style="border-top:1px solid var(--line-soft)">
+                    <td style="padding:8px 12px;font-size:12.5px">${esc(it.nombre)}</td>
+                    <td style="padding:8px 12px;text-align:right;font-size:12px;color:var(--muted);white-space:nowrap">${cant} × ${money(it.precioUnit)}</td>
+                    <td style="padding:8px 12px;text-align:right;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap">${money(it.subtotal)}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+              <tfoot>
+                <tr style="border-top:1px solid var(--line);background:var(--surface-soft)">
+                  <td style="padding:8px 12px;font-size:12px;color:var(--muted)">Total factura</td>
+                  <td></td>
+                  <td style="padding:8px 12px;text-align:right;font-weight:700">${money(v.total)}</td>
+                </tr>
+                ${v.pagado>0.001?`
+                <tr style="background:var(--surface-soft)">
+                  <td colspan="2" style="padding:4px 12px;font-size:11.5px;color:var(--success);text-align:right">Pagado previamente</td>
+                  <td style="padding:4px 12px;text-align:right;font-size:11.5px;color:var(--success);font-weight:600">− ${money(v.pagado)}</td>
+                </tr>`:''}
+              </tfoot>
+            </table>
+          </div>`;
+        }).join('')}
+      </div>
+    `:''}
 
     ${abonos.length>0 ? `
       <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Últimos cobros (${abonos.length})</div>
-      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;max-height:220px;overflow-y:auto">
+      <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden;max-height:180px;overflow-y:auto;margin-bottom:16px">
         <table style="width:100%;margin:0">
           <thead style="background:var(--surface-soft);position:sticky;top:0"><tr>
             <th style="text-align:left;padding:8px 12px;font-size:10.5px">Fecha</th>
@@ -2929,21 +3104,24 @@ function modalAbono(clienteId){
             <th style="text-align:right;padding:8px 12px;font-size:10.5px">Monto</th>
           </tr></thead>
           <tbody>
-            ${abonos.slice(0,30).map(a=>`
+            ${abonos.slice(0,20).map(a=>`
               <tr style="border-top:1px solid var(--line-soft)">
-                <td style="padding:8px 12px">${fFecha(a.fecha)} ${a.hora||''}</td>
+                <td style="padding:8px 12px;font-size:12px">${fFecha(a.fecha)} ${a.hora||''}</td>
                 <td style="padding:8px 12px"><span class="badge badge-cobrador">${esc(a.usuarioNombre||'—')}</span></td>
-                <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--success)">+ ${money(a.monto)}</td>
+                <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--success);font-variant-numeric:tabular-nums">+ ${money(a.monto)}</td>
               </tr>
             `).join('')}
           </tbody>
         </table>
       </div>
-    ` : ''}
+    `:''}
 
-    <div class="modal-actions">
+    <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
       <button class="btn btn-outline" onclick="cerrarModal()">Cerrar</button>
-      ${deudaTotal>0 ? `<button class="btn btn-success" onclick="cerrarModal(); setTimeout(()=>abrirModal('abono','${clienteId}'),100)">Registrar cobro</button>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${deudaTotal>0 ? `<button class="btn btn-outline" onclick="copiarResumenDeuda('${clienteId}')">📋 Copiar resumen</button>`:''}
+        ${deudaTotal>0 ? `<button class="btn btn-success" onclick="cerrarModal(); setTimeout(()=>abrirModal('abono','${clienteId}'),100)">Registrar cobro</button>`:''}
+      </div>
     </div>
   `;
 }
