@@ -462,6 +462,7 @@ async function initSupabase(){
   sb.auth.onAuthStateChange((event, session) => {
     if(event === 'SIGNED_OUT'){
       sbUser = null; sbNegocioId = null;
+      desuscribirRealtime();
       mostrarLogin();
     }
   });
@@ -598,6 +599,7 @@ async function doResetPassword(){
 async function cerrarSesionGlobal(){
   if(!sb) return;
   if(!confirm('¿Cerrar sesión?')) return;
+  desuscribirRealtime();
   await sb.auth.signOut();
 }
 
@@ -673,6 +675,7 @@ async function sincronizarUsuariosRelacionales(){
     await cargarStateDesdeSupabase();
     ocultarLogin();
     window.arrancarApp();
+    suscribirRealtime();
         // Botones de cerrar sesión
     const btn = document.getElementById('btnLogoutTop');
     if(btn) btn.style.display = 'inline-flex';
@@ -1140,6 +1143,7 @@ async function cargarStateDesdeSupabase(){
     .eq('id', negId)
     .single();
   if(errorSnapshot) throw errorSnapshot;
+  sbVersionActual = negocioSnapshot.version ?? 0;   // ← NUEVA
 
   const estadoGuardado = simgestExtraerEstadoJsonb(negocioSnapshot);
   const estadoRescate = simgestParseJsonb(window.SIMGEST_ESTADO_RESCATE);
@@ -1431,25 +1435,141 @@ window.syncToCloud = function(stateArg){
   }, 1200);
 };
 
+let sbVersionActual = null;
+
 async function subirStateASupabase(s){
   if(!sb || !sbNegocioId || !s) return;
 
-  // Fuente principal y única de la copia completa: negocios.estado (JSONB).
-  // No guardar usuarioActualId, porque la sesión pertenece a cada dispositivo.
-  // Nunca tocar public.usuarios para reconstruir el estado: los usuarios internos
-  // U1/U2/U3/U5 y sus movimientos permanecen en este objeto JSONB.
+  // Inicializar versión si es la primera subida de esta sesión
+  if(sbVersionActual === null){
+    const { data } = await sb.from('negocios').select('version').eq('id', sbNegocioId).single();
+    sbVersionActual = data?.version ?? 0;
+  }
+
   const estadoCompartido = JSON.parse(JSON.stringify(s));
   delete estadoCompartido.usuarioActualId;
 
-  const { error } = await sb
+  const { data, error } = await sb
     .from('negocios')
     .update({
       estado: estadoCompartido,
-      capital: s.capital || {}
+      capital: s.capital || {},
+      version: (sbVersionActual ?? 0) + 1,
+      updated_at: new Date().toISOString()
     })
-    .eq('id', sbNegocioId);
+    .eq('id', sbNegocioId)
+    .eq('version', sbVersionActual ?? 0)
+    .select('version')
+    .maybeSingle();
 
   if(error) throw error;
+
+  if(!data){
+    // CONFLICTO: otro dispositivo subió primero. Bajamos la versión del servidor.
+    console.warn('[sync] conflicto de versión, recargando estado remoto…');
+    const { data: fresh } = await sb.from('negocios').select('*').eq('id', sbNegocioId).single();
+    if(fresh){
+      const remoto = simgestExtraerEstadoJsonb(fresh);
+      if(remoto){
+        __cargandoDesdeServidor = true;
+        try{
+          localStorage.setItem(LS_KEY, JSON.stringify(remoto));
+          state = JSON.parse(JSON.stringify(remoto));
+          const usuarioLocalId = usuarioActual?.id;
+          if(usuarioLocalId && state.usuarios?.some(u=>String(u.id)===String(usuarioLocalId))){
+            usuarioActual = state.usuarios.find(u=>String(u.id)===String(usuarioLocalId));
+            state.usuarioActualId = usuarioActual.id;
+          }
+          sbVersionActual = fresh.version ?? 0;
+          render();
+        } finally {
+          __cargandoDesdeServidor = false;
+        }
+      }
+    }
+    throw new Error('Conflicto: otro dispositivo guardó primero. Se recargó el estado del servidor.');
+  }
+
+  sbVersionActual = data.version;
+}
+
+/* ================================================================
+   REALTIME — suscripción a cambios remotos en negocios.estado
+   ================================================================ */
+let realtimeChannel = null;
+let pollingTimer = null;
+
+function desuscribirRealtime(){
+  if(realtimeChannel && sb){
+    try { sb.removeChannel(realtimeChannel); } catch(e){}
+    realtimeChannel = null;
+  }
+  if(pollingTimer){
+    clearInterval(pollingTimer);
+    pollingTimer = null;
+  }
+}
+
+function manejarCambioRemoto(nuevoRow){
+  if(!nuevoRow) return;
+
+  // Ignorar si es el mismo version que ya tenemos (eco de nuestra propia subida)
+  if(typeof nuevoRow.version === 'number' && nuevoRow.version === sbVersionActual) return;
+
+  const nuevoEstado = simgestExtraerEstadoJsonb(nuevoRow);
+  if(!nuevoEstado || !simgestEsEstadoCompleto(nuevoEstado)) return;
+
+  __cargandoDesdeServidor = true;
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(nuevoEstado));
+    state = JSON.parse(JSON.stringify(nuevoEstado));
+
+    // Restaurar usuario local del dispositivo
+    const usuarioLocalId = usuarioActual?.id;
+    if(usuarioLocalId && state.usuarios?.some(u=>String(u.id)===String(usuarioLocalId))){
+      usuarioActual = state.usuarios.find(u=>String(u.id)===String(usuarioLocalId));
+      state.usuarioActualId = usuarioActual.id;
+    }
+    if(typeof nuevoRow.version === 'number') sbVersionActual = nuevoRow.version;
+
+    // Inicializar claves que puedan faltar
+    if(!state.config) state.config = { usarTurnos:true };
+    if(!state.caja) state.caja = { saldoInicial:0, movimientos:[] };
+    if(!state.capital) state.capital = { configurado:false, deudasInicialesPorCliente:{}, bolsasIniciales:{} };
+    state.proveedores?.forEach(p=>{ bolsaDe(p.id,'paso'); bolsaDe(p.id,'paquete'); });
+
+    render();
+    const ventas = state.ventas?.length || 0;
+    toast(`🔄 Actualizado desde el servidor · ${ventas} ventas en total`, 'ok');
+  } finally {
+    __cargandoDesdeServidor = false;
+  }
+}
+
+function suscribirRealtime(){
+  if(!sb || !sbNegocioId) return;
+  desuscribirRealtime();
+
+  realtimeChannel = sb.channel('negocio-' + sbNegocioId)
+    .on('postgres_changes',
+      { event:'UPDATE', schema:'public', table:'negocios', filter:`id=eq.${sbNegocioId}` },
+      (payload) => manejarCambioRemoto(payload.new)
+    )
+    .subscribe((status) => {
+      console.info('[realtime] estado:', status);
+    });
+
+  // Red de seguridad: polling cada 25 s por si Realtime se cae
+  pollingTimer = setInterval(async () => {
+    if(!sb || !sbNegocioId || document.hidden) return;
+    try{
+      const { data } = await sb.from('negocios')
+        .select('estado, version').eq('id', sbNegocioId).single();
+      if(!data) return;
+      if(typeof data.version === 'number' && data.version === sbVersionActual) return;
+      manejarCambioRemoto(data);
+    }catch(e){ /* silencioso */ }
+  }, 25000);
 }
 
 /* ---------- ARRANCAR ---------- */
@@ -2110,6 +2230,7 @@ function renderModal(){
   else if(tipo==='nuevoBanco'||tipo==='editarBanco') contenido=modalBanco(id);
     
   else if(tipo==='movimientoBanco') contenido=modalMovimientoBanco(id);
+  else if(tipo==='syncManual') contenido=modalSyncManual();
   else if(tipo==='montoLibreRecarga') contenido=modalMontoLibreRecarga(id);
   else if(tipo==='verBonificaciones') contenido=modalVerBonificaciones();
   else if(tipo==='cantidadProducto') contenido=modalCantidadProducto(id);   // ← NUEVA
@@ -2124,6 +2245,31 @@ function renderModal(){
   if(tipo==='cantidadProducto')  setTimeout(()=>{const el=$('m-cantidad-prod'); if(el){el.focus(); el.select();}},50);  // ← NUEVA
   if(tipo==='configurarCapital'||tipo==='editarCapital'){ setTimeout(()=>{const el=$('m-cap-efectivo'); if(el) el.focus();},50); recalcularCapitalTotal(); }
 }
+function modalSyncManual(){
+  const d = ui.modal?.extra;
+  if(!d) return '';
+  return `
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Sincronizar con el servidor</div>
+        <div class="card-subtitle">Comparación de datos</div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    ${d.resumenHTML}
+    <div class="modal-actions" style="flex-wrap:wrap;justify-content:space-between">
+      <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="_forzarSubidaLocal()">
+          ⬆️ Subir esta PC al servidor
+        </button>
+        <button class="btn btn-primary" onclick="_aplicarDescargaRemota()">
+          ⬇️ Descargar del servidor
+        </button>
+      </div>
+    </div>`;
+}
+
 function modalConfirmar(d){
   if(!d) return '';
   const critico=d.criticidad==='critico';
@@ -4749,9 +4895,10 @@ function verMasMovimientosCaja(){
 function resetCajaMovMostrar(){
   ui.cajaMovMostrar = 100;
 }
+let __cargandoDesdeServidor = false;
 function render(){
   reconciliarMovimientosVentasCaja();
-  save(); renderNav(); renderUsuarioSelector();
+  if(!__cargandoDesdeServidor) save(); renderNav(); renderUsuarioSelector();
   const visibles=tabsDisponibles().map(t=>t.id);
   if(!visibles.includes(vista)) vista=visibles[0];
   const fns={resumen:viewResumen,balance:viewBalance,ganancias:viewGanancias,caja:viewCaja,bancos:viewBancos,turnos:viewTurnos,ventas:viewVentas,inventario:viewInventario,clientes:viewClientes,cobranzas:viewCobranzas,compras:viewCompras,gastos:viewGastos,cuentas:viewCuentas,productos:viewProductos,categorias:viewCategorias,proveedores:viewProveedores,usuarios:viewUsuarios,capital:viewCapital,config:viewConfig,cierre:viewCierre};
@@ -5188,15 +5335,20 @@ function viewConfig(){
   </div>
   <div class="card">
     <div class="card-head"><div>
-      <div class="card-title">Sincronizar tablas normalizadas</div>
-      <div class="card-subtitle">Copia ventas/movs nuevos del JSONB a las tablas de Supabase</div>
+      <div class="card-title">Sincronización manual</div>
+      <div class="card-subtitle">Trae los datos del teléfono / otras computadoras</div>
     </div></div>
     <div class="alert alert-info" style="margin-bottom:14px">
-      <div>Es idempotente: solo migra registros nuevos, no duplica. Tarda 1–3 minutos.</div>
+      <div>Si el teléfono registró ventas y <b>no aparecen acá</b>, usá <b>Descargar del servidor</b>. Vas a ver cuántas ventas tiene cada lado antes de decidir.</div>
     </div>
-    <button class="btn btn-primary" onclick="migrarATablas()">
-      🔄 Sincronizar ahora
-    </button>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="sincronizarManual()">
+        🔄 Sincronizar con el servidor
+      </button>
+      <button class="btn btn-outline" onclick="migrarATablas()">
+        📋 Subir a tablas (auditoría)
+      </button>
+    </div>
   </div>`;
 }
 function exportarDatos(){
@@ -6834,6 +6986,122 @@ async function cargarExistentes(tabla, columna){
     .eq('negocio_id', sbNegocioId);
   if(error) throw new Error(`${tabla} (cargar existentes): ${error.message}`);
   return new Set((data||[]).map(r => r[columna]));
+}
+
+/* ================================================================
+   SINCRONIZACIÓN MANUAL (descargar del servidor / subir si hace falta)
+   ================================================================ */
+async function sincronizarManual(){
+  if(!sb || !sbNegocioId){ toast('Sin conexión a Supabase','err'); return; }
+
+  __cargandoDesdeServidor = true;
+  try {
+    const { data: neg, error } = await sb
+      .from('negocios').select('estado, version, updated_at')
+      .eq('id', sbNegocioId).single();
+    if(error) throw error;
+
+    const remoto = simgestExtraerEstadoJsonb(neg);
+    if(!remoto || !simgestEsEstadoCompleto(remoto)){
+      toast('El servidor no tiene un estado válido','err'); return;
+    }
+
+    const cRem = {
+      ventas:(remoto.ventas||[]).length,
+      movs:  (remoto.caja?.movimientos||[]).length,
+      abonos:(remoto.abonos||[]).length,
+      clientes:(remoto.clientes||[]).length,
+    };
+    const cLoc = {
+      ventas:(state.ventas||[]).length,
+      movs:  (state.caja?.movimientos||[]).length,
+      abonos:(state.abonos||[]).length,
+      clientes:(state.clientes||[]).length,
+    };
+
+    const remotoEsMas = (cRem.ventas + cRem.movs) > (cLoc.ventas + cLoc.movs);
+    const localEsMas  = (cLoc.ventas + cLoc.movs) > (cRem.ventas + cRem.movs);
+    const iguales     = (cRem.ventas + cRem.movs) === (cLoc.ventas + cLoc.movs);
+
+    const resumenHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0">
+        <div style="background:var(--info-soft);padding:12px;border-radius:10px;border:1px solid #d1e0ec">
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--info);margin-bottom:8px">Servidor</div>
+          <div style="font-size:12.5px;line-height:1.8">
+            Ventas: <b>${cRem.ventas}</b><br>
+            Movs. caja: <b>${cRem.movs}</b><br>
+            Cobros: <b>${cRem.abonos}</b><br>
+            Clientes: <b>${cRem.clientes}</b>
+          </div>
+        </div>
+        <div style="background:var(--surface-soft);padding:12px;border-radius:10px;border:1px solid var(--line)">
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Esta computadora</div>
+          <div style="font-size:12.5px;line-height:1.8">
+            Ventas: <b>${cLoc.ventas}</b><br>
+            Movs. caja: <b>${cLoc.movs}</b><br>
+            Cobros: <b>${cLoc.abonos}</b><br>
+            Clientes: <b>${cLoc.clientes}</b>
+          </div>
+        </div>
+      </div>
+      ${remotoEsMas ? '<div class="alert alert-info" style="margin:0"><div>🟢 El servidor tiene <b>más datos</b>. Si el teléfono registró ventas nuevas, están ahí.</div></div>' : ''}
+      ${localEsMas  ? '<div class="alert alert-warning" style="margin:0"><div>⚠️ Esta computadora tiene <b>más datos</b>. Si descargás, vas a perder ventas locales.</div></div>' : ''}
+      ${iguales     ? '<div class="alert alert-info" style="margin:0"><div>✅ Servidor y esta computadora tienen la misma cantidad de datos.</div></div>' : ''}
+    `;
+
+    ui.modal = { tipo:'syncManual', extra:{ remoto, cRem, cLoc, resumenHTML } };
+    renderModal();
+    __cargandoDesdeServidor = false;
+  } catch(e){
+    __cargandoDesdeServidor = false;
+    console.error('[sync manual]', e);
+    toast('Error: ' + (e.message||e), 'err');
+  }
+}
+
+function _aplicarDescargaRemota(){
+  const remoto = ui.modal?.extra?.remoto;
+  if(!remoto) return;
+  const cRem = ui.modal?.extra?.cRem;
+  const usuarioLocal = usuarioActual?.id;
+
+  localStorage.setItem(LS_KEY, JSON.stringify(remoto));
+  state = JSON.parse(JSON.stringify(remoto));
+
+  if(usuarioLocal && userById(usuarioLocal)){
+    usuarioActual = userById(usuarioLocal);
+    state.usuarioActualId = usuarioActual.id;
+  }
+  if(!state.config) state.config = { usarTurnos:true };
+  if(!state.caja) state.caja = { saldoInicial:0, movimientos:[] };
+  if(!state.capital) state.capital = { configurado:false, deudasInicialesPorCliente:{}, bolsasIniciales:{} };
+  state.proveedores?.forEach(p=>{ bolsaDe(p.id,'paso'); bolsaDe(p.id,'paquete'); });
+
+  const avatar = document.getElementById('avatarIni');
+  if(avatar){
+    avatar.textContent = iniciales(usuarioActual.nombre);
+    avatar.style.background = usuarioActual.color || '#8a6d3b';
+  }
+  const rol = document.getElementById('rolLbl');
+  if(rol) rol.textContent = usuarioActual.rol==='admin'?'Administrador':usuarioActual.rol==='cajero'?'Cajero':'Cobrador';
+
+  ui.modal = null;
+  __cargandoDesdeServidor = true;
+  render();
+  __cargandoDesdeServidor = false;
+
+  toast(`✅ Descargado: ${cRem.ventas} ventas, ${cRem.movs} movs`, 'ok');
+}
+
+async function _forzarSubidaLocal(){
+  ui.modal = null;
+  renderModal();
+  try {
+    await subirStateASupabase(state);
+    toast('✅ Subido al servidor', 'ok');
+  } catch(e){
+    toast('Error al subir: ' + (e.message||e), 'err');
+  }
 }
 
   window.migrarATablas = async function(silencioso){
