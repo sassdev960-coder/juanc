@@ -2208,6 +2208,7 @@ function renderModal(){
   else if(tipo==='editarGasto') contenido=modalEditarGasto(id);
   else if(tipo==='editarMovimientoCaja') contenido=modalEditarMovimientoCaja(id);
   else if(tipo==='detalleAbono') contenido=modalDetalleAbono(id);
+  else if(tipo==='editarAbono') contenido=modalEditarAbono(id);
   else if(tipo==='nuevoProducto'||tipo==='editarProducto') contenido=modalProducto(id);
   else if(tipo==='nuevaCategoria'||tipo==='editarCategoria') contenido=modalCategoria(id);
   else if(tipo==='nuevoProveedor'||tipo==='editarProveedor') contenido=modalProveedor(id);
@@ -6327,6 +6328,7 @@ function viewCobranzas(){
           <td class="num">${a.vuelta>0.001?money(a.vuelta):'—'}</td>
           <td style="white-space:nowrap">
   <button class="btn-ghost" style="padding:3px 8px;font-size:12px" onclick="abrirModal('detalleAbono','${a.id}')">Detalle</button>
+  ${!a.anulado&&esAdmin()&&!mesCerrado(mesDe(a.fecha))?`<button class="btn-ghost" style="padding:3px 8px;font-size:12px;color:var(--primary)" onclick="abrirModal('editarAbono','${a.id}')">Editar</button>`:''}
   ${a.anulado?'<span class="badge badge-danger">Revertido</span>':puedeAnular?`<button class="btn-ghost" style="padding:3px 8px;color:var(--danger);font-size:12px" onclick="accionAnularCobro('${a.id}')">Anular</button>`:mesCerrado(mesDe(a.fecha))?'<span class="badge badge-neutral">Mes cerrado</span>':'—'}
 </td>
         </tr>`;
@@ -8241,6 +8243,58 @@ function guardarEdicionMovimientoCaja(id){
 }
 
 /* ---------- ABONO: DETALLE ---------- */
+function modalEditarAbono(id){
+  const a=state.abonos.find(x=>x.id===id);
+  if(!a) return '<div class="empty">Cobro no encontrado</div>';
+  if(a.anulado) return `<div class="modal"><div class="alert alert-warning"><div>Este cobro está anulado. No se puede editar.</div></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="cerrarModal()">Cerrar</button></div></div>`;
+  if(mesCerrado(mesDe(a.fecha))) return `<div class="modal"><div class="alert alert-warning"><div>Mes cerrado. No se puede editar.</div></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="cerrarModal()">Cerrar</button></div></div>`;
+  const c=state.clientes.find(x=>x.id===a.clienteId);
+  return `
+    <div class="modal-head">
+      <div><div class="modal-title">Editar cobro ${esc(a.id)}</div>
+      <div class="card-subtitle">${esc(c?.nombre||'—')}</div></div>
+      <button class="modal-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="alert alert-info"><div>El monto aplicado se mantiene. Solo se ajustan fecha y método de pago.</div></div>
+    <div class="field"><label>Monto aplicado (Bs)</label>
+      <input type="text" readonly value="${money(a.monto)}"></div>
+    <div class="field"><label>Fecha del cobro</label>
+      <input id="mea-fecha" type="date" value="${a.fecha}" max="${HOY()}"></div>
+    <div class="field"><label>Método de pago recibido</label>
+      <select id="mea-metodo">
+        <option value="efectivo" ${a.metodoPago==='efectivo'?'selected':''}>Efectivo</option>
+        <option value="transferencia" ${a.metodoPago==='transferencia'?'selected':''}>Transferencia</option>
+      </select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionAbono('${id}')">Guardar cambios</button>
+    </div>`;
+}
+function guardarEdicionAbono(id){
+  const a=state.abonos.find(x=>x.id===id);
+  if(!a) return toast('Cobro no encontrado','err');
+  if(a.anulado) return toast('No se puede editar un cobro anulado','err');
+  if(!esAdmin()) return toast('Solo admin','err');
+  const fecha=$('mea-fecha').value || a.fecha;
+  const metodo=$('mea-metodo').value === 'transferencia' ? 'transferencia' : 'efectivo';
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
+  if(mesCerrado(mesDe(fecha))) {
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas guardar este cobro en el mes cerrado?`)) return;
+  }
+  a.fecha=fecha;
+  a.metodoPago=metodo;
+  // Actualizar movimiento de caja vinculado
+  const mov=state.caja.movimientos.find(m=>m.referencia===id && m.tipo==='abono');
+  if(mov){
+    mov.fecha=fecha;
+    mov.metodoPago=metodo;
+  }
+  toast('Cobro actualizado','ok');
+  cerrarModal(); render();
+}
 function modalDetalleAbono(id){
   const a = state.abonos.find(x=>x.id===id);
   if(!a) return '<div class="empty">Cobro no encontrado</div>';
