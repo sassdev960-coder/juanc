@@ -3711,7 +3711,7 @@ function guardarEdicionMovimientoBanco(movId){
   const desc=$('meb-desc').value.trim()||(tipo==='ingreso'?'Depósito':'Retiro');
   const fecha=$('meb-fecha').value || m.fecha;
   if(!(monto>0)) return toast('Monto inválido','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   m.tipo = tipo;
   m.fecha = fecha;
@@ -4010,7 +4010,7 @@ function confirmarDinero(tipo){
   const concepto=$('m-dinero-concepto').value.trim()||(tipo==='aporte'?'Aporte':'Retiro');
   const fecha=$('m-dinero-fecha')?.value||HOY();
   if(!(monto>0)) return toast('Monto inválido','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(tipo==='retiro'&&monto>saldoCaja()) return toast('Saldo insuficiente','err');
   if(mesCerrado(mesDe(fecha))){
@@ -4028,7 +4028,7 @@ function confirmarReponerBolsa(){
   const fecha=$('m-rep-fecha')?.value||HOY();
   if(!provId) return toast('Selecciona operador','err');
   if(!(monto>0)) return toast('Monto inválido','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(monto>saldoCaja()){
     toast(`Saldo insuficiente en caja. Tienes ${money(saldoCaja())}.`,'err'); return;
@@ -4049,7 +4049,7 @@ function confirmarBonificacion(){
   const fecha=$('m-bonif-fecha')?.value||HOY();
   if(!provId) return toast('Selecciona operador','err');
   if(!(monto>0)) return toast('Monto inválido','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(mesCerrado(mesDe(fecha))){
     if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir esta bonificación en el mes cerrado?`)) return;
@@ -4082,7 +4082,7 @@ function confirmarAjusteSaldo(){
   if(!provId) return toast('Selecciona operador','err');
   if(!monto||isNaN(monto)) return toast('Monto inválido','err');
   if(!motivo) return toast('Motivo obligatorio','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(mesCerrado(mesDe(fecha))){
     if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este ajuste en el mes cerrado?`)) return;
@@ -4146,7 +4146,7 @@ function confirmarPagoCuenta(id){
   const fecha=$('m-cuenta-fecha')?.value||HOY();
   const saldo=saldoCuenta(c);
   if(!(monto>0)) return toast('Monto inválido','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(monto>saldo+0.001) return toast(`Máximo ${money(saldo)}`,'err');
   if(monto>saldoCaja()&&!confirm(`Supera caja (${money(saldoCaja())}). ¿Continuar?`)) return;
@@ -4323,7 +4323,7 @@ function confirmarAbono(clienteId){
   }
 
   if(!(entregado>0)) return toast('Ingresa el total que entrega el cliente','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
 
   // Permitir pagos parciales: se aplica solo lo entregado y el resto permanece como deuda.
@@ -4459,7 +4459,7 @@ function guardarMovimientoBanco(bancoId){
   const desc=$('m-bmov-desc').value.trim()||(tipo==='ingreso'?'Depósito':'Retiro');
   const fecha=$('m-bmov-fecha')?.value||HOY();
   if(!(monto>0)) return toast('Monto inválido','err');
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(mesCerrado(mesDe(fecha))){
     if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este movimiento en el mes cerrado?`)) return;
