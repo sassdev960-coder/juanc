@@ -1836,10 +1836,10 @@ function saldoBancosTotal(){ return num2(state.bancos.reduce((a,b)=>a+saldoBanco
   });
 }
 function eliminarMovimientosPorRef(ref){ state.caja.movimientos=state.caja.movimientos.filter(m=>m.referencia!==ref); }
-function agregarMovimientoBanco(bancoId,monto,descripcion,referencia){
+function agregarMovimientoBanco(bancoId,monto,descripcion,referencia,fecha=HOY()){
   const b=bancoById(bancoId); if(!b) return;
   if(!b.movimientos) b.movimientos=[];
-  b.movimientos.push({id:'MB'+(state.seq.movBanco++),fecha:HOY(),hora:horaActual(),monto:num2(monto),descripcion,referencia:referencia||null,usuarioId:usuarioActual?.id||null,usuarioNombre:usuarioActual?.nombre||'—'});
+  b.movimientos.push({id:'MB'+(state.seq.movBanco++),fecha:fecha||HOY(),hora:horaActual(),monto:num2(monto),descripcion,referencia:referencia||null,usuarioId:usuarioActual?.id||null,usuarioNombre:usuarioActual?.nombre||'—'});
 }
 const saldoVenta = v => num2(v.total-(v.pagado||0));
 
@@ -2819,6 +2819,7 @@ function modalPagarCuenta(id){
       <div class="money-input-wrap"><input id="m-cuenta-monto" type="number" step="0.01" min="0.01" value="${saldo}"></div>
       <div class="hint">Saldo en caja: <b>${money(saldoCaja())}</b></div></div>
     <div class="field"><label>Nota</label><input id="m-cuenta-nota"></div>
+    <div class="field"><label>Fecha</label><input id="m-cuenta-fecha" type="date" value="${HOY()}" max="${HOY()}"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
       <button class="btn btn-success" onclick="confirmarPagoCuenta('${id}')">Registrar pago</button>
@@ -2849,6 +2850,8 @@ function modalBonificacion(provId, tipoRec){
       <div class="hint" id="bonif-saldo-actual">${bolsa?`Saldo actual de esta bolsa: <b>${money(bolsa.saldo||0)}</b>`:''}</div></div>
     <div class="field"><label>Concepto / referencia</label>
       <input id="m-bonif-concepto" placeholder="Ej: Bonificación SMS 15/10"></div>
+    <div class="field"><label>Fecha</label>
+      <input id="m-bonif-fecha" type="date" value="${HOY()}" max="${HOY()}"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
       <button class="btn btn-success" onclick="confirmarBonificacion()">Registrar bonificación</button>
@@ -2889,6 +2892,8 @@ function modalAjustarSaldo(provId, tipoRec){
     </div>
     <div class="field"><label>Motivo *</label>
       <input id="m-aj-motivo" placeholder="Ej: Corregir tipeo, bonif. mal cargada..."></div>
+    <div class="field"><label>Fecha</label>
+      <input id="m-aj-fecha" type="date" value="${HOY()}" max="${HOY()}"></div>
     <div style="background:var(--surface-soft);border-radius:10px;padding:12px;border:1px solid var(--line-soft);font-size:12.5px">
       Saldo actual de esta bolsa: <b>${bolsa?money(bolsa.saldo||0):'—'}</b>
     </div>
@@ -2906,6 +2911,8 @@ function modalDinero(tipo){
       <div class="money-input-wrap"><input id="m-dinero-monto" type="number" step="0.01" min="0.01"></div></div>
     <div class="field"><label>Concepto</label>
       <input id="m-dinero-concepto" placeholder="${esAporte?'Ej: Aporte del dueño':'Ej: Retiro'}"></div>
+    <div class="field"><label>Fecha</label>
+      <input id="m-dinero-fecha" type="date" value="${HOY()}" max="${HOY()}"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
       <button class="btn ${esAporte?'btn-success':'btn-danger'}" onclick="confirmarDinero('${tipo}')">${esAporte?'Agregar':'Retirar'}</button>
@@ -2955,6 +2962,8 @@ function modalReponerBolsa(provId, tipoRec){
         <div class="hint">Disponible en caja: <b style="color:var(--success)">${money(saldo)}</b>. <span id="rep-saldo-bolsa">${bolsa?`Saldo actual de esta bolsa: <b>${money(bolsa.saldo||0)}</b>`:''}</span></div></div>
       <div class="field"><label>Concepto</label>
         <input id="m-rep-concepto" placeholder="Ej: Compra de saldo al operador"></div>
+    <div class="field"><label>Fecha</label>
+        <input id="m-rep-fecha" type="date" value="${HOY()}" max="${HOY()}"></div>
       <div class="modal-actions">
         <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
         <button class="btn btn-primary" onclick="confirmarReponerBolsa()">Reponer saldo</button>
@@ -3095,6 +3104,10 @@ function modalAbono(clienteId){
           <span class="choice-title">💳 Transferencia</span>
         </button>
       </div>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label>Fecha del cobro</label>
+      <input id="m-abono-fecha" type="date" value="${HOY()}" max="${HOY()}">
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
@@ -3651,6 +3664,7 @@ function modalMovimientoBanco(bancoId){
     <div class="field"><label>Monto (Bs) *</label>
       <div class="money-input-wrap"><input id="m-bmov-monto" type="number" step="0.01" min="0.01"></div></div>
     <div class="field"><label>Descripción</label><input id="m-bmov-desc"></div>
+    <div class="field"><label>Fecha</label><input id="m-bmov-fecha" type="date" value="${HOY()}" max="${HOY()}"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarMovimientoBanco('${bancoId}')">Registrar</button>
@@ -3932,9 +3946,15 @@ function eliminarUsuario(id){
 function confirmarDinero(tipo){
   const monto=Number($('m-dinero-monto').value);
   const concepto=$('m-dinero-concepto').value.trim()||(tipo==='aporte'?'Aporte':'Retiro');
+  const fecha=$('m-dinero-fecha')?.value||HOY();
   if(!(monto>0)) return toast('Monto inválido','err');
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(tipo==='retiro'&&monto>saldoCaja()) return toast('Saldo insuficiente','err');
-  agregarMovimientoCaja(tipo,tipo==='aporte'?monto:-monto,concepto,null);
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este movimiento en el mes cerrado?`)) return;
+  }
+  agregarMovimientoCaja(tipo,tipo==='aporte'?monto:-monto,concepto,null,fecha);
   toast(tipo==='aporte'?'Agregado':'Retirado','ok');
   cerrarModal(); render();
 }
@@ -3943,13 +3963,19 @@ function confirmarReponerBolsa(){
   const tipo=$('m-rep-tipo').value;
   const monto=Number($('m-rep-monto').value);
   const concepto=$('m-rep-concepto').value.trim()||('Reposición '+(provById(provId)?.nombre||'')+' · '+TIPOS_BOLSA[tipo]);
+  const fecha=$('m-rep-fecha')?.value||HOY();
   if(!provId) return toast('Selecciona operador','err');
   if(!(monto>0)) return toast('Monto inválido','err');
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(monto>saldoCaja()){
     toast(`Saldo insuficiente en caja. Tienes ${money(saldoCaja())}.`,'err'); return;
   }
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este movimiento en el mes cerrado?`)) return;
+  }
   const b=bolsaDe(provId,tipo); b.saldo=num2((b.saldo||0)+monto);
-  agregarMovimientoCaja('recarga_reposicion',-monto,concepto,null);
+  agregarMovimientoCaja('recarga_reposicion',-monto,concepto,null,fecha);
   toast(`Saldo repuesto · ${TIPOS_BOLSA[tipo]} · ${money(monto)}`,'ok');
   cerrarModal(); render();
 }
@@ -3958,15 +3984,21 @@ function confirmarBonificacion(){
   const tipo=$('m-bonif-tipo').value;
   const monto=Number($('m-bonif-monto').value);
   const concepto=$('m-bonif-concepto').value.trim()||('Bonificación '+TIPOS_BOLSA[tipo]);
+  const fecha=$('m-bonif-fecha')?.value||HOY();
   if(!provId) return toast('Selecciona operador','err');
   if(!(monto>0)) return toast('Monto inválido','err');
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir esta bonificación en el mes cerrado?`)) return;
+  }
   const b=bolsaDe(provId,tipo);
   b.saldo=num2((b.saldo||0)+monto);
   b.bonificaciones=num2((b.bonificaciones||0)+monto);
   if(!state.ajustesBolsa) state.ajustesBolsa=[];
   state.ajustesBolsa.push({
     id:'AB'+(state.seq.ajusteBolsa++),
-    fecha:HOY(), hora:horaActual(),
+    fecha, hora:horaActual(),
     provId, tipo,
     delta:num2(monto),
     motivoTipo:'bonificacion',
@@ -3984,9 +4016,15 @@ function confirmarAjusteSaldo(){
   const tipo=$('m-aj-tipo').value;
   const monto=Number($('m-aj-monto').value);
   const motivo=$('m-aj-motivo').value.trim();
+  const fecha=$('m-aj-fecha')?.value||HOY();
   if(!provId) return toast('Selecciona operador','err');
   if(!monto||isNaN(monto)) return toast('Monto inválido','err');
   if(!motivo) return toast('Motivo obligatorio','err');
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este ajuste en el mes cerrado?`)) return;
+  }
   const b=bolsaDe(provId,tipo);
   const saldoAntes=num2(b.saldo||0);
   const saldoDespues=num2(saldoAntes+monto);
@@ -3995,7 +4033,7 @@ function confirmarAjusteSaldo(){
   if(!state.ajustesBolsa) state.ajustesBolsa=[];
   state.ajustesBolsa.push({
     id:'AB'+(state.seq.ajusteBolsa++),
-    fecha:HOY(), hora:horaActual(),
+    fecha, hora:horaActual(),
     provId, tipo,
     delta:num2(monto),
     motivoTipo:'ajuste',
@@ -4013,11 +4051,13 @@ function guardarGasto(){
   const desc=$('m-gasto-desc').value.trim();
   const fecha=$('m-gasto-fecha').value||HOY();
   if(!(monto>0)) return toast('Monto inválido','err');
-  if(bloquearMesCerrado(fecha,'Registrar gasto')) return;
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este gasto en el mes cerrado?`)) return;
+  }
   if(monto>saldoCaja()&&!confirm(`Supera caja (${money(saldoCaja())}). ¿Continuar?`)) return;
   const g={id:'G'+(state.seq.gasto++),fecha,hora:horaActual(),categoria:cat,monto:num2(monto),descripcion:desc||cat,usuarioId:usuarioActual?.id||null,usuarioNombre:usuarioActual?.nombre||'—'};
   state.gastos.push(g);
-  agregarMovimientoCaja('gasto',-monto,'Gasto · '+cat+(desc?' · '+desc:''),g.id);
+  agregarMovimientoCaja('gasto',-monto,'Gasto · '+cat+(desc?' · '+desc:''),g.id,fecha);
   toast('Gasto '+money(monto),'ok'); cerrarModal(); render();
 }
 function guardarCuentaPagar(id){
@@ -4041,12 +4081,18 @@ function confirmarPagoCuenta(id){
   const c=cuentaById(id); if(!c) return;
   const monto=Number($('m-cuenta-monto').value);
   const nota=$('m-cuenta-nota').value.trim();
+  const fecha=$('m-cuenta-fecha')?.value||HOY();
   const saldo=saldoCuenta(c);
   if(!(monto>0)) return toast('Monto inválido','err');
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
   if(monto>saldo+0.001) return toast(`Máximo ${money(saldo)}`,'err');
   if(monto>saldoCaja()&&!confirm(`Supera caja (${money(saldoCaja())}). ¿Continuar?`)) return;
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este pago en el mes cerrado?`)) return;
+  }
   c.pagado=num2((c.pagado||0)+monto);
-  agregarMovimientoCaja('pago_cuenta',-monto,'Pago a '+c.acreedor+(nota?' · '+nota:''),c.id);
+  agregarMovimientoCaja('pago_cuenta',-monto,'Pago a '+c.acreedor+(nota?' · '+nota:''),c.id,fecha);
   toast('Pago '+money(monto),'ok'); cerrarModal(); render();
 }
 function montoVentasAplicadoAbono(a){
@@ -4187,6 +4233,7 @@ function accionAnularCobro(id){
 }
 
 function confirmarAbono(clienteId){
+  const fecha=$('m-abono-fecha')?.value || HOY();
   const modo=ui.abonoModo || (deudaInicialCliente(clienteId)>0.001?'capital':'ventas');
   const deudaIni=deudaInicialCliente(clienteId);
   let aplicadoCapital=0, aplicadoVentas=0, entregado=0;
@@ -4214,6 +4261,8 @@ function confirmarAbono(clienteId){
   }
 
   if(!(entregado>0)) return toast('Ingresa el total que entrega el cliente','err');
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
 
   // Permitir pagos parciales: se aplica solo lo entregado y el resto permanece como deuda.
   // En modo combinado se cubre primero el monto de capital indicado y el remanente va a las ventas seleccionadas en el orden mostrado.
@@ -4261,6 +4310,9 @@ function confirmarAbono(clienteId){
     }
   }
 
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este cobro en el mes cerrado?`)) return;
+  }
   const abonoId='A'+(state.seq.abono++);
   const c=state.clientes.find(x=>x.id===clienteId);
   const metodoAbono = ui.abonoMetodo === 'transferencia' ? 'transferencia' : 'efectivo';
@@ -4269,7 +4321,7 @@ function confirmarAbono(clienteId){
   if(aplicadoVentas>0.001) partes.push(`ventas seleccionadas ${money(aplicadoVentas)}`);
   const descMov=`Cobro de ${c?.nombre||''} (${partes.join(' + ')}) · ${metodoAbono}`;
   state.abonos.push({
-    id:abonoId,clienteId,ventaId:null,fecha:HOY(),hora:horaActual(),
+    id:abonoId,clienteId,ventaId:null,fecha,hora:horaActual(),
     monto:aplicadoTotal,entregado:num2(entregado),vuelta,
     metodoPago: metodoAbono,
     aplicadoCapital:num2(aplicadoCapital),aplicadoVentas:num2(aplicadoVentas),
@@ -4277,7 +4329,7 @@ function confirmarAbono(clienteId){
     modoCobro:modo,anulado:false,
     usuarioId:usuarioActual?.id||null,usuarioNombre:usuarioActual?.nombre||'—'
   });
-  agregarMovimientoCaja('abono',aplicadoTotal,descMov,abonoId,HOY(),metodoAbono);
+  agregarMovimientoCaja('abono',aplicadoTotal,descMov,abonoId,fecha,metodoAbono);
   const detalleVentas=ventasAplicadas.map(x=>{
     const v=state.ventas.find(y=>y.id===x.ventaId);
     return `${v?.id||x.ventaId} (${fFecha(v?.fecha||'')}) ${money(x.monto)}`;
@@ -4342,8 +4394,14 @@ function guardarMovimientoBanco(bancoId){
   const tipo=$('m-bmov-tipo').value;
   const monto=Number($('m-bmov-monto').value)||0;
   const desc=$('m-bmov-desc').value.trim()||(tipo==='ingreso'?'Depósito':'Retiro');
+  const fecha=$('m-bmov-fecha')?.value||HOY();
   if(!(monto>0)) return toast('Monto inválido','err');
-  agregarMovimientoBanco(bancoId,tipo==='ingreso'?monto:-monto,desc,null);
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
+  if(mesCerrado(mesDe(fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(fecha))} está cerrado. ¿Deseas introducir este movimiento en el mes cerrado?`)) return;
+  }
+  agregarMovimientoBanco(bancoId,tipo==='ingreso'?monto:-monto,desc,null,fecha);
   toast('Registrado','ok'); cerrarModal(); render();
 }
 function eliminarBanco(id){
@@ -4678,7 +4736,9 @@ function confirmarVenta(){
   const fechaVenta=ui.ventaFecha||HOY();
   if(!/^\d{4}-\d{2}-\d{2}$/.test(fechaVenta) || Number.isNaN(Date.parse(fechaVenta+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
   if(fechaVenta>HOY()) return toast('La fecha de la venta no puede ser futura','err');
-  if(mesCerrado(fechaVenta.slice(0,7))) return toast(`El mes ${fechaVenta.slice(0,7)} está cerrado. No se puede registrar una venta en ese período.`,'err');
+  if(mesCerrado(fechaVenta.slice(0,7))){
+    if(!confirm(`El mes ${nombreMes(fechaVenta.slice(0,7))} está cerrado. ¿Deseas introducir esta venta en el mes cerrado?`)) return;
+  }
   for(const it of ui.ventaCarrito){
     const p=prodById(it.productoId);
     if(!p) return toast(`Producto eliminado: ${it.nombre}`,'err');
@@ -4832,8 +4892,9 @@ function confirmarCompra(){
     return toast('Selecciona una fecha válida','err');
   if(fechaCompra > HOY())
     return toast('La fecha de la compra no puede ser futura','err');
-  if(mesCerrado(fechaCompra.slice(0,7)))
-    return toast(`El mes ${nombreMes(fechaCompra.slice(0,7))} está cerrado. No se puede registrar una compra en ese período.`,'err');
+  if(mesCerrado(fechaCompra.slice(0,7))){
+    if(!confirm(`El mes ${nombreMes(fechaCompra.slice(0,7))} está cerrado. ¿Deseas introducir esta compra en el mes cerrado?`)) return;
+  }
 
   const total=totalCarritoCompra();
   const prov=ui.compraProveedorId?provById(ui.compraProveedorId):null;
@@ -7798,7 +7859,7 @@ function guardarEdicionVenta(id){
     v.pagado = nuevoTotal;
     v.montoRecibido = nuevoTotal;
     v.cambio = 0;
-    agregarMovimientoCaja('venta', nuevoTotal, `Venta ${id} · ${v.clienteNombre}`, id);
+    agregarMovimientoCaja('venta', nuevoTotal, `Venta ${id} · ${v.clienteNombre}`, id, v.fecha);
   } else {
     // Crédito: conservar lo ya pagado, tope al nuevo total
     v.pagado = num2(Math.min(Number(v.pagado)||0, nuevoTotal));
@@ -7974,7 +8035,7 @@ function guardarEdicionCompra(id){
   c.items = itemsNuevos;
   c.total = nuevoTotal;
 
-  agregarMovimientoCaja('compra', -nuevoTotal, `Compra ${id} · ${c.proveedorNombre}`, id);
+  agregarMovimientoCaja('compra', -nuevoTotal, `Compra ${id} · ${c.proveedorNombre}`, id, c.fecha);
 
   if(ui.compraEliminarItems?.[id]) delete ui.compraEliminarItems[id];
 
@@ -8034,7 +8095,7 @@ function guardarEdicionGasto(id){
   g.categoria = cat;
   g.monto = monto;
   g.descripcion = desc || cat;
-  agregarMovimientoCaja('gasto', -monto, 'Gasto · '+cat+(desc?' · '+desc:''), id);
+  agregarMovimientoCaja('gasto', -monto, 'Gasto · '+cat+(desc?' · '+desc:''), id, fecha);
 
   toast('Gasto actualizado','ok');
   cerrarModal(); render();
@@ -8094,6 +8155,7 @@ function guardarEdicionMovimientoCaja(id){
   const desc = $('mem-desc').value.trim();
   const fecha = $('mem-fecha').value || m.fecha;
   if(!(monto>0)) return toast('Monto inválido','err');
+  if(bloquearMesCerrado(fecha,'Editar movimiento')) return;
 
   const signos = {
     aporte: 1, retiro: -1, gasto: -1, pago_cuenta: -1, recarga_reposicion: -1,
