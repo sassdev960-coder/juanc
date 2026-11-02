@@ -1716,7 +1716,7 @@ const ui = {
   buscarClienteLista:'', filtroClientesCobrador:'con_deuda',
   clientesMostrar: CLIENTES_POR_PAGINA,
   buscarProdVenta:'', buscarClienteVenta:'',
-  filtroGastosMes:mesActual(), buscarGasto:'',
+  filtroGastosMes:mesActual(), gananciasMes:mesActual(), buscarGasto:'',
   filtroCuentasEstado:'pendientes', buscarCuenta:'',
   cuentaAbierta:null, buscarBanco:'',
   buscarProductoInv:'', buscarProductoConfig:'', buscarProveedor:'',
@@ -2230,6 +2230,7 @@ function renderModal(){
   else if(tipo==='nuevoBanco'||tipo==='editarBanco') contenido=modalBanco(id);
     
   else if(tipo==='movimientoBanco') contenido=modalMovimientoBanco(id);
+  else if(tipo==='editarMovimientoBanco') contenido=modalEditarMovimientoBanco(id);
   else if(tipo==='syncManual') contenido=modalSyncManual();
   else if(tipo==='montoLibreRecarga') contenido=modalMontoLibreRecarga(id);
   else if(tipo==='verBonificaciones') contenido=modalVerBonificaciones();
@@ -3642,9 +3643,9 @@ function modalBanco(id){
       <input id="m-banco-nombre" value="${b?esc(b.nombre):''}" autofocus></div>
     <div class="field"><label>Notas</label>
       <input id="m-banco-nota" value="${b?esc(b.nota||''):''}"></div>
-    ${!b?`<div class="field"><label>Saldo inicial (Bs)</label>
-      <div class="money-input-wrap"><input id="m-banco-saldo" type="number" step="0.01" min="0" value="0"></div>
-      <div class="hint">Para el arranque del negocio, mejor cargalo desde <b>Capital inicial</b>.</div></div>`:''}
+    <div class="field"><label>Saldo inicial (Bs)</label>
+      <div class="money-input-wrap"><input id="m-banco-saldo" type="number" step="0.01" min="0" value="${b?b.saldoInicial:0}"></div>
+      <div class="hint">Para el arranque del negocio, mejor cargalo desde <b>Capital inicial</b>.</div></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="guardarBanco(${b?`'${b.id}'`:'null'})">${b?'Guardar':'Crear'}</button>
@@ -3672,6 +3673,67 @@ function modalMovimientoBanco(bancoId){
 }
 
 /* ---------- MONTO LIBRE AL VENDER RECARGA ---------- */
+function bancoDeMovimiento(movId){
+  return state.bancos.find(b => (b.movimientos||[]).some(m => m.id===movId));
+}
+function modalEditarMovimientoBanco(movId){
+  const b=bancoDeMovimiento(movId);
+  const m=b ? (b.movimientos||[]).find(x=>x.id===movId) : null;
+  if(!b||!m) return '<div class="empty">Movimiento no encontrado</div>';
+  const tipo = (m.monto||0)>=0 ? 'ingreso' : 'egreso';
+  return `
+    <div class="modal-head"><div><div class="modal-title">Editar movimiento bancario</div>
+    <div class="card-subtitle">${esc(b.nombre)} · ${esc(m.id)}</div></div>
+      <button class="modal-close" onclick="cerrarModal()">×</button></div>
+    <div class="alert alert-warning"><div>Se ajusta el saldo de la cuenta automáticamente.</div></div>
+    <div class="field"><label>Tipo *</label>
+      <select id="meb-tipo">
+        <option value="ingreso" ${tipo==='ingreso'?'selected':''}>Ingreso</option>
+        <option value="egreso" ${tipo==='egreso'?'selected':''}>Egreso</option>
+      </select></div>
+    <div class="field"><label>Monto (Bs) *</label>
+      <div class="money-input-wrap"><input id="meb-monto" type="number" step="0.01" min="0.01" value="${Math.abs(m.monto)}"></div></div>
+    <div class="field"><label>Descripción</label>
+      <input id="meb-desc" value="${esc(m.descripcion||'')}"></div>
+    <div class="field"><label>Fecha</label>
+      <input id="meb-fecha" type="date" value="${m.fecha}" max="${HOY()}"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionMovimientoBanco('${movId}')">Guardar cambios</button>
+    </div>`;
+}
+function guardarEdicionMovimientoBanco(movId){
+  const b=bancoDeMovimiento(movId);
+  const m=b ? (b.movimientos||[]).find(x=>x.id===movId) : null;
+  if(!b||!m) return toast('Movimiento no encontrado','err');
+  const tipo=$('meb-tipo').value;
+  const monto=num2(Number($('meb-monto').value)||0);
+  const desc=$('meb-desc').value.trim()||(tipo==='ingreso'?'Depósito':'Retiro');
+  const fecha=$('meb-fecha').value || m.fecha;
+  if(!(monto>0)) return toast('Monto inválido','err');
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(fecha) || Number.isNaN(Date.parse(fecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(fecha>HOY()) return toast('La fecha no puede ser futura','err');
+  m.tipo = tipo;
+  m.fecha = fecha;
+  m.monto = num2(monto * (tipo==='ingreso'?1:-1));
+  m.descripcion = desc;
+  toast('Movimiento actualizado','ok');
+  cerrarModal(); render();
+}
+function accionEliminarMovimientoBanco(movId){
+  const b=bancoDeMovimiento(movId);
+  const m=b ? (b.movimientos||[]).find(x=>x.id===movId) : null;
+  if(!b||!m) return toast('Movimiento no encontrado','err');
+  pedirConfirmacion({
+    criticidad:'advertencia',titulo:'Eliminar movimiento',
+    mensaje:`¿Eliminar el movimiento de ${money(Math.abs(m.monto))} en ${esc(b.nombre)}?`,
+    textoBoton:'Sí, eliminar',
+    onConfirm:()=>{
+      b.movimientos=b.movimientos.filter(x=>x.id!==movId);
+      toast('Movimiento eliminado','ok'); render();
+    }
+  });
+}
 function modalMontoLibreRecarga(productoId){
   const p=prodById(productoId); if(!p) return '';
   const tipo=tipoBolsaDeProducto(p);
@@ -4385,9 +4447,10 @@ function confirmarCerrarTurno(turnoId,teorico){
 function guardarBanco(id){
   const n=$('m-banco-nombre').value.trim();
   const nota=$('m-banco-nota').value.trim();
+  const saldo=num2(Number($('m-banco-saldo')?.value)||0);
   if(!n) return toast('Ingresa nombre','err');
-  if(id){ const b=bancoById(id); b.nombre=n; b.nota=nota; toast('Actualizado','ok'); }
-  else{ const saldo=Number($('m-banco-saldo').value)||0; state.bancos.push({id:'B'+(state.seq.banco++),nombre:n,nota,saldoInicial:num2(saldo),movimientos:[]}); toast('Creado','ok'); }
+  if(id){ const b=bancoById(id); b.nombre=n; b.nota=nota; b.saldoInicial=saldo; toast('Actualizado','ok'); }
+  else{ state.bancos.push({id:'B'+(state.seq.banco++),nombre:n,nota,saldoInicial:saldo,movimientos:[]}); toast('Creado','ok'); }
   cerrarModal(); render();
 }
 function guardarMovimientoBanco(bancoId){
@@ -5450,7 +5513,7 @@ function restablecerSistema(){
     ${bancos.length===0?'<div class="empty">'+(state.bancos.length===0?'Aún no hay bancos.':'Sin resultados.')+'</div>':''}
     ${bancos.map(b=>{
       const saldo=saldoBanco(b);
-      const movs=(b.movimientos||[]).slice().reverse().slice(0,8);
+      const movs=(b.movimientos||[]).slice().reverse().slice(0,50);
       return `<div class="card" style="background:var(--surface-soft);margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap">
           <div>
@@ -5469,12 +5532,16 @@ function restablecerSistema(){
           <button class="btn-ghost" style="font-size:12px;color:var(--danger)" onclick="eliminarBanco('${b.id}')">Eliminar</button>
         </div>
         ${movs.length>0?`<div class="table-wrap" style="margin:12px 0 0;padding:0"><table>
-          <thead><tr><th>Fecha</th><th>Descripción</th><th>Usuario</th><th class="num">Monto</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Descripción</th><th>Usuario</th><th class="num">Monto</th>${esAdmin()?'<th></th>':''}</tr></thead>
           <tbody>${movs.map(m=>`<tr>
             <td>${fFecha(m.fecha)} ${m.hora||''}</td>
             <td>${esc(m.descripcion)}</td>
             <td><span class="badge badge-info">${esc(m.usuarioNombre||'—')}</span></td>
             <td class="num" style="color:${m.monto>0?'var(--success)':'var(--danger)'};font-weight:600">${m.monto>0?'+':''}${money(m.monto)}</td>
+            ${esAdmin()?`<td class="num" style="white-space:nowrap">
+              <button class="btn-ghost" style="padding:2px 8px;font-size:12px;color:var(--primary)" onclick="abrirModal('editarMovimientoBanco','${m.id}')">Editar</button>
+              <button class="btn-ghost" style="padding:2px 8px;font-size:12px;color:var(--danger)" onclick="accionEliminarMovimientoBanco('${m.id}')">Eliminar</button>
+            </td>`:''}
           </tr>`).join('')}</tbody>
         </table></div>`:''}
       </div>`;
@@ -6558,7 +6625,7 @@ function viewTurnos(){
 }
 function viewGanancias(){
   const h=HOY();
-  const mes=mesActual();
+  const mes=ui.gananciasMes||mesActual();
   const primerDia=mes+'-01';
   const vHoy=state.ventas.filter(v=>v.fecha===h);
   const vMes=state.ventas.filter(v=>mesDe(v.fecha)===mes);
@@ -6566,7 +6633,7 @@ function viewGanancias(){
   const ganFisMes=gananciaVentas(vMes);
   const ganFisTotal=gananciaVentas(state.ventas);
   const bonifHoy=num2((state.ajustesBolsa||[]).filter(a=>a.motivoTipo==='bonificacion'&&a.fecha===h).reduce((a,x)=>a+x.delta,0));
-  const bonifMes=num2((state.ajustesBolsa||[]).filter(a=>a.motivoTipo==='bonificacion'&&a.fecha>=primerDia&&a.fecha<=h).reduce((a,x)=>a+x.delta,0));
+  const bonifMes=num2((state.ajustesBolsa||[]).filter(a=>a.motivoTipo==='bonificacion'&&mesDe(a.fecha)===mes).reduce((a,x)=>a+x.delta,0));
   const bonifTotal=num2((state.ajustesBolsa||[]).filter(a=>a.motivoTipo==='bonificacion').reduce((a,x)=>a+x.delta,0));
   const ganTotal=num2(ganFisTotal+bonifTotal);
   const gastosMes=num2(state.gastos.filter(g=>mesDe(g.fecha)===mes).reduce((a,g)=>a+g.monto,0));
@@ -6582,7 +6649,11 @@ function viewGanancias(){
   const top=Object.values(ranking).sort((a,b)=>b.ingresos-a.ingresos).slice(0,10);
   const maxGan=top.length>0?Math.max(...top.map(t=>t.ingresos)):1;
   return `
-  <div class="page-head"><div class="page-eyebrow">Rentabilidad</div><h1 class="page-title">Ganancias</h1></div>
+  <div class="page-head" style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap"><div><div class="page-eyebrow">Rentabilidad</div><h1 class="page-title">Ganancias</h1></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <label style="font-size:12px;color:var(--muted)">Período</label>
+      <input type="month" value="${mes}" onchange="ui.gananciasMes=this.value; render()" style="width:auto;padding:6px 10px;font-size:12.5px">
+    </div></div>
   <div class="info-banner">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
     <div><strong>Ganancia de físicos:</strong> margen precio − costo.<br>
