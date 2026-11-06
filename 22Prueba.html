@@ -8,76 +8,41 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f3f7f6;
-  --card:#ffffff;
-  --ink:#0e2a28;
-  --muted:#6c8583;
-  --line:#e3ecea;
-  --primary:#0d9488;
-  --primary-dark:#0b7d73;
-  --primary-soft:#e6f6f4;
-  --accent:#f59e0b;
-  --danger:#dd5252;
-  --radius:16px;
+  --bg:#f3f7f6; --card:#ffffff; --ink:#0e2a28; --muted:#6c8583; --line:#e3ecea;
+  --primary:#0d9488; --primary-dark:#0b7d73; --primary-soft:#e6f6f4;
+  --accent:#f59e0b; --danger:#dd5252; --radius:16px;
   --shadow:0 1px 2px rgba(14,42,40,.04), 0 8px 24px -12px rgba(14,42,40,.12);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{
-  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  background:var(--bg); color:var(--ink);
-  -webkit-font-smoothing:antialiased;
-}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 input,select{font-family:inherit;font-size:14px;color:var(--ink)}
 svg{width:20px;height:20px;flex-shrink:0}
 
-/* ---------- Layout ---------- */
 .app{display:flex;min-height:100vh}
-.sidebar{
-  width:252px;flex:0 0 252px;background:#fff;border-right:1px solid var(--line);
-  padding:22px 14px;position:sticky;top:0;height:100vh;
-  display:flex;flex-direction:column;gap:6px;
-}
+.sidebar{width:252px;flex:0 0 252px;background:#fff;border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
 .brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px}
-.logo{
-  width:38px;height:38px;border-radius:12px;
-  background:linear-gradient(135deg,#14b8a6,#0d9488);
-  display:grid;place-items:center;color:#fff;font-size:19px;
-  box-shadow:0 6px 14px -6px rgba(13,148,136,.7);
-}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:grid;place-items:center;color:#fff;font-size:19px;box-shadow:0 6px 14px -6px rgba(13,148,136,.7)}
 .brand strong{display:block;font-size:15.5px;letter-spacing:-.2px}
 .brand .tiny{display:block;margin-top:1px}
 .nav{display:flex;flex-direction:column;gap:3px;flex:1}
-.nav-item{
-  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;
-  font-size:14px;font-weight:500;color:#4b6462;transition:.15s;width:100%;text-align:left;
-}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;font-size:14px;font-weight:500;color:#4b6462;transition:.15s;width:100%;text-align:left}
 .nav-item:hover{background:#f4f8f7;color:var(--ink)}
 .nav-item.active{background:var(--primary-soft);color:var(--primary-dark);font-weight:600}
 .nav-item.active svg{stroke:var(--primary-dark)}
-.side-foot{
-  background:#f7fbfa;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px;
-}
+.side-foot{background:#f7fbfa;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
 .side-foot .row{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted)}
 .side-foot b{color:var(--ink)}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:16px 26px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;
-}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 26px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
 .topbar h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
 .top-right{display:flex;align-items:center;gap:10px}
-.avatar{
-  width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
-  background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;font-size:12.5px;font-weight:700;
-}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;font-size:12.5px;font-weight:700}
 .avatar.round{width:40px;height:40px;border-radius:12px;flex-shrink:0}
 .view{padding:26px;max-width:1180px;width:100%;margin:0 auto}
 .bottomnav{display:none}
 
-/* ---------- Genéricos ---------- */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
 .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
 .big{font-size:26px;font-weight:800;letter-spacing:-.7px}
@@ -86,21 +51,17 @@ svg{width:20px;height:20px;flex-shrink:0}
 .tiny{font-size:11.5px}
 .strong{font-weight:600}
 .section-title{font-size:13.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:26px 0 12px}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  padding:10px 16px;border-radius:11px;font-size:13.5px;font-weight:600;transition:.15s;white-space:nowrap;
-}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:11px;font-size:13.5px;font-weight:600;transition:.15s;white-space:nowrap}
 .btn svg{width:17px;height:17px}
 .btn.primary{background:var(--primary);color:#fff;box-shadow:0 8px 18px -10px rgba(13,148,136,.9)}
 .btn.primary:hover{background:var(--primary-dark)}
 .btn.ghost{background:#fff;border:1px solid var(--line);color:#43605e}
 .btn.ghost:hover{background:#f6faf9;border-color:#d3e2df}
+.btn.danger{background:#fdecec;color:#c23b3b;border:1px solid #f8d7d7}
+.btn.danger:hover{background:#fbdcdc}
 .btn.sm{padding:7px 12px;font-size:12.5px;border-radius:9px}
 .btn.block{width:100%}
-.icon-btn{
-  width:34px;height:34px;border-radius:9px;display:inline-grid;place-items:center;
-  color:#6b8583;transition:.15s;
-}
+.icon-btn{width:34px;height:34px;border-radius:9px;display:inline-grid;place-items:center;color:#6b8583;transition:.15s}
 .icon-btn:hover{background:#f2f7f6;color:var(--ink)}
 .icon-btn.danger:hover{background:#fdecec;color:var(--danger)}
 .icon-btn svg{width:16.5px;height:16.5px}
@@ -108,34 +69,24 @@ svg{width:20px;height:20px;flex-shrink:0}
 .tag.ok{background:var(--primary-soft);color:var(--primary-dark)}
 .tag.warn{background:#fff4e3;color:#b3750a}
 .tag.danger{background:#fdecec;color:#c23b3b}
-.search{
-  display:flex;align-items:center;gap:9px;background:#f5f9f8;border:1px solid var(--line);
-  border-radius:11px;padding:9px 13px;color:var(--muted);
-}
+.tag.blue{background:#e8f1fd;color:#2f6fc4}
+.search{display:flex;align-items:center;gap:9px;background:#f5f9f8;border:1px solid var(--line);border-radius:11px;padding:9px 13px;color:var(--muted)}
 .search input{border:none;background:none;outline:none;width:100%;color:var(--ink)}
 .search svg{width:17px;height:17px}
 .field{display:block;margin-bottom:13px}
 .field > span{display:block;font-size:12.5px;font-weight:600;color:#4b6462;margin-bottom:6px}
-.field input,.field select{
-  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
-  background:#fff;outline:none;transition:.15s;
-}
+.field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none;transition:.15s}
 .field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
 .empty{padding:34px;text-align:center;color:var(--muted);font-size:13.5px}
 
-/* ---------- Dashboard ---------- */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;gap:13px;align-items:flex-start;box-shadow:var(--shadow)}
 .kpi-ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--primary-soft);color:var(--primary-dark);flex-shrink:0}
 .kpi-ic.amber{background:#fff4e3;color:#b3750a}
 .kpi-ic.blue{background:#e8f1fd;color:#2f6fc4}
-.kpi-ic.red{background:#fdecec;color:#c23b3b}
 .kpi h3{font-size:20px;font-weight:800;letter-spacing:-.5px;margin-top:2px}
 .quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
-.quick-card{
-  display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);
-  border-radius:var(--radius);padding:16px;text-align:left;transition:.18s;box-shadow:var(--shadow);
-}
+.quick-card{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:left;transition:.18s;box-shadow:var(--shadow)}
 .quick-card:hover{transform:translateY(-2px);border-color:#cfe4e0;box-shadow:0 12px 28px -16px rgba(13,148,136,.5)}
 .quick-card .qic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--primary-soft);color:var(--primary-dark);flex-shrink:0}
 .quick-card span{display:block;font-size:14px;font-weight:600}
@@ -158,13 +109,9 @@ svg{width:20px;height:20px;flex-shrink:0}
 .alert .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
 .alert .dot.red{background:var(--danger)}
 
-/* ---------- Punto de venta ---------- */
 .pos-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start}
 .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px;margin-top:14px;max-height:calc(100vh - 300px);overflow-y:auto;padding-right:4px}
-.prod{
-  text-align:left;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;
-  transition:.15s;
-}
+.prod{text-align:left;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;transition:.15s}
 .prod:hover{border-color:var(--primary);background:var(--primary-soft);transform:translateY(-1px)}
 .prod-name{font-size:13px;font-weight:600;line-height:1.3;min-height:34px}
 .prod-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px;font-weight:700;color:var(--primary-dark)}
@@ -179,20 +126,15 @@ svg{width:20px;height:20px;flex-shrink:0}
 .cart-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0;font-size:15px;font-weight:700;border-top:1px dashed var(--line);margin-top:8px}
 .cart-total strong{font-size:21px;letter-spacing:-.5px}
 
-/* ---------- Tablas ---------- */
 .table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px}
 .table{width:100%;border-collapse:collapse;min-width:680px}
-.table th{
-  text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;
-  color:var(--muted);font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line);
-}
+.table th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}
 .table td{padding:12px 8px;border-bottom:1px solid #f2f7f6;font-size:13.5px;vertical-align:middle}
 .table tr:last-child td{border-bottom:none}
 .table td.low{color:var(--danger);font-weight:700}
 .pname{font-weight:600;font-size:13.5px}
 .right{text-align:right;white-space:nowrap}
 
-/* ---------- Proveedores ---------- */
 .sup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
 .sup-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
 .sup-head{display:flex;align-items:center;gap:11px;margin-bottom:14px}
@@ -202,49 +144,34 @@ svg{width:20px;height:20px;flex-shrink:0}
 .sup-stats b{font-size:13.5px}
 .sup-actions{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap}
 
-/* ---------- Modal ---------- */
-.overlay{
-  position:fixed;inset:0;background:rgba(10,32,30,.45);backdrop-filter:blur(3px);
-  display:grid;place-items:center;padding:18px;z-index:200;animation:fade .15s ease;
-}
+.overlay{position:fixed;inset:0;background:rgba(10,32,30,.45);backdrop-filter:blur(3px);display:grid;place-items:center;padding:18px;z-index:200;animation:fade .15s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-.modal{
-  background:#fff;border-radius:18px;width:100%;max-width:480px;max-height:90vh;
-  display:flex;flex-direction:column;animation:pop .18s ease;box-shadow:0 30px 60px -20px rgba(10,32,30,.4);
-}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:480px;max-height:90vh;display:flex;flex-direction:column;animation:pop .18s ease;box-shadow:0 30px 60px -20px rgba(10,32,30,.4)}
 .modal.wide{max-width:640px}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
 .modal-head h3{font-size:16px;font-weight:700}
 .modal-body{padding:18px 20px;overflow-y:auto}
-.modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 20px;border-top:1px solid var(--line);background:#fbfdfc;border-radius:0 0 18px 18px}
+.modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 20px;border-top:1px solid var(--line);background:#fbfdfc;border-radius:0 0 18px 18px;flex-wrap:wrap}
 .line-row{display:grid;grid-template-columns:1fr 62px 84px 34px;gap:7px;margin-bottom:8px;align-items:center}
 .line-row select,.line-row input{padding:8px 9px;border:1px solid var(--line);border-radius:9px;font-size:12.5px;width:100%;outline:none}
 .line-row input:focus,.line-row select:focus{border-color:var(--primary)}
 .total-line{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:6px;border-top:1px dashed var(--line);font-size:14px;font-weight:600}
 .total-line strong{font-size:19px;letter-spacing:-.4px}
-.sum-row{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-bottom:1px solid #f2f7f6}
+.sum-row{display:flex;justify-content:space-between;font-size:13.5px;padding:9px 0;border-bottom:1px solid #f2f7f6;gap:10px}
 .sum-row:last-child{border-bottom:none}
 .sum-row b{font-weight:700}
 .pill{display:inline-block;padding:2px 8px;border-radius:20px;background:#f2f7f6;font-size:11.5px;color:#4b6462;margin-right:4px}
 
-/* ---------- Toast ---------- */
-.toast{
-  position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);
-  background:#0e2a28;color:#fff;padding:11px 20px;border-radius:12px;font-size:13.5px;font-weight:500;
-  opacity:0;pointer-events:none;transition:.25s;z-index:500;box-shadow:0 14px 30px -12px rgba(0,0,0,.5);
-}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#0e2a28;color:#fff;padding:11px 20px;border-radius:12px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:500;box-shadow:0 14px 30px -12px rgba(0,0,0,.5)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
-/* ---------- Print ---------- */
 #printArea{display:none}
 @media print{
   body{background:#fff}
   .app,.toast,#modalRoot{display:none !important}
   #printArea{display:block !important;padding:0}
 }
-
-/* ---------- Responsive ---------- */
 @media (max-width:1000px){
   .cols{grid-template-columns:1fr}
   .pos-grid{grid-template-columns:1fr}
@@ -262,15 +189,8 @@ svg{width:20px;height:20px;flex-shrink:0}
   .kpi h3{font-size:17px}
   .quick{grid-template-columns:1fr}
   .sup-grid{grid-template-columns:1fr}
-  .bottomnav{
-    display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;
-    border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom));
-    z-index:100;box-shadow:0 -8px 24px -18px rgba(14,42,40,.5);
-  }
-  .bottomnav .nav-item{
-    flex-direction:column;gap:3px;padding:6px 2px;font-size:10px;font-weight:600;
-    justify-content:center;text-align:center;border-radius:10px;
-  }
+  .bottomnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:100;box-shadow:0 -8px 24px -18px rgba(14,42,40,.5)}
+  .bottomnav .nav-item{flex-direction:column;gap:3px;padding:6px 2px;font-size:10px;font-weight:600;justify-content:center;text-align:center;border-radius:10px}
   .bottomnav .nav-item svg{width:21px;height:21px}
   .modal{max-height:94vh}
   .line-row{grid-template-columns:1fr 52px 70px 30px;gap:5px}
@@ -315,9 +235,7 @@ svg{width:20px;height:20px;flex-shrink:0}
 <div class="toast" id="toast"></div>
 
 <script>
-/* =========================================================
-   ICONOS
-   ========================================================= */
+/* ============ ICONOS ============ */
 const S = (p, extra='') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ${extra}>${p}</svg>`;
 const ic = {
   home:  S('<path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H4a1 1 0 0 1-1-1z"/>'),
@@ -333,14 +251,13 @@ const ic = {
   x:     S('<path d="M18 6 6 18M6 6l12 12"/>'),
   check: S('<path d="M20 6 9 17l-5-5"/>'),
   cash:  S('<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>'),
-  alert: S('<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>'),
+  eye:   S('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'),
+  undo:  S('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v.5a5.5 5.5 0 0 1-5.5 5.5H11"/>'),
   clock: S('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')
 };
 document.getElementById('topCart').innerHTML = ic.cart;
 
-/* =========================================================
-   DATOS DE DEMO
-   ========================================================= */
+/* ============ DATOS DEMO ============ */
 const uid = () => Math.random().toString(36).slice(2, 9);
 const ago = n => new Date(Date.now() - n * 86400000).toISOString();
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -371,17 +288,17 @@ const state = {
     {id:'s3', name:'Importadora FreshHome',   contact:'Raúl Ortega',  phone:'555-660-9988', email:'contacto@freshhome.com'}
   ],
   sales: [
-    {id:uid(), date: new Date().toISOString(), clientId:'c1',
+    {id:'v1', date: new Date().toISOString(), clientId:'c1',
      items:[{pid:'p1',name:'Limpiador multiusos 1L',qty:2,price:3.50,cost:1.20},
             {pid:'p4',name:'Cloro 1L',qty:1,price:2.20,cost:0.70}], total:9.20},
-    {id:uid(), date: new Date().toISOString(), clientId:'c2',
+    {id:'v2', date: new Date().toISOString(), clientId:'c2',
      items:[{pid:'p2',name:'Lavaloza líquido 750ml',qty:3,price:2.80,cost:0.95}], total:8.40},
-    {id:uid(), date: ago(1), clientId:'c3',
+    {id:'v3', date: ago(1), clientId:'c3',
      items:[{pid:'p3',name:'Detergente en polvo 1kg',qty:1,price:4.90,cost:2.10},
             {pid:'p9',name:'Esponja multiuso x3',qty:2,price:1.80,cost:0.60}], total:8.50},
-    {id:uid(), date: ago(2), clientId:'c4',
+    {id:'v4', date: ago(2), clientId:'c4',
      items:[{pid:'p8',name:'Jabón líquido manos 500ml',qty:2,price:3.20,cost:1.10}], total:6.40},
-    {id:uid(), date: ago(4), clientId:'c5',
+    {id:'v5', date: ago(4), clientId:'c5',
      items:[{pid:'p5',name:'Suavizante 1L',qty:2,price:3.60,cost:1.30},
             {pid:'p6',name:'Limpiavidrios 500ml',qty:1,price:3.00,cost:1.05}], total:10.20}
   ],
@@ -401,12 +318,11 @@ const state = {
   ]
 };
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
+/* ============ HELPERS ============ */
 const $ = s => document.querySelector(s);
 const money = n => '$' + (Math.round((n||0)*100)/100).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtDate = iso => { const d = new Date(iso); const p = n => String(n).padStart(2,'0'); return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`; };
+const fmtDateTime = iso => { const d = new Date(iso); const p = n => String(n).padStart(2,'0'); return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; };
 const initials = n => n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const getProduct  = id => state.products.find(p => p.id === id);
 const getClient   = id => state.clients.find(c => c.id === id);
@@ -429,9 +345,7 @@ function toast(msg){
   t._t = setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-/* =========================================================
-   NAVEGACIÓN
-   ========================================================= */
+/* ============ NAVEGACIÓN ============ */
 const NAV = [
   {id:'panel',       label:'Panel',          icon:'home'},
   {id:'pos',         label:'Punto de venta', icon:'cart'},
@@ -475,9 +389,7 @@ function updateSideFoot(){
   $('#sidePay').textContent = money(pay);
 }
 
-/* =========================================================
-   VISTA: PANEL
-   ========================================================= */
+/* ============ VISTA: PANEL ============ */
 function viewPanel(){
   const hoy = todayISO();
   const mes = hoy.slice(0,7);
@@ -489,7 +401,6 @@ function viewPanel(){
 
   const fecha = new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-  // Movimientos
   const movs = [];
   state.sales.forEach(s => movs.push({date:s.date, type:'venta', title:'Venta · ' + clientName(s.clientId), amount:s.total, plus:true}));
   state.purchases.forEach(p => movs.push({date:p.date, type:'compra', title:'Compra · ' + supplierName(p.supplierId), amount:p.total, plus:false}));
@@ -505,7 +416,6 @@ function viewPanel(){
       <div class="mov-amt ${m.plus?'plus':''}">${m.plus?'+':'−'}${money(m.amount)}</div>
     </div>`).join('') || '<div class="empty">Sin movimientos aún</div>';
 
-  // Alertas
   const lowStock = state.products.filter(p => p.stock <= p.min);
   const expiring = state.products.filter(p => {
     if(!p.expiry) return false;
@@ -574,9 +484,7 @@ function viewPanel(){
   </div>`;
 }
 
-/* =========================================================
-   VISTA: PUNTO DE VENTA
-   ========================================================= */
+/* ============ VISTA: PUNTO DE VENTA ============ */
 function posProductCards(list){
   if(!list.length) return '<div class="empty">Sin productos disponibles</div>';
   return list.map(p => `
@@ -585,11 +493,7 @@ function posProductCards(list){
       <div class="prod-meta"><span>${money(p.price)}</span><span class="muted tiny" style="font-weight:500">Stock ${p.stock}</span></div>
     </button>`).join('');
 }
-
-function cartTotal(){
-  return cart.reduce((a,c) => a + c.qty * (getProduct(c.pid)?.price || 0), 0);
-}
-
+function cartTotal(){ return cart.reduce((a,c) => a + c.qty * (getProduct(c.pid)?.price || 0), 0); }
 function cartHTML(){
   if(!cart.length) return '<div class="empty" style="padding:24px">El carrito está vacío</div>';
   return cart.map(c => {
@@ -607,6 +511,25 @@ function cartHTML(){
       </div>
       <div class="strong small" style="width:58px;text-align:right">${money(p.price*c.qty)}</div>
     </div>`;
+  }).join('');
+}
+
+/* Historial de ventas (revertible) */
+function salesHistoryRows(){
+  if(!state.sales.length) return '<tr><td colspan="6" class="empty">Aún no hay ventas registradas</td></tr>';
+  return state.sales.map(s => {
+    const itemsCount = s.items.reduce((a,i)=>a+i.qty,0);
+    return `<tr>
+      <td>${fmtDateTime(s.date)}</td>
+      <td><div class="pname">${clientName(s.clientId)}</div></td>
+      <td><span class="pill">${s.items.length} prod.</span> ${itemsCount} uds</td>
+      <td class="strong">${money(s.total)}</td>
+      <td><span class="tag ok">Completada</span></td>
+      <td class="right">
+        <button class="icon-btn" data-action="view-sale" data-id="${s.id}" title="Ver detalles">${ic.eye}</button>
+        <button class="icon-btn danger" data-action="revert-sale" data-id="${s.id}" title="Revertir venta">${ic.undo}</button>
+      </td>
+    </tr>`;
   }).join('');
 }
 
@@ -641,6 +564,21 @@ function viewPOS(){
       <div class="cart-total"><span>Total</span><strong>${money(cartTotal())}</strong></div>
       <button class="btn primary block" data-action="register-sale">${ic.check} Registrar venta</button>
     </aside>
+  </div>
+
+  <h3 class="section-title">Historial de ventas · ${state.sales.length} registros</h3>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Cliente</th><th>Productos</th>
+            <th>Total</th><th>Estado</th><th class="right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>${salesHistoryRows()}</tbody>
+      </table>
+    </div>
   </div>`;
 }
 
@@ -652,9 +590,7 @@ function filterPOS(v){
   if(el) el.innerHTML = posProductCards(list);
 }
 
-/* =========================================================
-   VISTA: INVENTARIO
-   ========================================================= */
+/* ============ VISTA: INVENTARIO ============ */
 function productRows(list){
   if(!list.length) return '<tr><td colspan="7" class="empty">Sin resultados</td></tr>';
   return list.map(p => {
@@ -719,9 +655,7 @@ function filterInventory(v){
   if(el) el.innerHTML = productRows(list);
 }
 
-/* =========================================================
-   VISTA: PROVEEDORES
-   ========================================================= */
+/* ============ VISTA: PROVEEDORES ============ */
 function viewSuppliers(){
   const cards = state.suppliers.map(s => {
     const bal = supplierBalance(s.id);
@@ -758,9 +692,7 @@ function viewSuppliers(){
   <div class="sup-grid">${cards || '<div class="empty">Sin proveedores</div>'}</div>`;
 }
 
-/* =========================================================
-   VISTA: CLIENTES
-   ========================================================= */
+/* ============ VISTA: CLIENTES ============ */
 function viewClients(){
   const cards = state.clients.map(c => {
     const compras = state.sales.filter(s => s.clientId === c.id);
@@ -779,6 +711,7 @@ function viewClients(){
         <div><span>Última</span><b>${compras.length ? fmtDate(compras[0].date) : '—'}</b></div>
       </div>
       <div class="sup-actions">
+        <button class="btn ghost sm" data-action="client-detail" data-id="${c.id}">${ic.eye} Ver detalles</button>
         <span class="muted tiny" style="align-self:center">${c.address}</span>
       </div>
     </div>`;
@@ -795,9 +728,7 @@ function viewClients(){
   <div class="sup-grid">${cards || '<div class="empty">Sin clientes</div>'}</div>`;
 }
 
-/* =========================================================
-   MODALES
-   ========================================================= */
+/* ============ MODALES ============ */
 function openModal({title, body, footer, wide}){
   $('#modalRoot').innerHTML = `
     <div class="overlay" data-action="overlay-close">
@@ -813,7 +744,7 @@ function openModal({title, body, footer, wide}){
 }
 function closeModal(){ $('#modalRoot').innerHTML = ''; }
 
-/* ----- Producto ----- */
+/* ---- Producto ---- */
 function productModal(id){
   const p = id ? getProduct(id) : {name:'',cat:'',stock:0,cost:0,price:0,min:5,expiry:''};
   openModal({
@@ -832,7 +763,6 @@ function productModal(id){
              <button class="btn primary" data-action="save-product" data-id="${id || ''}">Guardar</button>`
   });
 }
-
 function saveProduct(id){
   const name = $('#fName').value.trim();
   if(!name) return toast('Escribe el nombre del producto');
@@ -845,23 +775,17 @@ function saveProduct(id){
     price: parseFloat($('#fPrice').value) || 0,
     expiry: $('#fExp').value || ''
   };
-  if(id){
-    Object.assign(getProduct(id), data);
-    toast('Producto actualizado');
-  } else {
-    state.products.push({id:uid(), ...data});
-    toast('Producto agregado');
-  }
+  if(id){ Object.assign(getProduct(id), data); toast('Producto actualizado'); }
+  else { state.products.push({id:uid(), ...data}); toast('Producto agregado'); }
   closeModal(); render();
 }
 
-/* ----- Compra a proveedor ----- */
+/* ---- Compra ---- */
 function purchaseModal(supplierId){
   const supOpts = state.suppliers.map(s =>
     `<option value="${s.id}" ${s.id === supplierId ? 'selected' : ''}>${s.name}</option>`).join('');
   openModal({
-    title: 'Registrar compra',
-    wide: true,
+    title: 'Registrar compra', wide: true,
     body: `
       <label class="field"><span>Proveedor</span><select id="purSupplier">${supOpts}</select></label>
       <div class="field">
@@ -875,7 +799,6 @@ function purchaseModal(supplierId){
   });
   addPurchaseLine();
 }
-
 function addPurchaseLine(){
   const wrap = document.getElementById('purLines');
   if(!wrap) return;
@@ -891,14 +814,12 @@ function addPurchaseLine(){
   wrap.appendChild(div);
   updateLineCost(div.querySelector('.line-prod'));
 }
-
 function updateLineCost(sel){
   const row = sel.closest('.line-row');
   const p = getProduct(sel.value);
   if(p) row.querySelector('.line-cost').value = p.cost.toFixed(2);
   calcPurchaseTotal();
 }
-
 function calcPurchaseTotal(){
   let total = 0;
   document.querySelectorAll('#purLines .line-row').forEach(r => {
@@ -909,7 +830,6 @@ function calcPurchaseTotal(){
   const el = document.getElementById('purTotal');
   if(el) el.textContent = money(total);
 }
-
 function savePurchase(){
   const supplierId = $('#purSupplier').value;
   const rows = [...document.querySelectorAll('#purLines .line-row')];
@@ -919,22 +839,17 @@ function savePurchase(){
     const cost = parseFloat(r.querySelector('.line-cost').value) || 0;
     return {pid, name:(getProduct(pid)||{}).name || '', qty, cost};
   }).filter(i => i.qty > 0);
-
   if(!items.length) return toast('Agrega al menos un producto con cantidad');
-
   const total = items.reduce((a,i) => a + i.qty * i.cost, 0);
   state.purchases.unshift({id:uid(), date:new Date().toISOString(), supplierId, items, total});
-
   items.forEach(i => {
     const p = getProduct(i.pid);
     if(p){ p.stock += i.qty; p.cost = i.cost; }
   });
-
-  closeModal(); render();
-  toast('Compra registrada · ' + money(total));
+  closeModal(); render(); toast('Compra registrada · ' + money(total));
 }
 
-/* ----- Pago a proveedor ----- */
+/* ---- Pago ---- */
 function paymentModal(supplierId){
   const supOpts = state.suppliers.map(s =>
     `<option value="${s.id}" ${s.id === supplierId ? 'selected' : ''}>${s.name}</option>`).join('');
@@ -960,27 +875,21 @@ function paymentModal(supplierId){
              <button class="btn primary" data-action="save-payment">${ic.check} Registrar pago</button>`
   });
 }
-
 function updatePayBalance(){
   const id = $('#paySupplier').value;
   const bal = supplierBalance(id);
   $('#payBalance').textContent = money(bal);
   $('#payAmount').value = bal.toFixed(2);
 }
-
 function savePayment(){
   const supplierId = $('#paySupplier').value;
   const amount = parseFloat($('#payAmount').value) || 0;
   if(amount <= 0) return toast('Ingresa un monto válido');
-  state.payments.unshift({
-    id:uid(), date:new Date().toISOString(), supplierId, amount,
-    method: $('#payMethod').value
-  });
-  closeModal(); render();
-  toast('Pago registrado · ' + money(amount));
+  state.payments.unshift({id:uid(), date:new Date().toISOString(), supplierId, amount, method: $('#payMethod').value});
+  closeModal(); render(); toast('Pago registrado · ' + money(amount));
 }
 
-/* ----- Resumen de proveedor + impresión ----- */
+/* ---- Resumen proveedor ---- */
 function supplierDetail(id){
   const s = getSupplier(id);
   const purch = supplierPurchases(id);
@@ -994,7 +903,6 @@ function supplierDetail(id){
       <span>${fmtDate(p.date)}<br><span class="muted tiny">${p.items.map(i=>i.name+' ×'+i.qty).join(' · ')}</span></span>
       <b>${money(p.total)}</b>
     </div>`).join('') || '<div class="empty">Sin compras registradas</div>';
-
   const payRows = pays.map(p => `
     <div class="sum-row">
       <span>${fmtDate(p.date)} <span class="pill">${p.method}</span></span>
@@ -1002,100 +910,69 @@ function supplierDetail(id){
     </div>`).join('') || '<div class="empty">Sin pagos registrados</div>';
 
   openModal({
-    title: s.name,
-    wide: true,
+    title: s.name, wide: true,
     body: `
       <div class="sup-stats" style="margin-bottom:16px">
         <div><span>Total comprado</span><b>${money(totC)}</b></div>
         <div><span>Total pagado</span><b>${money(totP)}</b></div>
         <div><span>Saldo</span><b style="color:${bal>0?'#b3750a':'#0d9488'}">${money(bal)}</b></div>
       </div>
-      <h4 class="card-title">Compras</h4>
-      ${purchRows}
-      <h4 class="card-title" style="margin-top:18px">Pagos</h4>
-      ${payRows}`,
+      <h4 class="card-title">Compras</h4>${purchRows}
+      <h4 class="card-title" style="margin-top:18px">Pagos</h4>${payRows}`,
     footer: `<button class="btn ghost" data-action="close-modal">Cerrar</button>
              <button class="btn ghost" data-action="print-supplier" data-id="${id}">${ic.print} Imprimir</button>
              <button class="btn primary" data-action="new-purchase" data-id="${id}">Registrar compra</button>`
   });
 }
-
 function printSupplier(id){
   const s = getSupplier(id);
   const purch = supplierPurchases(id);
   const pays = supplierPayments(id);
-  const totC = supplierTotal(id);
-  const totP = supplierPaid(id);
-  const bal = totC - totP;
-
+  const totC = supplierTotal(id), totP = supplierPaid(id), bal = totC - totP;
   const purchRows = purch.map(p => `
-    <tr>
-      <td>${fmtDate(p.date)}</td>
+    <tr><td>${fmtDate(p.date)}</td>
       <td>${p.items.map(i=>`${i.name} ×${i.qty} @ ${money(i.cost)}`).join('<br>')}</td>
-      <td style="text-align:right">${money(p.total)}</td>
-    </tr>`).join('');
-
+      <td style="text-align:right">${money(p.total)}</td></tr>`).join('');
   const payRows = pays.map(p => `
-    <tr>
-      <td>${fmtDate(p.date)}</td>
-      <td>${p.method}</td>
-      <td style="text-align:right">${money(p.amount)}</td>
-    </tr>`).join('');
+    <tr><td>${fmtDate(p.date)}</td><td>${p.method}</td>
+      <td style="text-align:right">${money(p.amount)}</td></tr>`).join('');
 
   $('#printArea').innerHTML = `
     <div style="font-family:Inter,Arial,sans-serif;color:#0e2a28;padding:10px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0d9488;padding-bottom:14px;margin-bottom:18px">
-        <div>
-          <h1 style="margin:0;font-size:22px;letter-spacing:-.5px">BrilloTotal</h1>
-          <p style="margin:3px 0 0;font-size:12px;color:#6c8583">Productos de limpieza a domicilio</p>
-        </div>
+        <div><h1 style="margin:0;font-size:22px;letter-spacing:-.5px">BrilloTotal</h1>
+          <p style="margin:3px 0 0;font-size:12px;color:#6c8583">Productos de limpieza a domicilio</p></div>
         <div style="text-align:right;font-size:12px;color:#6c8583">
-          <div>Resumen de proveedor</div>
-          <div>Emitido: ${fmtDate(new Date().toISOString())}</div>
-        </div>
+          <div>Resumen de proveedor</div><div>Emitido: ${fmtDate(new Date().toISOString())}</div></div>
       </div>
-
       <h2 style="font-size:16px;margin:0 0 4px">${s.name}</h2>
-      <p style="margin:0 0 16px;font-size:12px;color:#6c8583">
-        Contacto: ${s.contact} · Tel. ${s.phone} · ${s.email}
-      </p>
-
+      <p style="margin:0 0 16px;font-size:12px;color:#6c8583">Contacto: ${s.contact} · Tel. ${s.phone} · ${s.email}</p>
       <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px">
-        <tr>
-          <td style="padding:10px;background:#f3f7f6;border-radius:8px 0 0 8px">Total comprado<br><b style="font-size:16px">${money(totC)}</b></td>
+        <tr><td style="padding:10px;background:#f3f7f6;border-radius:8px 0 0 8px">Total comprado<br><b style="font-size:16px">${money(totC)}</b></td>
           <td style="padding:10px;background:#f3f7f6">Total pagado<br><b style="font-size:16px">${money(totP)}</b></td>
-          <td style="padding:10px;background:#f3f7f6;border-radius:0 8px 8px 0">Saldo pendiente<br><b style="font-size:16px">${money(bal)}</b></td>
-        </tr>
+          <td style="padding:10px;background:#f3f7f6;border-radius:0 8px 8px 0">Saldo pendiente<br><b style="font-size:16px">${money(bal)}</b></td></tr>
       </table>
-
       <h3 style="font-size:13px;margin:18px 0 8px;color:#0d9488">Compras registradas</h3>
       <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead><tr style="background:#f3f7f6">
-          <th style="text-align:left;padding:8px">Fecha</th>
+        <thead><tr style="background:#f3f7f6"><th style="text-align:left;padding:8px">Fecha</th>
           <th style="text-align:left;padding:8px">Detalle</th>
-          <th style="text-align:right;padding:8px">Total</th>
-        </tr></thead>
+          <th style="text-align:right;padding:8px">Total</th></tr></thead>
         <tbody>${purchRows || '<tr><td colspan="3" style="padding:12px;color:#6c8583">Sin compras</td></tr>'}</tbody>
       </table>
-
       <h3 style="font-size:13px;margin:18px 0 8px;color:#0d9488">Pagos realizados</h3>
       <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead><tr style="background:#f3f7f6">
-          <th style="text-align:left;padding:8px">Fecha</th>
+        <thead><tr style="background:#f3f7f6"><th style="text-align:left;padding:8px">Fecha</th>
           <th style="text-align:left;padding:8px">Método</th>
-          <th style="text-align:right;padding:8px">Monto</th>
-        </tr></thead>
+          <th style="text-align:right;padding:8px">Monto</th></tr></thead>
         <tbody>${payRows || '<tr><td colspan="3" style="padding:12px;color:#6c8583">Sin pagos</td></tr>'}</tbody>
       </table>
-
       <p style="margin-top:26px;font-size:11px;color:#6c8583;border-top:1px solid #e3ecea;padding-top:10px">
-        Documento generado automáticamente por BrilloTotal · ${new Date().toLocaleString('es-ES')}
-      </p>
+        Documento generado automáticamente por BrilloTotal · ${new Date().toLocaleString('es-ES')}</p>
     </div>`;
   window.print();
 }
 
-/* ----- Proveedor / Cliente ----- */
+/* ---- Proveedor / Cliente ---- */
 function supplierModal(){
   openModal({
     title: 'Nuevo proveedor',
@@ -1110,19 +987,15 @@ function supplierModal(){
              <button class="btn primary" data-action="save-supplier">Guardar</button>`
   });
 }
-
 function saveSupplier(){
   const name = $('#sName').value.trim();
   if(!name) return toast('Escribe el nombre del proveedor');
-  state.suppliers.push({
-    id:uid(), name,
+  state.suppliers.push({id:uid(), name,
     contact: $('#sContact').value.trim() || '—',
     phone: $('#sPhone').value.trim() || '—',
-    email: $('#sEmail').value.trim() || '—'
-  });
+    email: $('#sEmail').value.trim() || '—'});
   closeModal(); render(); toast('Proveedor registrado');
 }
-
 function clientModal(){
   openModal({
     title: 'Nuevo cliente',
@@ -1134,21 +1007,98 @@ function clientModal(){
              <button class="btn primary" data-action="save-client">Guardar</button>`
   });
 }
-
 function saveClient(){
   const name = $('#cName').value.trim();
   if(!name) return toast('Escribe el nombre del cliente');
-  state.clients.push({
-    id:uid(), name,
+  state.clients.push({id:uid(), name,
     phone: $('#cPhone').value.trim() || '—',
-    address: $('#cAddress').value.trim() || '—'
-  });
+    address: $('#cAddress').value.trim() || '—'});
   closeModal(); render(); toast('Cliente registrado');
 }
 
-/* =========================================================
-   ACCIONES (delegación global)
-   ========================================================= */
+/* ============ DETALLE DE VENTA (con revertir) ============ */
+function saleDetailModal(saleId){
+  const sale = state.sales.find(s => s.id === saleId);
+  if(!sale) return;
+  const client = getClient(sale.clientId);
+
+  const itemsHTML = sale.items.map(i => `
+    <div class="sum-row">
+      <span>${i.name}<br><span class="muted tiny">${i.qty} × ${money(i.price)}</span></span>
+      <b>${money(i.qty * i.price)}</b>
+    </div>`).join('');
+
+  openModal({
+    title: 'Detalle de venta',
+    wide: true,
+    body: `
+      <div class="sup-stats" style="margin-bottom:14px">
+        <div><span>Cliente</span><b>${client ? client.name : 'General'}</b></div>
+        <div><span>Fecha</span><b>${fmtDateTime(sale.date)}</b></div>
+        <div><span>Total</span><b>${money(sale.total)}</b></div>
+      </div>
+      ${client ? `<p class="muted small" style="margin-bottom:14px">${client.phone} · ${client.address}</p>` : ''}
+      <h4 class="card-title">Productos vendidos</h4>
+      ${itemsHTML}
+      <div class="total-line"><span>Total</span><strong>${money(sale.total)}</strong></div>`,
+    footer: `
+      <button class="btn ghost" data-action="close-modal">Cerrar</button>
+      <button class="btn danger" data-action="revert-sale" data-id="${sale.id}">${ic.undo} Revertir venta</button>`
+  });
+}
+
+function revertSale(saleId){
+  const sale = state.sales.find(s => s.id === saleId);
+  if(!sale) return;
+  if(!confirm(`¿Revertir la venta de ${clientName(sale.clientId)} por ${money(sale.total)}?\n\nEl stock de los productos será restaurado.`)) return;
+  // Restaurar stock
+  sale.items.forEach(i => {
+    const p = getProduct(i.pid);
+    if(p) p.stock += i.qty;
+  });
+  // Eliminar del historial
+  state.sales = state.sales.filter(s => s.id !== saleId);
+  closeModal();
+  render();
+  toast('Venta revertida · stock restaurado');
+}
+
+/* ============ DETALLE DE CLIENTE (todos sus pedidos) ============ */
+function clientDetailModal(clientId){
+  const client = getClient(clientId);
+  if(!client) return;
+  const sales = state.sales.filter(s => s.clientId === clientId);
+  const total = sales.reduce((a,s)=>a+s.total,0);
+
+  const salesHTML = sales.map(s => `
+    <div class="sum-row" style="align-items:center">
+      <span>
+        <b>${fmtDateTime(s.date)}</b><br>
+        <span class="muted tiny">${s.items.length} producto(s) · ${s.items.reduce((a,i)=>a+i.qty,0)} uds</span>
+      </span>
+      <span style="display:flex;gap:8px;align-items:center">
+        <b>${money(s.total)}</b>
+        <button class="btn ghost sm" data-action="view-sale" data-id="${s.id}">${ic.eye} Detalles</button>
+      </span>
+    </div>`).join('') || '<div class="empty">Este cliente aún no tiene compras</div>';
+
+  openModal({
+    title: client.name,
+    wide: true,
+    body: `
+      <div class="sup-stats" style="margin-bottom:14px">
+        <div><span>Teléfono</span><b>${client.phone}</b></div>
+        <div><span>Pedidos</span><b>${sales.length}</b></div>
+        <div><span>Total comprado</span><b>${money(total)}</b></div>
+      </div>
+      <p class="muted small" style="margin-bottom:14px">${client.address}</p>
+      <h4 class="card-title">Historial de pedidos</h4>
+      ${salesHTML}`,
+    footer: `<button class="btn ghost" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+/* ============ ACCIONES ============ */
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action]');
   if(!el) return;
@@ -1160,11 +1110,9 @@ document.addEventListener('click', e => {
       render();
       window.scrollTo({top:0, behavior:'smooth'});
       break;
-
     case 'overlay-close':
       if(e.target === el) closeModal();
       break;
-
     case 'close-modal':
       closeModal();
       break;
@@ -1181,7 +1129,6 @@ document.addEventListener('click', e => {
       render();
       break;
     }
-
     case 'qty': {
       const id = el.dataset.id;
       const d = parseInt(el.dataset.d);
@@ -1194,7 +1141,6 @@ document.addEventListener('click', e => {
       render();
       break;
     }
-
     case 'register-sale': {
       if(!cart.length) return toast('El carrito está vacío');
       const clientId = document.getElementById('posClient').value;
@@ -1203,7 +1149,6 @@ document.addEventListener('click', e => {
         return {pid:p.id, name:p.name, qty:c.qty, price:p.price, cost:p.cost};
       });
       const total = items.reduce((s,i) => s + i.qty * i.price, 0);
-
       items.forEach(i => { const p = getProduct(i.pid); if(p) p.stock -= i.qty; });
       state.sales.unshift({id:uid(), date:new Date().toISOString(), clientId, items, total});
       cart = [];
@@ -1212,13 +1157,18 @@ document.addEventListener('click', e => {
       break;
     }
 
+    /* --- Historial de ventas --- */
+    case 'view-sale':
+      closeModal();
+      setTimeout(()=>saleDetailModal(el.dataset.id), 60);
+      break;
+    case 'revert-sale':
+      revertSale(el.dataset.id);
+      break;
+
     /* --- Inventario --- */
-    case 'new-product':
-      productModal();
-      break;
-    case 'edit-product':
-      productModal(el.dataset.id);
-      break;
+    case 'new-product': productModal(); break;
+    case 'edit-product': productModal(el.dataset.id); break;
     case 'del-product': {
       const p = getProduct(el.dataset.id);
       if(!p) break;
@@ -1230,57 +1180,32 @@ document.addEventListener('click', e => {
       }
       break;
     }
-    case 'save-product':
-      saveProduct(el.dataset.id || null);
-      break;
+    case 'save-product': saveProduct(el.dataset.id || null); break;
 
     /* --- Proveedores --- */
-    case 'new-supplier':
-      supplierModal();
-      break;
-    case 'save-supplier':
-      saveSupplier();
-      break;
-    case 'new-purchase':
-      purchaseModal(el.dataset.id);
-      break;
-    case 'add-purchase-line':
-      addPurchaseLine();
-      break;
+    case 'new-supplier': supplierModal(); break;
+    case 'save-supplier': saveSupplier(); break;
+    case 'new-purchase': purchaseModal(el.dataset.id); break;
+    case 'add-purchase-line': addPurchaseLine(); break;
     case 'del-line':
       el.closest('.line-row').remove();
       calcPurchaseTotal();
       break;
-    case 'save-purchase':
-      savePurchase();
-      break;
+    case 'save-purchase': savePurchase(); break;
     case 'new-payment':
-    case 'quick-payment':
-      paymentModal(el.dataset.id);
-      break;
-    case 'save-payment':
-      savePayment();
-      break;
-    case 'supplier-detail':
-      supplierDetail(el.dataset.id);
-      break;
-    case 'print-supplier':
-      printSupplier(el.dataset.id);
-      break;
+    case 'quick-payment': paymentModal(el.dataset.id); break;
+    case 'save-payment': savePayment(); break;
+    case 'supplier-detail': supplierDetail(el.dataset.id); break;
+    case 'print-supplier': printSupplier(el.dataset.id); break;
 
     /* --- Clientes --- */
-    case 'new-client':
-      clientModal();
-      break;
-    case 'save-client':
-      saveClient();
-      break;
+    case 'new-client': clientModal(); break;
+    case 'save-client': saveClient(); break;
+    case 'client-detail': clientDetailModal(el.dataset.id); break;
   }
 });
 
-/* =========================================================
-   INICIO
-   ========================================================= */
+/* ============ INICIO ============ */
 buildNav();
 render();
 </script>
