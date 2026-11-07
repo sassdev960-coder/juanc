@@ -32,7 +32,9 @@ nav{display:flex;flex-direction:column;gap:3px;overflow:auto;flex:1;margin:0 -6p
 .nav-item:hover{background:#1a2540;color:#fff}
 .nav-item.active{background:linear-gradient(90deg,rgba(244,63,94,.18),rgba(34,211,238,.06));color:#fff;box-shadow:inset 3px 0 0 var(--acc)}
 .side-foot{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
-.user-chip{display:flex;gap:9px;align-items:center}
+.user-chip{display:flex;gap:9px;align-items:center;min-width:0}
+.user-chip > div{min-width:0;overflow:hidden}
+.user-chip b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line);background:#0e1729;position:sticky;top:0;z-index:5}
 .topbar h2{font-size:18px}
@@ -65,9 +67,10 @@ tr:hover td{background:#152039}
 .b-bad{background:rgba(239,68,68,.15);color:#f87171}
 .b-info{background:rgba(34,211,238,.13);color:#67e8f9}
 .b-mut{background:#1e2b47;color:#9db0d0}
-.avatar{border-radius:50%;object-fit:cover;flex:none}
-.avatar.ini{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f43f5e,#22d3ee);color:#fff;font-weight:700;font-size:13px}
+.avatar{border-radius:50%;object-fit:cover;flex:none;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.avatar.ini{background:linear-gradient(135deg,#f43f5e,#22d3ee);color:#fff;font-weight:700;letter-spacing:.5px}
 table img.avatar{vertical-align:middle;margin-right:8px}
+table .avatar.ini{vertical-align:middle;margin-right:8px}
 .empty{padding:28px;text-align:center;color:var(--mut)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
@@ -81,20 +84,31 @@ table img.avatar{vertical-align:middle;margin-right:8px}
 .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .modal-head h3{font-size:17px}
 .modal-head button{background:none;border:0;color:var(--mut);font-size:26px;cursor:pointer;line-height:1}
-.photo-prev{width:88px;height:88px;border-radius:14px;object-fit:cover;border:1px solid var(--line);background:#0e1729}
+.photo-prev{width:88px;height:88px;border-radius:14px;object-fit:cover;border:1px solid var(--line);background:#0e1729;flex:none}
+
+/* perfil */
+.profile-head{display:flex;gap:16px;align-items:flex-start;padding:16px;background:linear-gradient(135deg,#182643,#0f1a30);border:1px solid var(--line);border-radius:16px}
+.profile-head .info{flex:1;min-width:0}
+.profile-head h3{font-size:20px;margin-bottom:4px}
+.profile-head .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.profile-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.profile-card{background:#0e1729;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.profile-card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);font-weight:700;margin-bottom:8px}
+.profile-card .line{display:flex;gap:8px;font-size:13px;line-height:1.7}
+.profile-card .line b{color:var(--mut);font-weight:500;min-width:52px}
 
 /* login */
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(900px 500px at 20% 0%,#1a2540,transparent),var(--bg)}
 .login-card{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:28px;width:100%;max-width:370px;display:flex;flex-direction:column;gap:14px}
 .hint{font-size:12px;color:var(--mut);text-align:center;line-height:1.7}
-.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,80px);background:#1c2947;border:1px solid var(--line);padding:12px 20px;border-radius:12px;opacity:0;transition:.3s;z-index:200;font-weight:600}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,80px);background:#1c2947;border:1px solid var(--line);padding:12px 20px;border-radius:12px;opacity:0;transition:.3s;z-index:200;font-weight:600;pointer-events:none}
 .toast.show{transform:translate(-50%,0);opacity:1}
 .toast.ok{border-color:#166534}.toast.bad{border-color:#991b1b}
 @media(max-width:900px){
   .layout{flex-direction:column}
   .sidebar{width:100%;height:auto;position:static}
   nav{flex-direction:row;overflow-x:auto}
-  .grid2,.grid3{grid-template-columns:1fr}
+  .grid2,.grid3,.profile-cards{grid-template-columns:1fr}
 }
 @media print{.sidebar,.topbar,.toolbar,.btn{display:none!important}}
 </style>
@@ -132,12 +146,29 @@ function age(bd) {
   return a;
 }
 const BELTS = ['Blanco', 'Amarillo', 'Naranja', 'Verde', 'Azul', 'Morado', 'Marrón', 'Rojo', 'Negro'];
-const BELT_COLOR = { Blanco: '#e5e7eb', Amarillo: '#facc15', Naranja: '#fb923c', Verde: '#22c55e', Azul: '#3b82f6', Morado: '#a855f7', 'Marrón': '#92400e', Rojo: '#ef4444', Negro: '#111827' };
+const BELT_COLOR = { Blanco: '#e5e7eb', Amarillo: '#facc15', Naranja: '#fb923c', Verde: '#22c55e', Azul: '#3b82f6', Morado: '#a855f7', 'Marrón': '#92400e', Rojo: '#ef4444', Negro: '#374151' };
 const opts = (arr, sel) => arr.map(o => `<option ${o === sel ? 'selected' : ''}>${h(o)}</option>`).join('');
 const toast = (msg, type = 'ok') => {
   const t = $('#toast'); t.textContent = msg; t.className = 'toast show ' + type;
   clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast ' + type, 2400);
 };
+
+/* Iniciales robustas — nunca devuelve "undefined" */
+function initialsOf(s) {
+  if (!s) return '?';
+  let full = '';
+  if (typeof s === 'string') full = s;
+  else full = (((s.nombres || '') + ' ' + (s.apellidos || '')).trim()) || (s.nombre || '');
+  const parts = full.split(/\s+/).filter(Boolean);
+  const ini = ((parts[0] && parts[0][0] ? parts[0][0] : '') + (parts[1] && parts[1][0] ? parts[1][0] : '')).toUpperCase();
+  return ini || (full[0] ? full[0].toUpperCase() : '?');
+}
+function avatarHTML(s, size = 36) {
+  if (s && s.foto) return `<img src="${s.foto}" class="avatar" style="width:${size}px;height:${size}px" alt="">`;
+  const ini = initialsOf(s);
+  const fs = Math.max(11, Math.round(size * 0.42));
+  return `<div class="avatar ini" style="width:${size}px;height:${size}px;font-size:${fs}px">${h(ini)}</div>`;
+}
 
 /* ---------- Persistencia ---------- */
 const KEY = 'dojopro_v1';
@@ -185,7 +216,7 @@ function seedData() {
   ['s1', 's2', 's3', 's4', 's5', 's6'].forEach(s => addPay(s, prev, 60000, 'pagado', prev + '-10', prev + '-08'));
   addPay('s1', cur, 55000, 'pagado', cur + '-10', cur + '-05');
   addPay('s2', cur, 55000, 'pendiente', cur + '-10');
-  addPay('s3', cur, 55000, 'pendiente', prev + '-10');   // deudor vencido
+  addPay('s3', cur, 55000, 'pendiente', prev + '-10');
   addPay('s4', cur, 65000, 'pagado', cur + '-10', cur + '-09');
   addPay('s5', cur, 65000, 'pendiente', cur + '-10');
   addPay('s6', cur, 80000, 'pendiente', cur + '-10');
@@ -213,7 +244,6 @@ function seedData() {
     items: [{ invId: 'i1', desc: 'Uniforme Taekwondo (8)', cantidad: 1, precio: 85000 }, { invId: 'i4', desc: 'Cinturón Amarillo (M)', cantidad: 1, precio: 18000 }]
   }];
 
-  /* Movimientos contables derivados */
   const transactions = [];
   payments.filter(p => p.estado === 'pagado').forEach(p => transactions.push({
     id: uid('t'), fecha: p.fechaPago, tipo: 'ingreso', categoria: 'Mensualidad',
@@ -271,11 +301,6 @@ const NAV = {
 const can = v => session && PERMS[session.rol].includes(v);
 
 /* ---------- Helpers UI ---------- */
-function avatarHTML(s, size = 36) {
-  if (s && s.foto) return `<img src="${s.foto}" class="avatar" style="width:${size}px;height:${size}px">`;
-  const ini = (((s && s.nombres) || '?')[0] + ((s && s.apellidos) || '')[0] || '').toUpperCase();
-  return `<div class="avatar ini" style="width:${size}px;height:${size}px">${h(ini)}</div>`;
-}
 function openModal(title, html, wide) {
   $('#modalTitle').textContent = title;
   $('#modalBody').innerHTML = html;
@@ -304,13 +329,8 @@ const MOUNTS = {
   students: () => renderStuList(),
   payments: () => renderPaymentsList(),
   attendance: () => renderAttSheet(),
-  sport: () => { },
-  inventory: () => { },
-  sales: () => { },
-  finance: () => { },
-  reports: () => { },
-  groups: () => { },
-  users: () => { }
+  sport: () => { }, inventory: () => { }, sales: () => { }, finance: () => { },
+  reports: () => { }, groups: () => { }, users: () => { }
 };
 
 function render() {
@@ -325,8 +345,12 @@ function render() {
         <div class="brand">🥋<div><b>DojoPro</b><small>Gestión de Academia</small></div></div>
         <nav>${nav}</nav>
         <div class="side-foot">
-          <div class="user-chip">${avatarHTML({ nombres: session.nombre, apellidos: '' }, 34)}
-            <div><b style="font-size:13px">${h(session.nombre)}</b><small class="mut" style="display:block">${session.rol === 'admin' ? 'Administrador' : 'Instructor'}</small></div>
+          <div class="user-chip">
+            ${avatarHTML({ nombre: session.nombre }, 34)}
+            <div>
+              <b style="font-size:13px">${h(session.nombre)}</b>
+              <small class="mut" style="display:block">${session.rol === 'admin' ? 'Administrador' : 'Instructor'}</small>
+            </div>
           </div>
           <div class="row" style="gap:6px">
             <button class="btn ghost sm grow" onclick="resetDemo()">Reiniciar demo</button>
@@ -414,7 +438,7 @@ function viewDashboard() {
         ${proximos.map(p => {
           const s = DB.students.find(x => x.id === p.studentId);
           const venc = p.fechaVencimiento < today();
-          return `<tr><td>${h(s ? s.nombres + ' ' + s.apellidos : '—')}</td><td class="mut">${p.periodo}</td>
+          return `<tr><td>${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '—')}</td><td class="mut">${p.periodo}</td>
           <td><span class="badge ${venc ? 'b-bad' : 'b-warn'}">${fmtDate(p.fechaVencimiento)}</span></td><td>${money(p.monto)}</td></tr>`;
         }).join('')}</tbody></table>` : '<p class="empty">Sin cobros pendientes 🎉</p>'}
       </div>
@@ -456,11 +480,13 @@ function renderStuList() {
     <thead><tr><th>Estudiante</th><th>Edad</th><th>Grupo</th><th>Cinturón</th><th>Tutor / Teléfono</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead>
     <tbody>${list.map(s => {
     const g = DB.groups.find(x => x.id === s.grupoId);
+    const nombre = ((s.nombres || '') + ' ' + (s.apellidos || '')).trim();
+    const bc = BELT_COLOR[s.cinturon] || '#94a3b8';
     return `<tr>
-        <td>${avatarHTML(s, 34)}<b>${h(s.nombres + ' ' + s.apellidos)}</b><div class="mut sm">${h(s.codigo)} · Doc ${h(s.documento)}</div></td>
+        <td>${avatarHTML(s, 34)}<b>${h(nombre)}</b><div class="mut sm">${h(s.codigo)} · Doc ${h(s.documento)}</div></td>
         <td>${age(s.fechaNacimiento)}</td>
         <td>${g ? h(g.nombre) : '<span class="mut">Sin grupo</span>'}</td>
-        <td><span class="badge b-mut" style="border-left:4px solid ${BELT_COLOR[s.cinturon] || '#888'}">${h(s.cinturon)} ${s.grado ? '· ' + s.grado + 'º' : ''}</span></td>
+        <td><span class="badge b-mut" style="border-left:4px solid ${bc}">${h(s.cinturon)} ${s.grado ? '· ' + s.grado + 'º' : ''}</span></td>
         <td>${h(s.tutor?.nombre || '—')}<div class="mut sm">${h(s.tutor?.telefono || s.telefono || '')}</div></td>
         <td><span class="badge ${s.estado === 'activo' ? 'b-ok' : 'b-bad'}">${s.estado}</span></td>
         <td style="text-align:right;white-space:nowrap">
@@ -561,6 +587,7 @@ function saveStudent(id) {
   persist(); closeModal(); render();
 }
 
+/* FICHA DEL ESTUDIANTE — estructura limpia */
 function viewStudent(id) {
   const s = DB.students.find(x => x.id === id); if (!s) return;
   const g = DB.groups.find(x => x.id === s.grupoId);
@@ -569,38 +596,61 @@ function viewStudent(id) {
   const proms = DB.promotions.filter(p => p.studentId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
   const att = DB.attendance.filter(a => a.registros[id]);
   const pres = att.filter(a => a.registros[id] === 'presente' || a.registros[id] === 'tarde').length;
+  const nombre = ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() || 'Estudiante';
+  const bc = BELT_COLOR[s.cinturon] || '#94a3b8';
+
+  const headPhoto = s.foto
+    ? `<img src="${s.foto}" class="photo-prev" alt="">`
+    : avatarHTML(s, 88);
+
   openModal('Ficha del estudiante', `
-    <div class="row" style="align-items:flex-start;gap:16px">
-      <img src="${s.foto || ''}" class="photo-prev" style="${s.foto ? '' : 'display:none'}">
-      ${avatarHTML(s, 88)}
-      <div>
-        <h3>${h(s.nombres + ' ' + s.apellidos)}</h3>
-        <div class="mut sm">${h(s.codigo)} · Doc ${h(s.documento)} · ${age(s.fechaNacimiento)} años</div>
-        <div class="mt"><span class="badge ${s.estado === 'activo' ? 'b-ok' : 'b-bad'}">${s.estado}</span>
-        <span class="badge b-info">${h(s.cinturon)} ${s.grado ? '· ' + s.grado + 'º grado' : ''}</span>
-        <span class="badge b-mut">${g ? h(g.nombre) : 'Sin grupo'}</span></div>
+    <div class="profile-head">
+      ${headPhoto}
+      <div class="info">
+        <h3>${h(nombre)}</h3>
+        <div class="mut sm">${h(s.codigo || '—')} · Doc ${h(s.documento || '—')} · ${age(s.fechaNacimiento)} años</div>
+        <div class="badges">
+          <span class="badge ${s.estado === 'activo' ? 'b-ok' : 'b-bad'}">${h(s.estado || '—')}</span>
+          <span class="badge" style="background:${bc}22;color:${bc};border-left:3px solid ${bc}">${h(s.cinturon || 'Blanco')}${s.grado ? ' · ' + s.grado + 'º grado' : ''}</span>
+          <span class="badge b-mut">${g ? h(g.nombre) : 'Sin grupo'}</span>
+        </div>
       </div>
     </div>
-    <div class="grid2 mt">
-      <div class="card"><div class="k mut sm">CONTACTO</div>
-        <div class="mt sm">📞 ${h(s.telefono || '—')}<br>✉️ ${h(s.email || '—')}<br>🏠 ${h(s.direccion || '—')}</div></div>
-      <div class="card"><div class="k mut sm">TUTOR</div>
-        <div class="mt sm">${h(s.tutor?.nombre || '—')} (${h(s.tutor?.parentesco || '—')})<br>📞 ${h(s.tutor?.telefono || '—')}<br>✉️ ${h(s.tutor?.email || '—')}</div></div>
+
+    <div class="profile-cards">
+      <div class="profile-card">
+        <div class="lbl">Contacto</div>
+        <div class="line"><b>Tel</b><span>${h(s.telefono || '—')}</span></div>
+        <div class="line"><b>Email</b><span>${h(s.email || '—')}</span></div>
+        <div class="line"><b>Dir</b><span>${h(s.direccion || '—')}</span></div>
+        <div class="line"><b>Talla</b><span>${h(s.talla || '—')}</span></div>
+      </div>
+      <div class="profile-card">
+        <div class="lbl">Tutor</div>
+        <div class="line"><b>Nombre</b><span>${h(s.tutor?.nombre || '—')}</span></div>
+        <div class="line"><b>Vínculo</b><span>${h(s.tutor?.parentesco || '—')}</span></div>
+        <div class="line"><b>Tel</b><span>${h(s.tutor?.telefono || '—')}</span></div>
+        <div class="line"><b>Email</b><span>${h(s.tutor?.email || '—')}</span></div>
+      </div>
     </div>
+
     <div class="cards mt">
       <div class="stat"><div class="k">Deuda</div><div class="v" style="color:${deuda ? '#f87171' : '#4ade80'}">${money(deuda)}</div></div>
       <div class="stat"><div class="k">Asistencias</div><div class="v">${pres}/${att.length}</div><div class="s">${att.length ? Math.round(pres / att.length * 100) + '% de asistencia' : 'Sin registros'}</div></div>
       <div class="stat"><div class="k">Ascensos</div><div class="v">${proms.length}</div></div>
     </div>
+
     <div class="sec-title">Historial de mensualidades</div>
-    ${pays.length ? `<table><thead><tr><th>Período</th><th>Monto</th><th>Vence</th><th>Estado</th><th>Pago</th></tr></thead><tbody>
+    ${pays.length ? `<div class="card" style="padding:0;overflow:auto"><table><thead><tr><th>Período</th><th>Monto</th><th>Vence</th><th>Estado</th><th>Pago</th></tr></thead><tbody>
       ${pays.map(p => `<tr><td>${p.periodo}</td><td>${money(p.monto)}</td><td>${fmtDate(p.fechaVencimiento)}</td>
       <td><span class="badge ${p.estado === 'pagado' ? 'b-ok' : (p.fechaVencimiento < today() ? 'b-bad' : 'b-warn')}">${p.estado}</span></td>
-      <td class="mut">${p.fechaPago ? fmtDate(p.fechaPago) : '—'}</td></tr>`).join('')}</tbody></table>` : '<p class="empty">Sin registros</p>'}
+      <td class="mut">${p.fechaPago ? fmtDate(p.fechaPago) : '—'}</td></tr>`).join('')}</tbody></table></div>` : '<div class="card"><p class="empty">Sin registros</p></div>'}
+
     <div class="sec-title">Historial deportivo</div>
-    ${proms.length ? `<table><thead><tr><th>Fecha</th><th>Cambio</th><th>Grado</th><th>Resultado</th></tr></thead><tbody>
+    ${proms.length ? `<div class="card" style="padding:0;overflow:auto"><table><thead><tr><th>Fecha</th><th>Cambio</th><th>Grado</th><th>Resultado</th></tr></thead><tbody>
       ${proms.map(p => `<tr><td>${fmtDate(p.fecha)}</td><td>${h(p.cinturonAnterior)} → <b>${h(p.cinturonNuevo)}</b></td><td>${p.grado}º</td>
-      <td><span class="badge ${p.resultado === 'Aprobado' ? 'b-ok' : 'b-bad'}">${h(p.resultado)}</span></td></tr>`).join('')}</tbody></table>` : '<p class="empty">Sin ascensos registrados</p>'}
+      <td><span class="badge ${p.resultado === 'Aprobado' ? 'b-ok' : 'b-bad'}">${h(p.resultado)}</span></td></tr>`).join('')}</tbody></table></div>` : '<div class="card"><p class="empty">Sin ascensos registrados</p></div>'}
+
     <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button></div>`, true);
 }
 
@@ -610,7 +660,6 @@ function delStudent(id) {
   DB.students = DB.students.filter(x => x.id !== id);
   DB.payments = DB.payments.filter(p => p.studentId !== id);
   DB.promotions = DB.promotions.filter(p => p.studentId !== id);
-  DB.transactions = DB.transactions.filter(t => !DB.payments.some(p => p.id === t.refId) ? true : true);
   persist(); render(); toast('Estudiante eliminado');
 }
 
@@ -652,8 +701,9 @@ function renderPaymentsList() {
     ${list.map(p => {
     const s = DB.students.find(x => x.id === p.studentId);
     const venc = p.estado === 'pendiente' && p.fechaVencimiento < today();
+    const nombre = s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '';
     return `<tr>
-        <td>${s ? avatarHTML(s, 28) + h(s.nombres + ' ' + s.apellidos) : '<span class="mut">Eliminado</span>'}</td>
+        <td>${s ? avatarHTML(s, 28) + h(nombre) : '<span class="mut">Eliminado</span>'}</td>
         <td class="mut">${h(p.concepto)}</td>
         <td><b>${money(p.monto)}</b></td>
         <td>${fmtDate(p.fechaVencimiento)}</td>
@@ -690,7 +740,7 @@ function openPaymentCreate() {
   const activos = DB.students.filter(s => s.estado === 'activo');
   openModal('Registrar cobro', `
     <div class="grid2">
-      <label>Estudiante<select id="pc_stu">${activos.map(s => `<option value="${s.id}">${h(s.nombres + ' ' + s.apellidos)}</option>`).join('')}</select></label>
+      <label>Estudiante<select id="pc_stu">${activos.map(s => `<option value="${s.id}">${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</option>`).join('')}</select></label>
       <label>Concepto<select id="pc_concepto">${opts(['Mensualidad', 'Inscripción', 'Examen', 'Uniforme', 'Otro'], 'Mensualidad')}</select></label>
       <label>Período<input type="month" id="pc_periodo" value="${today().slice(0, 7)}"></label>
       <label>Monto<input type="number" id="pc_monto" value="60000" min="0"></label>
@@ -718,7 +768,7 @@ function openPayRegister(id) {
   const s = DB.students.find(x => x.id === p.studentId);
   openModal('Registrar pago', `
     <div class="card" style="margin-bottom:14px">
-      <b>${h(s ? s.nombres + ' ' + s.apellidos : '')}</b>
+      <b>${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '')}</b>
       <div class="mut sm">${h(p.concepto)} · Período ${p.periodo}</div>
     </div>
     <div class="grid2">
@@ -744,7 +794,7 @@ function syncPaymentTx(p) {
     const s = DB.students.find(x => x.id === p.studentId);
     DB.transactions.push({
       id: uid('t'), fecha: p.fechaPago, tipo: 'ingreso', categoria: p.concepto,
-      descripcion: `${p.concepto} ${p.periodo} — ${s ? s.nombres + ' ' + s.apellidos : ''}`,
+      descripcion: `${p.concepto} ${p.periodo} — ${s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : ''}`,
       monto: p.monto, metodo: p.metodo, refId: p.id
     });
   }
@@ -762,7 +812,7 @@ function showReceipt(id) {
     <div style="text-align:center"><h3 style="margin:0">ACADEMIA DOJOPRO</h3><div>Recibo de pago</div></div><hr>
     <div>Recibo N°: <b>${p.recibo}</b></div>
     <div>Fecha: ${fmtDate(p.fechaPago || today())}</div>
-    <div>Estudiante: ${h(s ? s.nombres + ' ' + s.apellidos : '—')}</div>
+    <div>Estudiante: ${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '—')}</div>
     <div>Código: ${h(s ? s.codigo : '—')}</div>
     <div>Concepto: ${h(p.concepto)} (${p.periodo})</div>
     <div>Método: ${h(p.metodo || '—')}</div><hr>
@@ -797,7 +847,6 @@ function renderAttSheet() {
   const rec = DB.attendance.find(a => a.grupoId === gid && a.fecha === f);
   const reg = rec ? rec.registros : {};
   const st = ['presente', 'tarde', 'ausente', 'excusa'];
-  const colors = { presente: 'b-ok', tarde: 'b-warn', ausente: 'b-bad', excusa: 'b-info' };
 
   if (!students.length) {
     el.innerHTML = `<div class="card"><p class="empty">El grupo <b>${h(g.nombre)}</b> no tiene estudiantes activos.</p></div>`;
@@ -807,7 +856,7 @@ function renderAttSheet() {
     <div class="card" style="padding:0;overflow:auto">
       <table><thead><tr><th>Estudiante</th><th>Cinturón</th><th>Estado de asistencia</th></tr></thead><tbody>
       ${students.map(s => `<tr>
-        <td>${avatarHTML(s, 30)}<b>${h(s.nombres + ' ' + s.apellidos)}</b><div class="mut sm">${h(s.codigo)}</div></td>
+        <td>${avatarHTML(s, 30)}<b>${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</b><div class="mut sm">${h(s.codigo)}</div></td>
         <td><span class="badge b-mut">${h(s.cinturon)}</span></td>
         <td><select class="attSel" data-stu="${s.id}" style="max-width:200px" onchange="updateAttStats()">
           ${st.map(x => `<option value="${x}" ${(reg[s.id] || 'presente') === x ? 'selected' : ''}>${x}</option>`).join('')}
@@ -864,10 +913,11 @@ function viewSport() {
       ${list.map(s => {
         const p = proms.filter(x => x.studentId === s.id);
         const last = p[0];
+        const bc = BELT_COLOR[s.cinturon] || '#94a3b8';
         return `<tr>
-          <td>${avatarHTML(s, 30)}<b>${h(s.nombres + ' ' + s.apellidos)}</b><div class="mut sm">${h(s.codigo)}</div></td>
-          <td><span class="badge" style="background:${BELT_COLOR[s.cinturon]}22;color:${BELT_COLOR[s.cinturon]};border-left:4px solid ${BELT_COLOR[s.cinturon]}">${h(s.cinturon)}</span></td>
-          <td>${s.grado}º</td>
+          <td>${avatarHTML(s, 30)}<b>${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</b><div class="mut sm">${h(s.codigo)}</div></td>
+          <td><span class="badge" style="background:${bc}22;color:${bc};border-left:4px solid ${bc}">${h(s.cinturon || 'Blanco')}</span></td>
+          <td>${s.grado || 0}º</td>
           <td class="mut">${last ? fmtDate(last.fecha) : '—'}</td>
           <td>${p.length}</td>
           <td style="text-align:right"><button class="btn ghost sm" onclick="openPromotion('${s.id}')">Ascender</button></td>
@@ -881,7 +931,7 @@ function viewSport() {
       ${proms.map(p => {
         const s = DB.students.find(x => x.id === p.studentId);
         return `<tr><td>${fmtDate(p.fecha)}</td>
-        <td>${h(s ? s.nombres + ' ' + s.apellidos : '—')}</td>
+        <td>${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '—')}</td>
         <td>${h(p.cinturonAnterior)} → <b>${h(p.cinturonNuevo)}</b></td>
         <td>${p.grado}º</td>
         <td><span class="badge ${p.resultado === 'Aprobado' ? 'b-ok' : 'b-bad'}">${h(p.resultado)}</span></td>
@@ -896,7 +946,7 @@ function openPromotion(studentId) {
   const s = DB.students.find(x => x.id === sel) || {};
   openModal('Registrar examen / ascenso', `
     <div class="grid2">
-      <label>Deportista<select id="pr_stu" onchange="refreshPromBelt()">${list.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${h(x.nombres + ' ' + x.apellidos)}</option>`).join('')}</select></label>
+      <label>Deportista<select id="pr_stu" onchange="refreshPromBelt()">${list.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${h(((x.nombres || '') + ' ' + (x.apellidos || '')).trim())}</option>`).join('')}</select></label>
       <label>Fecha del examen<input type="date" id="pr_fecha" value="${today()}"></label>
       <label>Cinturón actual<input id="pr_actual" value="${h(s.cinturon || 'Blanco')}" disabled></label>
       <label>Nuevo cinturón<select id="pr_nuevo">${opts(BELTS, s.cinturon)}</select></label>
@@ -985,7 +1035,7 @@ function saveItem(id) {
 }
 function adjustStock(id) {
   const it = DB.inventory.find(x => x.id === id); if (!it) return;
-  const n = prompt(`Ajustar stock de "${it.nombre}".\nStock actual: ${it.stock}\nIngresa el nuevo stock (o usa negativo para descontar):`, it.stock);
+  const n = prompt(`Ajustar stock de "${it.nombre}".\nStock actual: ${it.stock}\nIngresa el nuevo stock:`, it.stock);
   if (n === null) return;
   const val = parseInt(n, 10); if (isNaN(val) || val < 0) return toast('Valor inválido', 'bad');
   it.stock = val; persist(); render(); toast('Stock actualizado');
@@ -1031,7 +1081,7 @@ function openSale() {
   saleDraft = [];
   const prods = DB.inventory.filter(i => i.stock > 0)
     .map(i => `<option value="${i.id}">${h(i.nombre)}${i.talla ? ' (' + h(i.talla) + ')' : ''} — ${money(i.precio)} · stock ${i.stock}</option>`).join('');
-  const stu = DB.students.filter(s => s.estado === 'activo').map(s => `<option value="${s.id}">${h(s.nombres + ' ' + s.apellidos)}</option>`).join('');
+  const stu = DB.students.filter(s => s.estado === 'activo').map(s => `<option value="${s.id}">${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</option>`).join('');
   openModal('Nueva venta', `
     <div class="grid2">
       <label>Cliente / Estudiante<select id="saleClient"><option value="">— Público general —</option>${stu}</select></label>
@@ -1087,13 +1137,12 @@ function confirmSale() {
   const cid = v('saleClient');
   const s = DB.students.find(x => x.id === cid);
   const total = saleDraft.reduce((a, d) => a + d.precio * d.cantidad, 0);
-  // descontar stock
   saleDraft.forEach(d => {
     if (d.invId) { const it = DB.inventory.find(i => i.id === d.invId); if (it) it.stock -= d.cantidad; }
   });
   const sale = {
     id: uid('sa'), fecha: today(), clienteId: cid,
-    clienteNombre: s ? s.nombres + ' ' + s.apellidos : 'Público general',
+    clienteNombre: s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : 'Público general',
     metodo: v('saleMethod'), total, items: saleDraft.slice()
   };
   DB.sales.push(sale);
@@ -1141,7 +1190,7 @@ function viewFinance() {
       <div class="stat"><div class="k">Movimientos</div><div class="v">${DB.transactions.length}</div></div>
     </div>
     <div class="toolbar mt">
-      <input type="month" id="finMonth" style="width:auto" onchange="renderFinList()" placeholder="Todos">
+      <input type="month" id="finMonth" style="width:auto" onchange="renderFinList()">
       <select id="finType" style="width:auto" onchange="renderFinList()">
         <option value="">Todos</option><option value="ingreso">Ingresos</option><option value="egreso">Egresos</option>
       </select>
@@ -1218,7 +1267,6 @@ function viewReports() {
   vencidas.forEach(p => { deudoresMap[p.studentId] = (deudoresMap[p.studentId] || 0) + p.monto; });
   const deudores = Object.entries(deudoresMap).map(([id, monto]) => ({ s: DB.students.find(x => x.id === id), monto })).filter(x => x.s);
 
-  // Asistencia por grupo (últimos 30 días)
   const lim = new Date(); lim.setDate(lim.getDate() - 30); const limStr = lim.toISOString().slice(0, 10);
   const att = DB.attendance.filter(a => a.fecha >= limStr);
   const porGrupo = DB.groups.map(g => {
@@ -1228,7 +1276,6 @@ function viewReports() {
     return { g, p, t, pct: t ? Math.round(p / t * 100) : 0 };
   });
 
-  // Ventas por producto
   const prodMap = {};
   DB.sales.forEach(s => s.items.forEach(i => {
     const k = i.desc; if (!prodMap[k]) prodMap[k] = { cant: 0, total: 0 };
@@ -1236,7 +1283,6 @@ function viewReports() {
   }));
   const topProds = Object.entries(prodMap).sort((a, b) => b[1].total - a[1].total).slice(0, 8);
 
-  // Financiero por mes (últimos 6)
   const meses = [];
   for (let i = 5; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); meses.push(d.toISOString().slice(0, 7)); }
   const finMes = meses.map(m => {
@@ -1264,7 +1310,7 @@ function viewReports() {
       ${deudores.map(d => {
         const g = DB.groups.find(x => x.id === d.s.grupoId);
         const n = vencidas.filter(p => p.studentId === d.s.id).length;
-        return `<tr><td>${avatarHTML(d.s, 28)}<b>${h(d.s.nombres + ' ' + d.s.apellidos)}</b></td>
+        return `<tr><td>${avatarHTML(d.s, 28)}<b>${h(((d.s.nombres || '') + ' ' + (d.s.apellidos || '')).trim())}</b></td>
         <td class="mut">${g ? h(g.nombre) : '—'}</td>
         <td class="mut">${h(d.s.tutor?.nombre || '—')}</td>
         <td class="mut">${h(d.s.tutor?.telefono || d.s.telefono || '—')}</td>
@@ -1389,7 +1435,7 @@ function viewUsers() {
     <div class="card" style="padding:0;overflow:auto">
       <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
       ${DB.users.map(u => `<tr>
-        <td>${avatarHTML({ nombres: u.nombre, apellidos: '' }, 30)} <b>${h(u.nombre)}</b></td>
+        <td>${avatarHTML({ nombre: u.nombre }, 30)} <b>${h(u.nombre)}</b></td>
         <td class="mut">${h(u.usuario)}</td>
         <td><span class="badge ${u.rol === 'admin' ? 'b-info' : 'b-mut'}">${u.rol}</span></td>
         <td><span class="badge ${u.activo ? 'b-ok' : 'b-bad'}">${u.activo ? 'activo' : 'inactivo'}</span></td>
