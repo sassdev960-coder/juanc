@@ -28,7 +28,7 @@ h1,h2,h3{margin:0}
 .brand b{font-size:16px;display:block}
 .brand small{display:block;font-size:11px;color:var(--mut);font-weight:400}
 nav{display:flex;flex-direction:column;gap:3px;overflow:auto;flex:1;margin:0 -6px}
-.nav-item{background:none;border:0;color:#a9bbd8;text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;display:flex;gap:9px;align-items:center;white-space:nowrap}
+.nav-item{background:none;border:0;color:#a9bbd8;text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;display:flex;gap:9px;align-items:center;white-space:nowrap;font-size:14px}
 .nav-item:hover{background:#1a2540;color:#fff}
 .nav-item.active{background:linear-gradient(90deg,rgba(244,63,94,.18),rgba(34,211,238,.06));color:#fff;box-shadow:inset 3px 0 0 var(--acc)}
 .side-foot{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
@@ -37,11 +37,11 @@ nav{display:flex;flex-direction:column;gap:3px;overflow:auto;flex:1;margin:0 -6p
 .user-chip b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line);background:#0e1729;position:sticky;top:0;z-index:5}
-.topbar h2{font-size:18px}
+.topbar h2{font-size:18px;display:flex;align-items:center;gap:9px}
 .content{padding:20px 24px 70px;width:100%;max-width:1400px}
 
 /* components */
-.btn{background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;border:0;padding:9px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;border:0;padding:9px 16px;border-radius:10px;cursor:pointer;font-weight:600;text-decoration:none;line-height:1.1}
 .btn:hover{filter:brightness(1.1)}
 .btn.ghost{background:#1c2947;border:1px solid var(--line);color:#cfe0ff;font-weight:500}
 .btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}
@@ -61,7 +61,7 @@ table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);padding:10px 10px;border-bottom:1px solid var(--line)}
 td{padding:10px;border-bottom:1px solid #1b2743;vertical-align:middle}
 tr:hover td{background:#152039}
-.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
 .b-ok{background:rgba(34,197,94,.15);color:#4ade80}
 .b-warn{background:rgba(245,158,11,.15);color:#fbbf24}
 .b-bad{background:rgba(239,68,68,.15);color:#f87171}
@@ -75,6 +75,11 @@ table .avatar.ini{vertical-align:middle;margin-right:8px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .sec-title{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin:22px 0 10px;font-weight:700}
+
+/* search wrapper */
+.search-wrap{position:relative;flex:1;min-width:160px}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none}
+.search-wrap input{padding-left:34px}
 
 /* modal */
 .modal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:100;overflow:auto;backdrop-filter:blur(3px)}
@@ -128,6 +133,39 @@ table .avatar.ini{vertical-align:middle;margin-right:8px}
    DojoPro · Demo funcional con persistencia en localStorage
    ========================================================= */
 
+/* ---------- Iconos SVG (Lucide style, sin dependencias) ---------- */
+const ICONS = {
+  dashboard: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  students: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/>',
+  payments: '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+  attendance: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+  sport: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
+  inventory: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  sales: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+  finance: '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  reports: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  groups: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+  printer: '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/>',
+  home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  check: '<polyline points="20 6 9 17 4 12"/>',
+  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>',
+  user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  alert: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+};
+function icon(name, size = 16) {
+  const paths = ICONS[name] || '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex:none">${paths}</svg>`;
+}
+
 /* ---------- Utilidades ---------- */
 const $ = s => document.querySelector(s);
 const v = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
@@ -153,7 +191,7 @@ const toast = (msg, type = 'ok') => {
   clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast ' + type, 2400);
 };
 
-/* Iniciales robustas — nunca devuelve "undefined" */
+/* Iniciales robustas */
 function initialsOf(s) {
   if (!s) return '?';
   let full = '';
@@ -169,6 +207,9 @@ function avatarHTML(s, size = 36) {
   const fs = Math.max(11, Math.round(size * 0.42));
   return `<div class="avatar ini" style="width:${size}px;height:${size}px;font-size:${fs}px">${h(ini)}</div>`;
 }
+
+/* Placeholder SVG para foto (silueta) */
+const PHOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2288%22 height=%2288%22 viewBox=%220 0 88 88%22><rect width=%2288%22 height=%2288%22 fill=%22%2316213a%22/><circle cx=%2244%22 cy=%2234%22 r=%2214%22 fill=%22%234a5d80%22/><path d=%22M44 54c-14 0-26 8-26 22v12h52V76c0-14-12-22-26-22z%22 fill=%22%234a5d80%22/></svg>';
 
 /* ---------- Persistencia ---------- */
 const KEY = 'dojopro_v1';
@@ -286,17 +327,17 @@ const PERMS = {
   instructor: ['dashboard', 'students', 'attendance', 'sport', 'groups']
 };
 const NAV = {
-  dashboard: { icon: '📊', label: 'Panel general' },
-  students: { icon: '📝', label: 'Inscripciones' },
-  payments: { icon: '💳', label: 'Mensualidades' },
-  attendance: { icon: '✅', label: 'Asistencia' },
-  sport: { icon: '🥋', label: 'Seguimiento deportivo' },
-  inventory: { icon: '📦', label: 'Inventario' },
-  sales: { icon: '🛒', label: 'Ventas' },
-  finance: { icon: '💰', label: 'Ingresos y egresos' },
-  reports: { icon: '📈', label: 'Reportes' },
-  groups: { icon: '🗓️', label: 'Horarios y grupos' },
-  users: { icon: '👥', label: 'Usuarios y permisos' }
+  dashboard: { icon: 'dashboard', label: 'Panel general' },
+  students: { icon: 'students', label: 'Inscripciones' },
+  payments: { icon: 'payments', label: 'Mensualidades' },
+  attendance: { icon: 'attendance', label: 'Asistencia' },
+  sport: { icon: 'sport', label: 'Seguimiento deportivo' },
+  inventory: { icon: 'inventory', label: 'Inventario' },
+  sales: { icon: 'sales', label: 'Ventas' },
+  finance: { icon: 'finance', label: 'Ingresos y egresos' },
+  reports: { icon: 'reports', label: 'Reportes' },
+  groups: { icon: 'groups', label: 'Horarios y grupos' },
+  users: { icon: 'users', label: 'Usuarios y permisos' }
 };
 const can = v => session && PERMS[session.rol].includes(v);
 
@@ -337,12 +378,12 @@ function render() {
   if (!session) return renderLogin();
   if (!can(state.view)) state.view = 'dashboard';
   const nav = PERMS[session.rol].map(k =>
-    `<button class="nav-item ${state.view === k ? 'active' : ''}" onclick="go('${k}')"><span>${NAV[k].icon}</span>${NAV[k].label}</button>`
+    `<button class="nav-item ${state.view === k ? 'active' : ''}" onclick="go('${k}')">${icon(NAV[k].icon)}${NAV[k].label}</button>`
   ).join('');
   document.getElementById('app').innerHTML = `
     <div class="layout">
       <aside class="sidebar">
-        <div class="brand">🥋<div><b>DojoPro</b><small>Gestión de Academia</small></div></div>
+        <div class="brand"><span style="color:var(--acc);display:flex;align-items:center">${icon('sport', 26)}</span><div><b>DojoPro</b><small>Gestión de Academia</small></div></div>
         <nav>${nav}</nav>
         <div class="side-foot">
           <div class="user-chip">
@@ -360,7 +401,7 @@ function render() {
       </aside>
       <main class="main">
         <header class="topbar">
-          <h2>${NAV[state.view].icon} ${NAV[state.view].label}</h2>
+          <h2>${icon(NAV[state.view].icon, 18)} ${NAV[state.view].label}</h2>
           <span class="mut sm">${new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </header>
         <div class="content">${VIEWS[state.view]()}</div>
@@ -378,7 +419,7 @@ function renderLogin() {
   document.getElementById('app').innerHTML = `
     <div class="login-wrap">
       <div class="login-card">
-        <div class="brand" style="font-size:26px">🥋<div><b style="font-size:19px">DojoPro</b><small>Gestión de Academia</small></div></div>
+        <div class="brand"><span style="color:var(--acc);display:flex;align-items:center">${icon('sport', 28)}</span><div><b style="font-size:19px">DojoPro</b><small>Gestión de Academia</small></div></div>
         <label>Usuario<input id="lg_user" value="admin" autocomplete="off"></label>
         <label>Contraseña<input id="lg_pass" type="password" value="admin123" onkeydown="if(event.key==='Enter')login()"></label>
         <button class="btn full" onclick="login()">Ingresar</button>
@@ -440,7 +481,7 @@ function viewDashboard() {
           const venc = p.fechaVencimiento < today();
           return `<tr><td>${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '—')}</td><td class="mut">${p.periodo}</td>
           <td><span class="badge ${venc ? 'b-bad' : 'b-warn'}">${fmtDate(p.fechaVencimiento)}</span></td><td>${money(p.monto)}</td></tr>`;
-        }).join('')}</tbody></table>` : '<p class="empty">Sin cobros pendientes 🎉</p>'}
+        }).join('')}</tbody></table>` : '<p class="empty">Sin cobros pendientes.</p>'}
       </div>
       <div class="card">
         <div class="sec-title" style="margin-top:0">Últimos movimientos</div>
@@ -458,11 +499,14 @@ function viewDashboard() {
 function viewStudents() {
   return `
     <div class="toolbar">
-      <input id="stuSearch" class="grow" placeholder="🔍 Buscar por nombre, documento o código…" oninput="renderStuList()">
+      <div class="search-wrap">
+        ${icon('search', 15)}
+        <input id="stuSearch" placeholder="Buscar por nombre, documento o código…" oninput="renderStuList()">
+      </div>
       <select id="stuFilter" style="width:auto" onchange="renderStuList()">
         <option value="">Todos los estados</option><option value="activo">Activos</option><option value="retirado">Retirados</option>
       </select>
-      <button class="btn" onclick="openStudent()">+ Nueva inscripción</button>
+      <button class="btn" onclick="openStudent()">${icon('plus')} Nueva inscripción</button>
     </div>
     <div id="stuList"></div>`;
 }
@@ -492,7 +536,7 @@ function renderStuList() {
         <td style="text-align:right;white-space:nowrap">
           <button class="btn ghost sm" onclick="viewStudent('${s.id}')">Ver</button>
           <button class="btn ghost sm" onclick="openStudent('${s.id}')">Editar</button>
-          <button class="btn danger sm" onclick="delStudent('${s.id}')">✕</button>
+          <button class="btn danger sm" onclick="delStudent('${s.id}')">${icon('x', 14)}</button>
         </td></tr>`;
   }).join('')}</tbody></table></div>`;
 }
@@ -504,7 +548,7 @@ function openStudent(id) {
   const gopts = DB.groups.map(g => `<option value="${g.id}" ${s.grupoId === g.id ? 'selected' : ''}>${h(g.nombre)}</option>`).join('');
   openModal(id ? 'Editar estudiante' : 'Nueva inscripción', `
     <div class="row" style="align-items:flex-start;gap:16px">
-      <img id="f_photoPrev" class="photo-prev" src="${s.foto || 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2288%22 height=%2288%22><rect width=%2288%22 height=%2288%22 fill=%22%2316213a%22/><text x=%2244%22 y=%2252%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22%23566%22>👤</text></svg>'}">
+      <img id="f_photoPrev" class="photo-prev" src="${s.foto || PHOTO_PLACEHOLDER}">
       <div style="flex:1">
         <label>Fotografía del estudiante<input type="file" accept="image/*" onchange="pickPhoto(this)"></label>
         <input type="hidden" id="f_foto" value="${h(s.foto || '')}">
@@ -587,7 +631,7 @@ function saveStudent(id) {
   persist(); closeModal(); render();
 }
 
-/* FICHA DEL ESTUDIANTE — estructura limpia */
+/* FICHA DEL ESTUDIANTE */
 function viewStudent(id) {
   const s = DB.students.find(x => x.id === id); if (!s) return;
   const g = DB.groups.find(x => x.id === s.grupoId);
@@ -673,8 +717,8 @@ function viewPayments() {
       <select id="payStatus" style="width:auto" onchange="renderPaymentsList()">
         <option value="">Todos</option><option value="pendiente">Pendientes</option><option value="pagado">Pagados</option><option value="vencido">Vencidos</option>
       </select>
-      <button class="btn ghost" onclick="generateMonthly()">⚙️ Generar mensualidades del mes</button>
-      <button class="btn" onclick="openPaymentCreate()">+ Registrar cobro</button>
+      <button class="btn ghost" onclick="generateMonthly()">${icon('settings')} Generar mensualidades</button>
+      <button class="btn" onclick="openPaymentCreate()">${icon('plus')} Registrar cobro</button>
     </div>
     <div id="payList"></div>`;
 }
@@ -711,9 +755,9 @@ function renderPaymentsList() {
         <td class="mut">${p.fechaPago ? fmtDate(p.fechaPago) + ' · ' + h(p.metodo) : '—'}</td>
         <td style="text-align:right;white-space:nowrap">
           ${p.estado === 'pendiente' ? `<button class="btn sm" onclick="openPayRegister('${p.id}')">Cobrar</button>` : `<button class="btn ghost sm" onclick="showReceipt('${p.id}')">Recibo</button>`}
-          <button class="btn danger sm" onclick="delPayment('${p.id}')">✕</button>
+          <button class="btn danger sm" onclick="delPayment('${p.id}')">${icon('x', 14)}</button>
         </td></tr>`;
-  }).join('')}</tbody></table>` : '<p class="empty">No hay registros para este período. Usa «Generar mensualidades del mes».</p>'}
+  }).join('')}</tbody></table>` : '<p class="empty">No hay registros para este período. Usa «Generar mensualidades».</p>'}
     </div>`;
 }
 
@@ -820,7 +864,7 @@ function showReceipt(id) {
     <div style="text-align:center;font-size:11px">Gracias por su pago · DojoPro</div>`;
   openModal('Recibo ' + p.recibo, `
     <div class="card" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.8">${body}</div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button><button class="btn" onclick='printHTML(${JSON.stringify(body)})'>🖨️ Imprimir</button></div>`);
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button><button class="btn" onclick='printHTML(${JSON.stringify(body)})'>${icon('printer')} Imprimir</button></div>`);
 }
 
 /* =========================================================
@@ -833,7 +877,7 @@ function viewAttendance() {
       <select id="attGroup" style="width:auto" onchange="renderAttSheet()">${gs || '<option value="">Sin grupos</option>'}</select>
       <input type="date" id="attDate" style="width:auto" value="${today()}" onchange="renderAttSheet()">
       <button class="btn ghost" onclick="markAll('presente')">Marcar todos presentes</button>
-      <button class="btn" onclick="saveAttendance()">💾 Guardar asistencia</button>
+      <button class="btn" onclick="saveAttendance()">${icon('save')} Guardar asistencia</button>
     </div>
     <div id="attSheet"></div>`;
 }
@@ -864,7 +908,11 @@ function renderAttSheet() {
       </tbody></table>
     </div>
     <div class="cards mt" id="attStats"></div>
-    <p class="mut sm mt">${rec ? '✅ Este día ya tiene asistencia guardada; puedes actualizarla.' : 'ℹ️ Aún no hay registro guardado para este día.'}</p>`;
+    <p class="mut sm mt" style="display:flex;align-items:center;gap:6px">
+      ${rec
+        ? `${icon('check', 14)} Este día ya tiene asistencia guardada; puedes actualizarla.`
+        : `${icon('info', 14)} Aún no hay registro guardado para este día.`}
+    </p>`;
   updateAttStats();
 }
 
@@ -907,7 +955,7 @@ function viewSport() {
       <div class="stat"><div class="k">Cinturones negros</div><div class="v">${list.filter(s => s.cinturon === 'Negro').length}</div></div>
       <div class="stat"><div class="k">Aprobación en exámenes</div><div class="v">${DB.promotions.length ? Math.round(DB.promotions.filter(p => p.resultado === 'Aprobado').length / DB.promotions.length * 100) + '%' : '—'}</div></div>
     </div>
-    <div class="toolbar mt"><button class="btn" onclick="openPromotion()">+ Registrar examen / ascenso</button></div>
+    <div class="toolbar mt"><button class="btn" onclick="openPromotion()">${icon('plus')} Registrar examen / ascenso</button></div>
     <div class="card" style="padding:0;overflow:auto">
       <table><thead><tr><th>Deportista</th><th>Cinturón actual</th><th>Grado</th><th>Último ascenso</th><th>Exámenes</th><th style="text-align:right">Acción</th></tr></thead><tbody>
       ${list.map(s => {
@@ -971,7 +1019,7 @@ function savePromotion() {
     examen: 'Examen de ascenso', resultado, nota: v('pr_nota')
   });
   if (resultado === 'Aprobado') { s.cinturon = nuevo; s.grado = grado; }
-  persist(); closeModal(); render(); toast(resultado === 'Aprobado' ? 'Ascenso registrado 🥋' : 'Examen registrado');
+  persist(); closeModal(); render(); toast(resultado === 'Aprobado' ? 'Ascenso registrado correctamente' : 'Examen registrado');
 }
 
 /* =========================================================
@@ -988,7 +1036,7 @@ function viewInventory() {
       <div class="stat"><div class="k">Valor del inventario</div><div class="v">${money(valor)}</div><div class="s">a costo</div></div>
       <div class="stat"><div class="k">Stock bajo</div><div class="v" style="color:${bajo.length ? '#f87171' : '#4ade80'}">${bajo.length}</div><div class="s">requieren reposición</div></div>
     </div>
-    <div class="toolbar mt"><button class="btn" onclick="openItem()">+ Nuevo producto</button></div>
+    <div class="toolbar mt"><button class="btn" onclick="openItem()">${icon('plus')} Nuevo producto</button></div>
     <div class="card" style="padding:0;overflow:auto">
       <table><thead><tr><th>Producto</th><th>Categoría</th><th>Talla</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Margen</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
       ${items.length ? items.map(i => `<tr>
@@ -1002,7 +1050,7 @@ function viewInventory() {
         <td style="text-align:right;white-space:nowrap">
           <button class="btn ghost sm" onclick="adjustStock('${i.id}')">±Stock</button>
           <button class="btn ghost sm" onclick="openItem('${i.id}')">Editar</button>
-          <button class="btn danger sm" onclick="delItem('${i.id}')">✕</button>
+          <button class="btn danger sm" onclick="delItem('${i.id}')">${icon('x', 14)}</button>
         </td></tr>`).join('') : '<tr><td colspan="8"><p class="empty">Sin productos registrados</p></td></tr>'}
       </tbody></table>
     </div>`;
@@ -1061,7 +1109,7 @@ function viewSales() {
       <div class="stat"><div class="k">Ticket promedio</div><div class="v">${money(mes.length ? total / mes.length : 0)}</div></div>
       <div class="stat"><div class="k">Ventas totales</div><div class="v">${DB.sales.length}</div></div>
     </div>
-    <div class="toolbar mt"><button class="btn" onclick="openSale()">+ Nueva venta</button></div>
+    <div class="toolbar mt"><button class="btn" onclick="openSale()">${icon('plus')} Nueva venta</button></div>
     <div class="card" style="padding:0;overflow:auto">
     ${ventas.length ? `<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Método</th><th>Total</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
       ${ventas.map(s => `<tr>
@@ -1072,7 +1120,7 @@ function viewSales() {
         <td><b>${money(s.total)}</b></td>
         <td style="text-align:right;white-space:nowrap">
           <button class="btn ghost sm" onclick="showSaleReceipt('${s.id}')">Recibo</button>
-          <button class="btn danger sm" onclick="delSale('${s.id}')">✕</button>
+          <button class="btn danger sm" onclick="delSale('${s.id}')">${icon('x', 14)}</button>
         </td></tr>`).join('')}</tbody></table>` : '<p class="empty">Sin ventas registradas</p>'}
     </div>`;
 }
@@ -1128,7 +1176,7 @@ function renderSaleDraft() {
   el.innerHTML = saleDraft.length ? `<div class="card" style="padding:0;overflow:auto">
     <table><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead><tbody>
     ${saleDraft.map((d, i) => `<tr><td>${h(d.desc)}</td><td>${d.cantidad}</td><td>${money(d.precio)}</td><td><b>${money(d.precio * d.cantidad)}</b></td>
-    <td style="text-align:right"><button class="btn danger sm" onclick="removeSaleItem(${i})">✕</button></td></tr>`).join('')}
+    <td style="text-align:right"><button class="btn danger sm" onclick="removeSaleItem(${i})">${icon('x', 14)}</button></td></tr>`).join('')}
     <tr><td colspan="3" style="text-align:right"><b>TOTAL</b></td><td colspan="2"><b style="font-size:17px;color:#4ade80">${money(total)}</b></td></tr>
     </tbody></table></div>` : '<p class="mut sm">Aún no has agregado productos a la venta.</p>';
 }
@@ -1172,7 +1220,7 @@ function showSaleReceipt(id) {
     <div style="text-align:center;font-size:11px">¡Gracias por tu compra!</div>`;
   openModal('Comprobante de venta', `
     <div class="card" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.8">${body}</div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button><button class="btn" onclick='printHTML(${JSON.stringify(body)})'>🖨️ Imprimir</button></div>`);
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button><button class="btn" onclick='printHTML(${JSON.stringify(body)})'>${icon('printer')} Imprimir</button></div>`);
 }
 
 /* =========================================================
@@ -1194,8 +1242,8 @@ function viewFinance() {
       <select id="finType" style="width:auto" onchange="renderFinList()">
         <option value="">Todos</option><option value="ingreso">Ingresos</option><option value="egreso">Egresos</option>
       </select>
-      <button class="btn ghost" onclick="openTx('ingreso')">+ Ingreso</button>
-      <button class="btn" onclick="openTx('egreso')">+ Egreso</button>
+      <button class="btn ghost" onclick="openTx('ingreso')">${icon('plus')} Ingreso</button>
+      <button class="btn" onclick="openTx('egreso')">${icon('plus')} Egreso</button>
     </div>
     <div id="finList"></div>`;
 }
@@ -1222,7 +1270,7 @@ function renderFinList() {
         <td>${h(t.descripcion)}</td>
         <td class="mut">${h(t.metodo || '—')}</td>
         <td style="color:${t.tipo === 'ingreso' ? '#4ade80' : '#f87171'};font-weight:700;white-space:nowrap">${t.tipo === 'ingreso' ? '+' : '−'} ${money(t.monto)}</td>
-        <td style="text-align:right">${t.refId ? '' : `<button class="btn danger sm" onclick="delTx('${t.id}')">✕</button>`}</td>
+        <td style="text-align:right">${t.refId ? '' : `<button class="btn danger sm" onclick="delTx('${t.id}')">${icon('x', 14)}</button>`}</td>
       </tr>`).join('')}</tbody></table>` : '<p class="empty">Sin movimientos para el filtro seleccionado</p>'}
     </div>`;
 }
@@ -1293,7 +1341,7 @@ function viewReports() {
 
   return `
     <div class="row" style="justify-content:flex-end;margin-bottom:14px">
-      <button class="btn ghost" onclick="window.print()">🖨️ Imprimir reporte</button>
+      <button class="btn ghost" onclick="window.print()">${icon('printer')} Imprimir reporte</button>
     </div>
 
     <div class="sec-title" style="margin-top:0">Estudiantes</div>
@@ -1315,7 +1363,7 @@ function viewReports() {
         <td class="mut">${h(d.s.tutor?.nombre || '—')}</td>
         <td class="mut">${h(d.s.tutor?.telefono || d.s.telefono || '—')}</td>
         <td style="color:#f87171;font-weight:700">${money(d.monto)}</td><td>${n}</td></tr>`;
-      }).join('')}</tbody></table>` : '<p class="empty">No hay deudores vencidos 🎉</p>'}
+      }).join('')}</tbody></table>` : '<p class="empty">No hay deudores vencidos.</p>'}
     </div>
 
     <div class="sec-title">Asistencia por grupo (últimos 30 días)</div>
@@ -1355,7 +1403,7 @@ function viewReports() {
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 function viewGroups() {
   return `
-    <div class="toolbar"><button class="btn" onclick="openGroup()">+ Nuevo grupo</button></div>
+    <div class="toolbar"><button class="btn" onclick="openGroup()">${icon('plus')} Nuevo grupo</button></div>
     <div class="cards">
     ${DB.groups.map(g => {
       const n = DB.students.filter(s => s.grupoId === g.id && s.estado === 'activo').length;
@@ -1426,12 +1474,12 @@ function viewUsers() {
       <div class="sec-title" style="margin-top:0">Matriz de permisos</div>
       <table><thead><tr><th>Módulo</th><th>Administrador</th><th>Instructor</th></tr></thead><tbody>
       ${Object.keys(NAV).map(k => `<tr>
-        <td>${NAV[k].icon} ${NAV[k].label}</td>
-        <td>${PERMS.admin.includes(k) ? '<span class="badge b-ok">✔ Acceso</span>' : '<span class="badge b-mut">—</span>'}</td>
-        <td>${PERMS.instructor.includes(k) ? '<span class="badge b-ok">✔ Acceso</span>' : '<span class="badge b-mut">—</span>'}</td>
+        <td><span style="display:inline-flex;align-items:center;gap:7px">${icon(NAV[k].icon, 15)} ${NAV[k].label}</span></td>
+        <td>${PERMS.admin.includes(k) ? '<span class="badge b-ok">Acceso</span>' : '<span class="badge b-mut">—</span>'}</td>
+        <td>${PERMS.instructor.includes(k) ? '<span class="badge b-ok">Acceso</span>' : '<span class="badge b-mut">—</span>'}</td>
       </tr>`).join('')}</tbody></table>
     </div>
-    <div class="toolbar"><button class="btn" onclick="openUser()">+ Nuevo usuario</button></div>
+    <div class="toolbar"><button class="btn" onclick="openUser()">${icon('plus')} Nuevo usuario</button></div>
     <div class="card" style="padding:0;overflow:auto">
       <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
       ${DB.users.map(u => `<tr>
@@ -1441,7 +1489,7 @@ function viewUsers() {
         <td><span class="badge ${u.activo ? 'b-ok' : 'b-bad'}">${u.activo ? 'activo' : 'inactivo'}</span></td>
         <td style="text-align:right;white-space:nowrap">
           <button class="btn ghost sm" onclick="openUser('${u.id}')">Editar</button>
-          ${u.id !== session.id ? `<button class="btn danger sm" onclick="delUser('${u.id}')">✕</button>` : '<span class="mut sm"> (tú)</span>'}
+          ${u.id !== session.id ? `<button class="btn danger sm" onclick="delUser('${u.id}')">${icon('x', 14)}</button>` : '<span class="mut sm"> (tú)</span>'}
         </td></tr>`).join('')}
       </tbody></table>
     </div>`;
