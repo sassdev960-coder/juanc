@@ -2,127 +2,426 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#0a0f1a"/>
 <title>DojoPro · Gestión de Academia</title>
 <style>
 :root{
-  --bg:#0b1220; --panel:#111a2e; --panel2:#16213a; --line:#22304d;
-  --txt:#e6edf7; --mut:#8ea1c4; --acc:#f43f5e; --acc2:#22d3ee;
-  --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+  --bg:#0a0f1a;
+  --bg-elev:#0d1422;
+  --panel:#131b2e;
+  --panel-2:#182136;
+  --panel-3:#202b45;
+  --line:#243149;
+  --line-2:#2e3d5a;
+  --txt:#e8eef7;
+  --txt-2:#b8c6dc;
+  --mut:#7f92b0;
+  --acc:#f43f5e;
+  --acc-2:#22d3ee;
+  --ok:#10b981;
+  --warn:#f59e0b;
+  --bad:#ef4444;
+  --r-sm:8px;
+  --r-md:12px;
+  --r-lg:16px;
+  --r-xl:20px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.25);
+  --shadow-md:0 4px 14px rgba(0,0,0,.35);
+  --shadow-lg:0 12px 34px rgba(0,0,0,.5);
+  --shadow-xl:0 24px 60px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:14px}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 10% -10%,rgba(244,63,94,.07),transparent 55%),
+    radial-gradient(1000px 500px at 100% 0%,rgba(34,211,238,.06),transparent 50%),
+    var(--bg);
+  background-attachment:fixed;
+  color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
 button,input,select,textarea{font-family:inherit;font-size:14px}
-h1,h2,h3{margin:0}
+h1,h2,h3{margin:0;line-height:1.25}
 .mut{color:var(--mut)}
 .sm{font-size:12px}
 .mt{margin-top:14px}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .row.end{justify-content:flex-end}
-.grow{flex:1;min-width:160px}
+.grow{flex:1;min-width:0}
 
-/* layout */
-.layout{display:flex;min-height:100vh}
-.sidebar{width:245px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px;gap:14px;position:sticky;top:0;height:100vh}
-.brand{display:flex;gap:10px;align-items:center}
-.brand b{font-size:16px;display:block}
-.brand small{display:block;font-size:11px;color:var(--mut);font-weight:400}
-nav{display:flex;flex-direction:column;gap:3px;overflow:auto;flex:1;margin:0 -6px}
-.nav-item{background:none;border:0;color:#a9bbd8;text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;display:flex;gap:9px;align-items:center;white-space:nowrap;font-size:14px}
-.nav-item:hover{background:#1a2540;color:#fff}
-.nav-item.active{background:linear-gradient(90deg,rgba(244,63,94,.18),rgba(34,211,238,.06));color:#fff;box-shadow:inset 3px 0 0 var(--acc)}
+/* ============ LAYOUT ============ */
+.layout{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  min-height:100vh;
+  min-height:100dvh;
+}
+.sidebar{
+  background:var(--panel);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  padding:16px;
+  gap:14px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  height:100dvh;
+  min-width:0;
+  overflow:hidden;
+}
+.brand{display:flex;gap:10px;align-items:center;min-width:0}
+.brand-mark{color:var(--acc);display:flex;align-items:center;flex:none}
+.brand-text{min-width:0}
+.brand-text b{font-size:16px;display:block}
+.brand-text small{display:block;font-size:11px;color:var(--mut);font-weight:400}
+nav{display:flex;flex-direction:column;gap:2px;overflow-y:auto;flex:1;margin:0 -6px;padding:0 6px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.nav-item{
+  background:none;border:0;color:var(--txt-2);text-align:left;
+  padding:10px 12px;border-radius:10px;cursor:pointer;
+  display:flex;gap:10px;align-items:center;white-space:nowrap;
+  font-size:14px;min-height:40px;transition:background .15s,color .15s;min-width:0;
+}
+.nav-item svg{flex:none;color:var(--mut)}
+.nav-item:hover{background:var(--panel-3);color:#fff}
+.nav-item.active{
+  background:linear-gradient(90deg,rgba(244,63,94,.18),rgba(34,211,238,.05));
+  color:#fff;
+  box-shadow:inset 3px 0 0 var(--acc);
+}
+.nav-item.active svg{color:var(--acc)}
 .side-foot{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
 .user-chip{display:flex;gap:9px;align-items:center;min-width:0}
 .user-chip > div{min-width:0;overflow:hidden}
-.user-chip b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line);background:#0e1729;position:sticky;top:0;z-index:5}
-.topbar h2{font-size:18px;display:flex;align-items:center;gap:9px}
-.content{padding:20px 24px 70px;width:100%;max-width:1400px}
+.user-chip b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;font-size:13px}
+.user-chip small{color:var(--mut);font-size:11px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-actions{display:flex;gap:6px}
+.side-actions .btn{flex:1}
 
-/* components */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff;border:0;padding:9px 16px;border-radius:10px;cursor:pointer;font-weight:600;text-decoration:none;line-height:1.1}
-.btn:hover{filter:brightness(1.1)}
-.btn.ghost{background:#1c2947;border:1px solid var(--line);color:#cfe0ff;font-weight:500}
-.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px}
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:14px 24px;border-bottom:1px solid var(--line);
+  background:rgba(13,20,34,.85);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:5;
+}
+.topbar-left{display:flex;align-items:center;gap:10px;min-width:0}
+.topbar-left h2{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-right{display:flex;align-items:center;gap:14px;color:var(--mut);font-size:13px;flex:none}
+.topbar-right .date{white-space:nowrap}
+.topbar-right .avatar{display:none}
+.content{padding:22px 24px 90px;width:100%;min-width:0}
+.content > *{animation:fadeIn .2s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ COMPONENTS ============ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:linear-gradient(135deg,#f43f5e,#e11d48);
+  color:#fff;border:0;padding:9px 16px;border-radius:var(--r-sm);
+  cursor:pointer;font-weight:600;font-size:13px;min-height:36px;
+  transition:filter .15s,transform .1s;white-space:nowrap;text-decoration:none;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--panel-3);border:1px solid var(--line);color:#cfe0ff;font-weight:500}
+.btn.ghost:hover{background:#26334f}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:8px;min-height:28px}
 .btn.full{width:100%}
 .btn.danger{background:#7f1d1d;border:1px solid #b91c1c}
-input,select,textarea{background:#0e1729;border:1px solid var(--line);color:var(--txt);padding:9px 11px;border-radius:9px;width:100%;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--acc2)}
-label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--mut)}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
-.card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
-.stat{background:linear-gradient(160deg,#16213a,#101a2e);border:1px solid var(--line);border-radius:14px;padding:16px}
-.stat .k{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
-.stat .v{font-size:25px;font-weight:700;margin-top:6px}
-.stat .s{font-size:12px;color:var(--mut);margin-top:3px}
-table{width:100%;border-collapse:collapse}
-th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);padding:10px 10px;border-bottom:1px solid var(--line)}
-td{padding:10px;border-bottom:1px solid #1b2743;vertical-align:middle}
-tr:hover td{background:#152039}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
-.b-ok{background:rgba(34,197,94,.15);color:#4ade80}
-.b-warn{background:rgba(245,158,11,.15);color:#fbbf24}
-.b-bad{background:rgba(239,68,68,.15);color:#f87171}
-.b-info{background:rgba(34,211,238,.13);color:#67e8f9}
-.b-mut{background:#1e2b47;color:#9db0d0}
-.avatar{border-radius:50%;object-fit:cover;flex:none;display:inline-flex;align-items:center;justify-content:center;line-height:1}
-.avatar.ini{background:linear-gradient(135deg,#f43f5e,#22d3ee);color:#fff;font-weight:700;letter-spacing:.5px}
-table img.avatar{vertical-align:middle;margin-right:8px}
-table .avatar.ini{vertical-align:middle;margin-right:8px}
-.empty{padding:28px;text-align:center;color:var(--mut)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.sec-title{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);margin:22px 0 10px;font-weight:700}
+.btn.danger:hover{background:#991b1b}
+.btn.icon-only{padding:5px;width:30px;height:30px;min-height:0}
 
-/* search wrapper */
-.search-wrap{position:relative;flex:1;min-width:160px}
-.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none}
-.search-wrap input{padding-left:34px}
+input,select,textarea{
+  background:var(--bg-elev);border:1px solid var(--line);color:var(--txt);
+  padding:9px 12px;border-radius:var(--r-sm);width:100%;outline:none;
+  font-size:14px;min-height:38px;transition:border-color .15s,box-shadow .15s;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--acc-2);box-shadow:0 0 0 3px rgba(34,211,238,.14);
+}
+select{cursor:pointer}
+label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--mut);font-weight:500}
+textarea{resize:vertical;min-height:70px}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.toolbar > *{min-width:0}
+
+.card{
+  background:var(--panel-2);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow-sm);
+  min-width:0;
+}
+.card.flush{padding:0;overflow:hidden}
+.card.flush .table-wrap{border-radius:var(--r-lg)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px}
+.stat{
+  background:linear-gradient(160deg,var(--panel-2),var(--panel));
+  border:1px solid var(--line);border-radius:var(--r-md);padding:16px;
+  min-width:0;position:relative;overflow:hidden;
+}
+.stat::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--acc),var(--acc-2));
+  opacity:0;transition:opacity .2s;
+}
+.stat:hover::after{opacity:1}
+.stat .k{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.stat .v{font-size:26px;font-weight:700;margin-top:6px;line-height:1.1;overflow-wrap:break-word}
+.stat .s{font-size:12px;color:var(--mut);margin-top:4px}
+
+/* ============ TABLES ============ */
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r-md)}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);padding:11px 14px;border-bottom:1px solid var(--line);font-weight:700;background:rgba(0,0,0,.12)}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:break-word}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:rgba(255,255,255,.02)}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-ok{background:rgba(16,185,129,.14);color:#4ade80}
+.b-warn{background:rgba(245,158,11,.14);color:#fbbf24}
+.b-bad{background:rgba(239,68,68,.14);color:#f87171}
+.b-info{background:rgba(34,211,238,.13);color:#67e8f9}
+.b-mut{background:var(--panel-3);color:#a9bbd8}
+
+/* avatars */
+.avatar{border-radius:50%;object-fit:cover;flex:none;display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle}
+.avatar.ini{background:linear-gradient(135deg,#f43f5e,#22d3ee);color:#fff;font-weight:700;letter-spacing:.5px}
+td > .avatar,tbody .avatar{margin-right:8px}
+
+/* empty states */
+.empty{
+  padding:34px 20px;text-align:center;color:var(--mut);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.empty svg{opacity:.35}
+.empty b{color:var(--txt-2);font-size:14px}
+.empty span{font-size:12px;max-width:340px}
+
+.sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--mut);margin:24px 0 12px;font-weight:700}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;min-width:0}
+.grid2 > *,.grid3 > *{min-width:0}
+
+/* search */
+.search-wrap{position:relative;flex:1;min-width:180px}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none}
+.search-wrap input{padding-left:36px}
 
 /* modal */
-.modal{position:fixed;inset:0;background:rgba(4,8,18,.72);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:100;overflow:auto;backdrop-filter:blur(3px)}
+.modal{
+  position:fixed;inset:0;background:rgba(4,8,18,.75);display:none;
+  align-items:flex-start;justify-content:center;padding:40px 16px;
+  z-index:100;overflow-y:auto;backdrop-filter:blur(4px);
+}
 .modal.show{display:flex}
-.modal-box{background:var(--panel2);border:1px solid var(--line);border-radius:16px;width:100%;max-width:620px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
-.modal.wide .modal-box{max-width:880px}
-.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.modal-head h3{font-size:17px}
-.modal-head button{background:none;border:0;color:var(--mut);font-size:26px;cursor:pointer;line-height:1}
-.photo-prev{width:88px;height:88px;border-radius:14px;object-fit:cover;border:1px solid var(--line);background:#0e1729;flex:none}
+.modal-box{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-lg);
+  width:100%;max-width:620px;padding:22px;box-shadow:var(--shadow-xl);
+  min-width:0;max-height:calc(100vh - 80px);overflow-y:auto;
+}
+.modal.wide .modal-box{max-width:900px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:10px;position:sticky;top:-22px;background:var(--panel-2);padding:12px 0;margin-top:-12px;z-index:1}
+.modal-head h3{font-size:17px;overflow-wrap:break-word;min-width:0}
+.modal-head button{background:none;border:0;color:var(--mut);font-size:26px;cursor:pointer;line-height:1;padding:0;width:32px;height:32px;border-radius:8px;flex:none}
+.modal-head button:hover{background:var(--panel-3);color:#fff}
+.photo-prev{width:88px;height:88px;border-radius:var(--r-md);object-fit:cover;border:1px solid var(--line);background:var(--bg-elev);flex:none}
 
 /* perfil */
-.profile-head{display:flex;gap:16px;align-items:flex-start;padding:16px;background:linear-gradient(135deg,#182643,#0f1a30);border:1px solid var(--line);border-radius:16px}
+.profile-head{
+  display:flex;gap:16px;align-items:flex-start;padding:16px;
+  background:linear-gradient(135deg,#1c2b4d,#0f1a30);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+}
 .profile-head .info{flex:1;min-width:0}
-.profile-head h3{font-size:20px;margin-bottom:4px}
+.profile-head h3{font-size:19px;margin-bottom:4px;overflow-wrap:break-word}
 .profile-head .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .profile-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.profile-card{background:#0e1729;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
-.profile-card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);font-weight:700;margin-bottom:8px}
-.profile-card .line{display:flex;gap:8px;font-size:13px;line-height:1.7}
-.profile-card .line b{color:var(--mut);font-weight:500;min-width:52px}
+.profile-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;min-width:0}
+.profile-card .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);font-weight:700;margin-bottom:8px}
+.profile-card .line{display:flex;gap:8px;font-size:13px;line-height:1.7;min-width:0}
+.profile-card .line b{color:var(--mut);font-weight:500;min-width:50px;flex:none}
+.profile-card .line span{overflow-wrap:break-word;min-width:0}
 
 /* login */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(900px 500px at 20% 0%,#1a2540,transparent),var(--bg)}
-.login-card{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:28px;width:100%;max-width:370px;display:flex;flex-direction:column;gap:14px}
-.hint{font-size:12px;color:var(--mut);text-align:center;line-height:1.7}
-.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,80px);background:#1c2947;border:1px solid var(--line);padding:12px 20px;border-radius:12px;opacity:0;transition:.3s;z-index:200;font-weight:600;pointer-events:none}
-.toast.show{transform:translate(-50%,0);opacity:1}
-.toast.ok{border-color:#166534}.toast.bad{border-color:#991b1b}
-@media(max-width:900px){
-  .layout{flex-direction:column}
-  .sidebar{width:100%;height:auto;position:static}
-  nav{flex-direction:row;overflow-x:auto}
-  .grid2,.grid3,.profile-cards{grid-template-columns:1fr}
+.login-wrap{
+  min-height:100vh;min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(900px 500px at 20% 0%,#1a2540,transparent),var(--bg);
 }
-@media print{.sidebar,.topbar,.toolbar,.btn{display:none!important}}
+.login-card{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:28px;width:100%;max-width:380px;
+  display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow-lg);
+}
+.login-card .brand{justify-content:center}
+.login-card .brand-text{text-align:left}
+.hint{font-size:12px;color:var(--mut);text-align:center;line-height:1.8}
+.hint b{color:var(--txt-2)}
+
+/* toast */
+.toast{
+  position:fixed;bottom:22px;left:50%;transform:translate(-50%,100px);
+  background:var(--panel-3);border:1px solid var(--line);
+  padding:12px 20px;border-radius:var(--r-md);opacity:0;
+  transition:transform .25s,opacity .25s;z-index:200;
+  font-weight:600;pointer-events:none;box-shadow:var(--shadow-lg);
+  max-width:calc(100vw - 32px);text-align:center;
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+.toast.ok{border-color:#166534;color:#4ade80}
+.toast.bad{border-color:#991b1b;color:#f87171}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1024px){
+  .layout{grid-template-columns:76px 1fr}
+  .sidebar{padding:14px 8px;align-items:center}
+  .brand-text,.user-chip > div,.nav-item span:not(svg),
+  .side-actions{display:none}
+  .brand{justify-content:center}
+  .nav-item{justify-content:center;padding:12px;min-height:44px}
+  .user-chip{justify-content:center}
+  .side-foot{padding-top:10px}
+  .content{padding:20px 18px 90px}
+}
+
+@media (max-width:720px){
+  .layout{display:block;padding-bottom:76px;min-height:auto}
+  .sidebar{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100%;height:auto;min-height:0;
+    flex-direction:row;padding:6px;
+    border-right:0;border-top:1px solid var(--line);
+    background:rgba(19,27,46,.96);backdrop-filter:blur(14px);
+    z-index:50;overflow:visible;
+  }
+  .brand,.side-foot{display:none!important}
+  .sidebar nav{
+    flex-direction:row;overflow-x:auto;flex:1;margin:0;padding:0;
+    gap:2px;scrollbar-width:none;
+  }
+  .sidebar nav::-webkit-scrollbar{display:none}
+  .nav-item{
+    flex-direction:column;gap:3px;padding:8px 10px;
+    font-size:10px;min-width:66px;flex-shrink:0;
+    justify-content:center;border-radius:10px;min-height:56px;
+    box-shadow:none!important;
+  }
+  .nav-item span:not(svg){display:block}
+  .nav-item.active{background:rgba(244,63,94,.15);color:#fff}
+  .nav-item.active svg{color:var(--acc)}
+
+  .topbar{padding:12px 16px;gap:8px}
+  .topbar-left h2{font-size:16px}
+  .topbar-right .date{display:none}
+  .topbar-right .avatar{display:inline-flex}
+  .content{padding:16px 14px 30px}
+
+  .cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px}
+  .stat{padding:13px}
+  .stat .v{font-size:22px}
+
+  .grid2,.grid3,.profile-cards{grid-template-columns:1fr}
+
+  .toolbar{gap:8px}
+  .toolbar .btn{flex:1;min-width:0}
+  .search-wrap{min-width:100%}
+  .toolbar select,.toolbar input[type="month"],.toolbar input[type="date"]{width:100%!important}
+
+  /* modal bottom-sheet */
+  .modal{padding:0;align-items:flex-end}
+  .modal-box{
+    max-width:none;border-radius:20px 20px 0 0;
+    max-height:92vh;padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+    border-left:0;border-right:0;border-bottom:0;
+  }
+  .modal-head{top:-20px;padding-top:4px;margin-top:-8px}
+
+  .photo-prev{width:72px;height:72px}
+  .profile-head{padding:14px;gap:12px}
+
+  /* ===== TABLES → CARDS ===== */
+  .table-wrap{overflow:visible;border-radius:0;background:transparent}
+  table{min-width:0!important;display:block;background:transparent}
+  thead{display:none}
+  tbody{display:block}
+  tbody tr{
+    display:block;
+    background:var(--panel-2);border:1px solid var(--line);
+    border-radius:var(--r-md);margin-bottom:10px;overflow:hidden;
+  }
+  tbody tr:hover td{background:transparent}
+  tbody td{
+    display:flex;justify-content:space-between;align-items:center;
+    gap:12px;padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    text-align:right;
+  }
+  tbody tr td:last-child{border-bottom:0}
+  tbody td::before{
+    content:attr(data-label);
+    font-size:10px;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--mut);font-weight:700;flex-shrink:0;text-align:left;
+    padding-right:8px;
+  }
+  tbody td:empty{display:none}
+  tbody td.hide-mobile{display:none!important}
+
+  tbody td[data-label="Acciones"],
+  tbody td[data-label="Acción"]{
+    justify-content:flex-end!important;
+    background:rgba(0,0,0,.15);
+    gap:6px;
+    padding:10px 12px!important;
+  }
+  tbody td[data-label="Acciones"]::before,
+  tbody td[data-label="Acción"]::before{display:none}
+  tbody td[data-label="Acciones"] .btn,
+  tbody td[data-label="Acción"] .btn{flex:none}
+
+  tbody td > .avatar{margin-right:6px}
+  tbody td > b{display:inline-block;max-width:100%;overflow-wrap:break-word}
+
+  .card.flush{background:transparent;border:0;padding:0;box-shadow:none}
+  .card.flush .table-wrap{background:transparent}
+}
+
+@media (max-width:380px){
+  .nav-item{min-width:60px;padding:8px 6px;font-size:9px}
+  .topbar-left h2{font-size:15px}
+}
+
+/* print */
+@media print{
+  .sidebar,.topbar,.toolbar,.btn,.nav-item{display:none!important}
+  body{background:#fff;color:#000}
+  .content{padding:0}
+  .card{border:1px solid #ccc;background:#fff;box-shadow:none}
+  .table-wrap{overflow:visible}
+  table{min-width:0}
+  thead{display:table-header-group}
+  tbody tr{display:table-row}
+  tbody td{display:table-cell;border:1px solid #ddd}
+  tbody td::before{display:none}
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
-    <div class="modal-head"><h3 id="modalTitle"></h3><button onclick="closeModal()">×</button></div>
+    <div class="modal-head"><h3 id="modalTitle"></h3><button onclick="closeModal()" aria-label="Cerrar">×</button></div>
     <div id="modalBody"></div>
   </div>
 </div>
@@ -133,37 +432,35 @@ table .avatar.ini{vertical-align:middle;margin-right:8px}
    DojoPro · Demo funcional con persistencia en localStorage
    ========================================================= */
 
-/* ---------- Iconos SVG (Lucide style, sin dependencias) ---------- */
+/* ---------- Iconos SVG (Lucide) ---------- */
 const ICONS = {
-  dashboard: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
-  students: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/>',
-  payments: '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
-  attendance: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
-  sport: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
-  inventory: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
-  sales: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
-  finance: '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
-  reports: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
-  groups: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
-  users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-  search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
-  save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
-  printer: '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
-  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
-  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/>',
-  home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-  x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
-  check: '<polyline points="20 6 9 17 4 12"/>',
-  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
-  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>',
-  user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-  alert: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  students:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/>',
+  payments:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+  attendance:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+  sport:'<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
+  inventory:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  sales:'<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+  finance:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+  reports:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  groups:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  search:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+  printer:'<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  alert:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  refresh:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>'
 };
-function icon(name, size = 16) {
+function icon(name, size=16){
   const paths = ICONS[name] || '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex:none">${paths}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
 }
 
 /* ---------- Utilidades ---------- */
@@ -171,324 +468,360 @@ const $ = s => document.querySelector(s);
 const v = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
 const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const today = () => new Date().toISOString().slice(0, 10);
-const money = n => '$ ' + Number(n || 0).toLocaleString('es-CO');
-const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-const monthLabel = ym => { const [y, m] = ym.split('-'); return new Date(y, m - 1, 1).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' }); };
-function age(bd) {
-  if (!bd) return '—';
-  const d = new Date(bd), t = new Date();
-  let a = t.getFullYear() - d.getFullYear();
-  const m = t.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && t.getDate() < d.getDate())) a--;
+const money = n => '$ ' + Number(n||0).toLocaleString('es-CO');
+const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = d => d ? new Date(d+'T00:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+const monthLabel = ym => { const [y,m]=ym.split('-'); return new Date(y,m-1,1).toLocaleDateString('es-CO',{month:'long',year:'numeric'}); };
+const nom = s => s ? ((s.nombres||'')+' '+(s.apellidos||'')).trim() : '';
+function age(bd){
+  if(!bd) return '—';
+  const d=new Date(bd), t=new Date();
+  let a=t.getFullYear()-d.getFullYear();
+  const m=t.getMonth()-d.getMonth();
+  if(m<0||(m===0&&t.getDate()<d.getDate())) a--;
   return a;
 }
-const BELTS = ['Blanco', 'Amarillo', 'Naranja', 'Verde', 'Azul', 'Morado', 'Marrón', 'Rojo', 'Negro'];
-const BELT_COLOR = { Blanco: '#e5e7eb', Amarillo: '#facc15', Naranja: '#fb923c', Verde: '#22c55e', Azul: '#3b82f6', Morado: '#a855f7', 'Marrón': '#92400e', Rojo: '#ef4444', Negro: '#374151' };
-const opts = (arr, sel) => arr.map(o => `<option ${o === sel ? 'selected' : ''}>${h(o)}</option>`).join('');
-const toast = (msg, type = 'ok') => {
-  const t = $('#toast'); t.textContent = msg; t.className = 'toast show ' + type;
-  clearTimeout(t._t); t._t = setTimeout(() => t.className = 'toast ' + type, 2400);
+const BELTS = ['Blanco','Amarillo','Naranja','Verde','Azul','Morado','Marrón','Rojo','Negro'];
+const BELT_COLOR = {Blanco:'#e5e7eb',Amarillo:'#facc15',Naranja:'#fb923c',Verde:'#22c55e',Azul:'#3b82f6',Morado:'#a855f7','Marrón':'#92400e',Rojo:'#ef4444',Negro:'#374151'};
+const opts = (arr,sel) => arr.map(o=>`<option ${o===sel?'selected':''}>${h(o)}</option>`).join('');
+const toast = (msg,type='ok') => {
+  const t=$('#toast'); t.textContent=msg; t.className='toast show '+type;
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast '+type,2400);
 };
-
-/* Iniciales robustas */
-function initialsOf(s) {
-  if (!s) return '?';
-  let full = '';
-  if (typeof s === 'string') full = s;
-  else full = (((s.nombres || '') + ' ' + (s.apellidos || '')).trim()) || (s.nombre || '');
+function initialsOf(s){
+  if(!s) return '?';
+  let full = typeof s==='string' ? s : (((s.nombres||'')+' '+(s.apellidos||'')).trim() || (s.nombre||''));
   const parts = full.split(/\s+/).filter(Boolean);
-  const ini = ((parts[0] && parts[0][0] ? parts[0][0] : '') + (parts[1] && parts[1][0] ? parts[1][0] : '')).toUpperCase();
-  return ini || (full[0] ? full[0].toUpperCase() : '?');
+  const ini = ((parts[0]?.[0]||'')+(parts[1]?.[0]||'')).toUpperCase();
+  return ini || (full[0]?full[0].toUpperCase():'?');
 }
-function avatarHTML(s, size = 36) {
-  if (s && s.foto) return `<img src="${s.foto}" class="avatar" style="width:${size}px;height:${size}px" alt="">`;
-  const ini = initialsOf(s);
-  const fs = Math.max(11, Math.round(size * 0.42));
+function avatarHTML(s,size=36){
+  if(s && s.foto) return `<img src="${s.foto}" class="avatar" style="width:${size}px;height:${size}px" alt="">`;
+  const ini=initialsOf(s);
+  const fs=Math.max(11,Math.round(size*0.42));
   return `<div class="avatar ini" style="width:${size}px;height:${size}px;font-size:${fs}px">${h(ini)}</div>`;
 }
+const PHOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2288%22 height=%2288%22 viewBox=%220 0 88 88%22><rect width=%2288%22 height=%2288%22 fill=%22%23131b2e%22/><circle cx=%2244%22 cy=%2234%22 r=%2214%22 fill=%22%233a4a6b%22/><path d=%22M44 54c-14 0-26 8-26 22v12h52V76c0-14-12-22-26-22z%22 fill=%22%233a4a6b%22/></svg>';
 
-/* Placeholder SVG para foto (silueta) */
-const PHOTO_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2288%22 height=%2288%22 viewBox=%220 0 88 88%22><rect width=%2288%22 height=%2288%22 fill=%22%2316213a%22/><circle cx=%2244%22 cy=%2234%22 r=%2214%22 fill=%22%234a5d80%22/><path d=%22M44 54c-14 0-26 8-26 22v12h52V76c0-14-12-22-26-22z%22 fill=%22%234a5d80%22/></svg>';
-
-/* ---------- Persistencia ---------- */
-const KEY = 'dojopro_v1';
-let DB, session = null, state = { view: 'dashboard' };
-
-function persist() { localStorage.setItem(KEY, JSON.stringify(DB)); }
-function loadDB() { try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
-
-/* ---------- Datos de demostración ---------- */
-function seedData() {
-  const d = new Date(); const cur = d.toISOString().slice(0, 7);
-  const p = new Date(); p.setMonth(p.getMonth() - 1); const prev = p.toISOString().slice(0, 7);
-
-  const users = [
-    { id: 'u1', nombre: 'Ana Torres', usuario: 'admin', password: 'admin123', rol: 'admin', activo: true },
-    { id: 'u2', nombre: 'Carlos Rojas', usuario: 'instructor', password: 'instructor123', rol: 'instructor', activo: true }
-  ];
-  const groups = [
-    { id: 'g1', nombre: 'Infantil A', categoria: 'Infantil', edadMin: 5, edadMax: 8, dias: ['Lun', 'Mié', 'Vie'], horaInicio: '16:00', horaFin: '17:00', instructorId: 'u2', cupo: 15, mensualidad: 55000 },
-    { id: 'g2', nombre: 'Juvenil B', categoria: 'Juvenil', edadMin: 9, edadMax: 14, dias: ['Mar', 'Jue'], horaInicio: '17:00', horaFin: '18:30', instructorId: 'u2', cupo: 20, mensualidad: 65000 },
-    { id: 'g3', nombre: 'Adultos', categoria: 'Adulto', edadMin: 15, edadMax: 99, dias: ['Lun', 'Mié', 'Vie'], horaInicio: '19:00', horaFin: '20:30', instructorId: 'u2', cupo: 25, mensualidad: 80000 }
-  ];
-  const st = (id, codigo, nombres, apellidos, fn, grupoId, cinturon, grado, estado, tel, tutor) => ({
-    id, codigo, nombres, apellidos, documento: '10' + Math.floor(Math.random() * 90000000 + 10000000),
-    fechaNacimiento: fn, genero: 'N/D', telefono: tel, email: '', direccion: 'Calle 00 #00-00',
-    grupoId, fechaInscripcion: '2024-02-10', cinturon, grado, estado, foto: '', talla: 'M', eps: '',
-    notas: '', tutor
-  });
-  const students = [
-    st('s1', 'EST-001', 'Mateo', 'Rojas', '2017-05-12', 'g1', 'Amarillo', 1, 'activo', '3001112233', { nombre: 'Laura Rojas', parentesco: 'Madre', telefono: '3001112233', email: 'laura@mail.com' }),
-    st('s2', 'EST-002', 'Valentina', 'Cruz', '2018-09-03', 'g1', 'Blanco', 0, 'activo', '3002223344', { nombre: 'Diego Cruz', parentesco: 'Padre', telefono: '3002223344', email: '' }),
-    st('s3', 'EST-003', 'Samuel', 'Díaz', '2016-11-25', 'g1', 'Naranja', 2, 'activo', '3003334455', { nombre: 'Marta Díaz', parentesco: 'Madre', telefono: '3003334455', email: '' }),
-    st('s4', 'EST-004', 'Isabella', 'Moreno', '2011-03-18', 'g2', 'Verde', 3, 'activo', '3004445566', { nombre: 'Jorge Moreno', parentesco: 'Padre', telefono: '3004445566', email: '' }),
-    st('s5', 'EST-005', 'Andrés', 'Peña', '2010-07-30', 'g2', 'Azul', 4, 'activo', '3005556677', { nombre: 'Sofía Peña', parentesco: 'Madre', telefono: '3005556677', email: '' }),
-    st('s6', 'EST-006', 'Camila', 'Silva', '1998-01-22', 'g3', 'Negro', 1, 'activo', '3006667788', { nombre: '—', parentesco: '—', telefono: '', email: '' }),
-    st('s7', 'EST-007', 'Juan', 'Restrepo', '2012-06-14', 'g2', 'Amarillo', 1, 'retirado', '3007778899', { nombre: 'Ana Restrepo', parentesco: 'Madre', telefono: '3007778899', email: '' })
-  ];
-
-  const payments = [];
-  const addPay = (sid, periodo, monto, estado, fv, fp) => payments.push({
-    id: uid('p'), studentId: sid, concepto: 'Mensualidad', periodo, monto, estado,
-    fechaVencimiento: fv, fechaPago: fp || '', metodo: fp ? 'Efectivo' : '',
-    recibo: 'REC-' + String(payments.length + 1).padStart(4, '0')
-  });
-  ['s1', 's2', 's3', 's4', 's5', 's6'].forEach(s => addPay(s, prev, 60000, 'pagado', prev + '-10', prev + '-08'));
-  addPay('s1', cur, 55000, 'pagado', cur + '-10', cur + '-05');
-  addPay('s2', cur, 55000, 'pendiente', cur + '-10');
-  addPay('s3', cur, 55000, 'pendiente', prev + '-10');
-  addPay('s4', cur, 65000, 'pagado', cur + '-10', cur + '-09');
-  addPay('s5', cur, 65000, 'pendiente', cur + '-10');
-  addPay('s6', cur, 80000, 'pendiente', cur + '-10');
-
-  const promotions = [
-    { id: uid('pr'), studentId: 's1', fecha: '2024-11-20', cinturonAnterior: 'Blanco', cinturonNuevo: 'Amarillo', grado: 1, examen: 'Examen de ascenso', resultado: 'Aprobado', nota: 'Excelente técnica de patadas' },
-    { id: uid('pr'), studentId: 's4', fecha: '2024-11-20', cinturonAnterior: 'Amarillo', cinturonNuevo: 'Verde', grado: 3, examen: 'Examen de ascenso', resultado: 'Aprobado', nota: '' },
-    { id: uid('pr'), studentId: 's5', fecha: '2025-02-15', cinturonAnterior: 'Verde', cinturonNuevo: 'Azul', grado: 4, examen: 'Examen de ascenso', resultado: 'Aprobado', nota: '' }
-  ];
-
-  const inventory = [
-    { id: 'i1', nombre: 'Uniforme Taekwondo', categoria: 'Uniforme', talla: '8', stock: 6, stockMin: 3, costo: 45000, precio: 85000 },
-    { id: 'i2', nombre: 'Uniforme Taekwondo', categoria: 'Uniforme', talla: '12', stock: 2, stockMin: 3, costo: 48000, precio: 90000 },
-    { id: 'i3', nombre: 'Cinturón Blanco', categoria: 'Cinturón', talla: 'M', stock: 12, stockMin: 5, costo: 8000, precio: 18000 },
-    { id: 'i4', nombre: 'Cinturón Amarillo', categoria: 'Cinturón', talla: 'M', stock: 8, stockMin: 5, costo: 8000, precio: 18000 },
-    { id: 'i5', nombre: 'Protector de pecho', categoria: 'Protector', talla: 'S', stock: 4, stockMin: 2, costo: 55000, precio: 99000 },
-    { id: 'i6', nombre: 'Casco de combate', categoria: 'Protector', talla: 'Única', stock: 3, stockMin: 2, costo: 60000, precio: 110000 },
-    { id: 'i7', nombre: 'Botella de agua', categoria: 'Otros', talla: '—', stock: 40, stockMin: 10, costo: 800, precio: 2500 },
-    { id: 'i8', nombre: 'Canilleras', categoria: 'Protector', talla: 'M', stock: 1, stockMin: 3, costo: 35000, precio: 65000 }
-  ];
-
-  const sales = [{
-    id: uid('sa'), fecha: cur + '-08', clienteId: 's1', clienteNombre: 'Mateo Rojas',
-    metodo: 'Efectivo', total: 103000,
-    items: [{ invId: 'i1', desc: 'Uniforme Taekwondo (8)', cantidad: 1, precio: 85000 }, { invId: 'i4', desc: 'Cinturón Amarillo (M)', cantidad: 1, precio: 18000 }]
-  }];
-
-  const transactions = [];
-  payments.filter(p => p.estado === 'pagado').forEach(p => transactions.push({
-    id: uid('t'), fecha: p.fechaPago, tipo: 'ingreso', categoria: 'Mensualidad',
-    descripcion: 'Mensualidad ' + p.periodo + ' — ' + (students.find(s => s.id === p.studentId)?.nombres || ''),
-    monto: p.monto, metodo: p.metodo, refId: p.id
-  }));
-  sales.forEach(s => transactions.push({
-    id: uid('t'), fecha: s.fecha, tipo: 'ingreso', categoria: 'Venta',
-    descripcion: 'Venta de productos', monto: s.total, metodo: s.metodo, refId: s.id
-  }));
-  transactions.push({ id: uid('t'), fecha: cur + '-01', tipo: 'egreso', categoria: 'Arriendo', descripcion: 'Arriendo del dojo', monto: 900000, metodo: 'Transferencia', refId: '' });
-  transactions.push({ id: uid('t'), fecha: cur + '-03', tipo: 'egreso', categoria: 'Servicios', descripcion: 'Energía y agua', monto: 180000, metodo: 'Transferencia', refId: '' });
-  transactions.push({ id: uid('t'), fecha: cur + '-05', tipo: 'egreso', categoria: 'Insumos', descripcion: 'Compra de cinturones', monto: 160000, metodo: 'Efectivo', refId: '' });
-
-  const attendance = [];
-  [1, 2, 3, 5].forEach((k, idx) => {
-    const dt = new Date(); dt.setDate(dt.getDate() - k); const f = dt.toISOString().slice(0, 10);
-    attendance.push({
-      id: 'att_' + idx, fecha: f, grupoId: 'g1',
-      registros: { s1: 'presente', s2: idx === 1 ? 'ausente' : 'presente', s3: idx === 2 ? 'tarde' : 'presente' }
-    });
-  });
-
-  return { users, groups, students, payments, promotions, inventory, sales, transactions, attendance };
+/* empty state */
+function emptyState(title, sub, iconName='info'){
+  return `<div class="empty">${icon(iconName, 34)}<b>${h(title)}</b>${sub?`<span>${h(sub)}</span>`:''}</div>`;
+}
+function greeting(){
+  const hr = new Date().getHours();
+  return hr<12 ? 'Buenos días' : hr<19 ? 'Buenas tardes' : 'Buenas noches';
 }
 
+/* ---------- Persistencia ---------- */
+const KEY='dojopro_v1';
+let DB, session=null, state={view:'dashboard'};
+function persist(){ localStorage.setItem(KEY, JSON.stringify(DB)); }
+function loadDB(){ try{ const r=localStorage.getItem(KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+
+/* ---------- Seed ---------- */
+function seedData(){
+  const d=new Date(); const cur=d.toISOString().slice(0,7);
+  const p=new Date(); p.setMonth(p.getMonth()-1); const prev=p.toISOString().slice(0,7);
+
+  const users=[
+    {id:'u1',nombre:'Ana Torres',usuario:'admin',password:'admin123',rol:'admin',activo:true},
+    {id:'u2',nombre:'Carlos Rojas',usuario:'instructor',password:'instructor123',rol:'instructor',activo:true}
+  ];
+  const groups=[
+    {id:'g1',nombre:'Infantil A',categoria:'Infantil',edadMin:5,edadMax:8,dias:['Lun','Mié','Vie'],horaInicio:'16:00',horaFin:'17:00',instructorId:'u2',cupo:15,mensualidad:55000},
+    {id:'g2',nombre:'Juvenil B',categoria:'Juvenil',edadMin:9,edadMax:14,dias:['Mar','Jue'],horaInicio:'17:00',horaFin:'18:30',instructorId:'u2',cupo:20,mensualidad:65000},
+    {id:'g3',nombre:'Adultos',categoria:'Adulto',edadMin:15,edadMax:99,dias:['Lun','Mié','Vie'],horaInicio:'19:00',horaFin:'20:30',instructorId:'u2',cupo:25,mensualidad:80000}
+  ];
+  const st=(id,codigo,nombres,apellidos,fn,grupoId,cinturon,grado,estado,tel,tutor)=>({
+    id,codigo,nombres,apellidos,documento:'10'+Math.floor(Math.random()*90000000+10000000),
+    fechaNacimiento:fn,genero:'N/D',telefono:tel,email:'',direccion:'Calle 00 #00-00',
+    grupoId,fechaInscripcion:'2024-02-10',cinturon,grado,estado,foto:'',talla:'M',eps:'',notas:'',tutor
+  });
+  const students=[
+    st('s1','EST-001','Mateo','Rojas','2017-05-12','g1','Amarillo',1,'activo','3001112233',{nombre:'Laura Rojas',parentesco:'Madre',telefono:'3001112233',email:'laura@mail.com'}),
+    st('s2','EST-002','Valentina','Cruz','2018-09-03','g1','Blanco',0,'activo','3002223344',{nombre:'Diego Cruz',parentesco:'Padre',telefono:'3002223344',email:''}),
+    st('s3','EST-003','Samuel','Díaz','2016-11-25','g1','Naranja',2,'activo','3003334455',{nombre:'Marta Díaz',parentesco:'Madre',telefono:'3003334455',email:''}),
+    st('s4','EST-004','Isabella','Moreno','2011-03-18','g2','Verde',3,'activo','3004445566',{nombre:'Jorge Moreno',parentesco:'Padre',telefono:'3004445566',email:''}),
+    st('s5','EST-005','Andrés','Peña','2010-07-30','g2','Azul',4,'activo','3005556677',{nombre:'Sofía Peña',parentesco:'Madre',telefono:'3005556677',email:''}),
+    st('s6','EST-006','Camila','Silva','1998-01-22','g3','Negro',1,'activo','3006667788',{nombre:'—',parentesco:'—',telefono:'',email:''}),
+    st('s7','EST-007','Juan','Restrepo','2012-06-14','g2','Amarillo',1,'retirado','3007778899',{nombre:'Ana Restrepo',parentesco:'Madre',telefono:'3007778899',email:''})
+  ];
+  const payments=[];
+  const addPay=(sid,periodo,monto,estado,fv,fp)=>payments.push({
+    id:uid('p'),studentId:sid,concepto:'Mensualidad',periodo,monto,estado,
+    fechaVencimiento:fv,fechaPago:fp||'',metodo:fp?'Efectivo':'',
+    recibo:'REC-'+String(payments.length+1).padStart(4,'0')
+  });
+  ['s1','s2','s3','s4','s5','s6'].forEach(s=>addPay(s,prev,60000,'pagado',prev+'-10',prev+'-08'));
+  addPay('s1',cur,55000,'pagado',cur+'-10',cur+'-05');
+  addPay('s2',cur,55000,'pendiente',cur+'-10');
+  addPay('s3',cur,55000,'pendiente',prev+'-10');
+  addPay('s4',cur,65000,'pagado',cur+'-10',cur+'-09');
+  addPay('s5',cur,65000,'pendiente',cur+'-10');
+  addPay('s6',cur,80000,'pendiente',cur+'-10');
+
+  const promotions=[
+    {id:uid('pr'),studentId:'s1',fecha:'2024-11-20',cinturonAnterior:'Blanco',cinturonNuevo:'Amarillo',grado:1,examen:'Examen de ascenso',resultado:'Aprobado',nota:'Excelente técnica de patadas'},
+    {id:uid('pr'),studentId:'s4',fecha:'2024-11-20',cinturonAnterior:'Amarillo',cinturonNuevo:'Verde',grado:3,examen:'Examen de ascenso',resultado:'Aprobado',nota:''},
+    {id:uid('pr'),studentId:'s5',fecha:'2025-02-15',cinturonAnterior:'Verde',cinturonNuevo:'Azul',grado:4,examen:'Examen de ascenso',resultado:'Aprobado',nota:''}
+  ];
+  const inventory=[
+    {id:'i1',nombre:'Uniforme Taekwondo',categoria:'Uniforme',talla:'8',stock:6,stockMin:3,costo:45000,precio:85000},
+    {id:'i2',nombre:'Uniforme Taekwondo',categoria:'Uniforme',talla:'12',stock:2,stockMin:3,costo:48000,precio:90000},
+    {id:'i3',nombre:'Cinturón Blanco',categoria:'Cinturón',talla:'M',stock:12,stockMin:5,costo:8000,precio:18000},
+    {id:'i4',nombre:'Cinturón Amarillo',categoria:'Cinturón',talla:'M',stock:8,stockMin:5,costo:8000,precio:18000},
+    {id:'i5',nombre:'Protector de pecho',categoria:'Protector',talla:'S',stock:4,stockMin:2,costo:55000,precio:99000},
+    {id:'i6',nombre:'Casco de combate',categoria:'Protector',talla:'Única',stock:3,stockMin:2,costo:60000,precio:110000},
+    {id:'i7',nombre:'Botella de agua',categoria:'Otros',talla:'—',stock:40,stockMin:10,costo:800,precio:2500},
+    {id:'i8',nombre:'Canilleras',categoria:'Protector',talla:'M',stock:1,stockMin:3,costo:35000,precio:65000}
+  ];
+  const sales=[{
+    id:uid('sa'),fecha:cur+'-08',clienteId:'s1',clienteNombre:'Mateo Rojas',
+    metodo:'Efectivo',total:103000,
+    items:[{invId:'i1',desc:'Uniforme Taekwondo (8)',cantidad:1,precio:85000},{invId:'i4',desc:'Cinturón Amarillo (M)',cantidad:1,precio:18000}]
+  }];
+  const transactions=[];
+  payments.filter(p=>p.estado==='pagado').forEach(p=>transactions.push({
+    id:uid('t'),fecha:p.fechaPago,tipo:'ingreso',categoria:'Mensualidad',
+    descripcion:'Mensualidad '+p.periodo+' — '+(students.find(s=>s.id===p.studentId)?.nombres||''),
+    monto:p.monto,metodo:p.metodo,refId:p.id
+  }));
+  sales.forEach(s=>transactions.push({
+    id:uid('t'),fecha:s.fecha,tipo:'ingreso',categoria:'Venta',
+    descripcion:'Venta de productos',monto:s.total,metodo:s.metodo,refId:s.id
+  }));
+  transactions.push({id:uid('t'),fecha:cur+'-01',tipo:'egreso',categoria:'Arriendo',descripcion:'Arriendo del dojo',monto:900000,metodo:'Transferencia',refId:''});
+  transactions.push({id:uid('t'),fecha:cur+'-03',tipo:'egreso',categoria:'Servicios',descripcion:'Energía y agua',monto:180000,metodo:'Transferencia',refId:''});
+  transactions.push({id:uid('t'),fecha:cur+'-05',tipo:'egreso',categoria:'Insumos',descripcion:'Compra de cinturones',monto:160000,metodo:'Efectivo',refId:''});
+
+  const attendance=[];
+  [1,2,3,5].forEach((k,idx)=>{
+    const dt=new Date(); dt.setDate(dt.getDate()-k); const f=dt.toISOString().slice(0,10);
+    attendance.push({
+      id:'att_'+idx,fecha:f,grupoId:'g1',
+      registros:{s1:'presente',s2:idx===1?'ausente':'presente',s3:idx===2?'tarde':'presente'}
+    });
+  });
+  return {users,groups,students,payments,promotions,inventory,sales,transactions,attendance};
+}
 DB = loadDB() || seedData();
 persist();
 
 /* ---------- Sesión ---------- */
-function restoreSession() {
-  try { const s = sessionStorage.getItem('dojopro_session'); if (s) session = JSON.parse(s); } catch (e) { }
-}
-function setSession(u) { session = u; sessionStorage.setItem('dojopro_session', JSON.stringify(u)); }
-function logout() { session = null; sessionStorage.removeItem('dojopro_session'); render(); }
+function restoreSession(){ try{ const s=sessionStorage.getItem('dojopro_session'); if(s) session=JSON.parse(s); }catch(e){} }
+function setSession(u){ session=u; sessionStorage.setItem('dojopro_session',JSON.stringify(u)); }
+function logout(){ session=null; sessionStorage.removeItem('dojopro_session'); render(); }
 
 /* ---------- Permisos ---------- */
-const PERMS = {
-  admin: ['dashboard', 'students', 'payments', 'attendance', 'sport', 'inventory', 'sales', 'finance', 'reports', 'groups', 'users'],
-  instructor: ['dashboard', 'students', 'attendance', 'sport', 'groups']
+const PERMS={
+  admin:['dashboard','students','payments','attendance','sport','inventory','sales','finance','reports','groups','users'],
+  instructor:['dashboard','students','attendance','sport','groups']
 };
-const NAV = {
-  dashboard: { icon: 'dashboard', label: 'Panel general' },
-  students: { icon: 'students', label: 'Inscripciones' },
-  payments: { icon: 'payments', label: 'Mensualidades' },
-  attendance: { icon: 'attendance', label: 'Asistencia' },
-  sport: { icon: 'sport', label: 'Seguimiento deportivo' },
-  inventory: { icon: 'inventory', label: 'Inventario' },
-  sales: { icon: 'sales', label: 'Ventas' },
-  finance: { icon: 'finance', label: 'Ingresos y egresos' },
-  reports: { icon: 'reports', label: 'Reportes' },
-  groups: { icon: 'groups', label: 'Horarios y grupos' },
-  users: { icon: 'users', label: 'Usuarios y permisos' }
+const NAV={
+  dashboard:{icon:'dashboard',label:'Panel general'},
+  students:{icon:'students',label:'Inscripciones'},
+  payments:{icon:'payments',label:'Mensualidades'},
+  attendance:{icon:'attendance',label:'Asistencia'},
+  sport:{icon:'sport',label:'Deportivo'},
+  inventory:{icon:'inventory',label:'Inventario'},
+  sales:{icon:'sales',label:'Ventas'},
+  finance:{icon:'finance',label:'Finanzas'},
+  reports:{icon:'reports',label:'Reportes'},
+  groups:{icon:'groups',label:'Grupos'},
+  users:{icon:'users',label:'Usuarios'}
 };
 const can = v => session && PERMS[session.rol].includes(v);
 
-/* ---------- Helpers UI ---------- */
-function openModal(title, html, wide) {
-  $('#modalTitle').textContent = title;
-  $('#modalBody').innerHTML = html;
-  $('#modal').classList.toggle('wide', !!wide);
+/* ---------- Modal ---------- */
+function openModal(title,html,wide){
+  $('#modalTitle').textContent=title;
+  $('#modalBody').innerHTML=html;
+  $('#modal').classList.toggle('wide',!!wide);
   $('#modal').classList.add('show');
+  document.body.style.overflow='hidden';
 }
-function closeModal() { $('#modal').classList.remove('show'); $('#modalBody').innerHTML = ''; }
-function printHTML(html) {
-  const w = window.open('', '_blank', 'width=420,height=640');
-  if (!w) return toast('Permite las ventanas emergentes para imprimir', 'bad');
+function closeModal(){
+  $('#modal').classList.remove('show');
+  $('#modalBody').innerHTML='';
+  document.body.style.overflow='';
+}
+function printHTML(html){
+  const w=window.open('','_blank','width=420,height=640');
+  if(!w) return toast('Permite ventanas emergentes','bad');
   w.document.write(`<html><head><title>Recibo DojoPro</title><style>body{font-family:ui-monospace,monospace;padding:16px;font-size:13px;color:#111}hr{border:0;border-top:1px dashed #999;margin:10px 0}</style></head><body>${html}</body></html>`);
-  w.document.close(); w.focus(); setTimeout(() => w.print(), 250);
+  w.document.close(); w.focus(); setTimeout(()=>w.print(),250);
 }
-function go(view) { state.view = view; render(); }
+function go(view){ state.view=view; render(); }
 
-/* =========================================================
-   RENDER PRINCIPAL
-   ========================================================= */
-const VIEWS = {
-  dashboard: viewDashboard, students: viewStudents, payments: viewPayments,
-  attendance: viewAttendance, sport: viewSport, inventory: viewInventory,
-  sales: viewSales, finance: viewFinance, reports: viewReports,
-  groups: viewGroups, users: viewUsers
+/* ---------- Auto-label tables para vista móvil ---------- */
+let labelScheduled=false;
+function scheduleLabel(){
+  if(labelScheduled) return;
+  labelScheduled=true;
+  requestAnimationFrame(()=>{
+    labelScheduled=false;
+    document.querySelectorAll('.content table').forEach(t=>{
+      const headers=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());
+      t.querySelectorAll('tbody tr').forEach(tr=>{
+        [...tr.children].forEach((td,i)=>{
+          if(td.tagName==='TD' && headers[i] && !td.dataset.label){
+            td.dataset.label=headers[i];
+          }
+        });
+      });
+    });
+  });
+}
+const tableObserver = new MutationObserver(scheduleLabel);
+tableObserver.observe(document.body,{childList:true,subtree:true});
+
+/* ---------- Vistas ---------- */
+const VIEWS={
+  dashboard:viewDashboard, students:viewStudents, payments:viewPayments,
+  attendance:viewAttendance, sport:viewSport, inventory:viewInventory,
+  sales:viewSales, finance:viewFinance, reports:viewReports,
+  groups:viewGroups, users:viewUsers
 };
-const MOUNTS = {
-  students: () => renderStuList(),
-  payments: () => renderPaymentsList(),
-  attendance: () => renderAttSheet(),
-  sport: () => { }, inventory: () => { }, sales: () => { }, finance: () => { },
-  reports: () => { }, groups: () => { }, users: () => { }
+const MOUNTS={
+  students:()=>renderStuList(),
+  payments:()=>renderPaymentsList(),
+  attendance:()=>renderAttSheet(),
+  sport:()=>{}, inventory:()=>{}, sales:()=>{}, finance:()=>{},
+  reports:()=>{}, groups:()=>{}, users:()=>{}
 };
 
-function render() {
-  if (!session) return renderLogin();
-  if (!can(state.view)) state.view = 'dashboard';
-  const nav = PERMS[session.rol].map(k =>
-    `<button class="nav-item ${state.view === k ? 'active' : ''}" onclick="go('${k}')">${icon(NAV[k].icon)}${NAV[k].label}</button>`
-  ).join('');
-  document.getElementById('app').innerHTML = `
+/* ---------- Render principal ---------- */
+function render(){
+  if(!session) return renderLogin();
+  if(!can(state.view)) state.view='dashboard';
+  const nav = PERMS[session.rol].map(k=>`
+    <button class="nav-item ${state.view===k?'active':''}" onclick="go('${k}')" title="${NAV[k].label}">
+      ${icon(NAV[k].icon,18)}<span>${NAV[k].label}</span>
+    </button>`).join('');
+  const isDash = state.view==='dashboard';
+  const title = isDash ? `${greeting()}, ${session.nombre.split(' ')[0]}` : NAV[state.view].label;
+
+  document.getElementById('app').innerHTML=`
     <div class="layout">
       <aside class="sidebar">
-        <div class="brand"><span style="color:var(--acc);display:flex;align-items:center">${icon('sport', 26)}</span><div><b>DojoPro</b><small>Gestión de Academia</small></div></div>
+        <div class="brand">
+          <span class="brand-mark">${icon('sport',26)}</span>
+          <div class="brand-text"><b>DojoPro</b><small>Gestión de Academia</small></div>
+        </div>
         <nav>${nav}</nav>
         <div class="side-foot">
           <div class="user-chip">
-            ${avatarHTML({ nombre: session.nombre }, 34)}
+            ${avatarHTML({nombre:session.nombre},34)}
             <div>
-              <b style="font-size:13px">${h(session.nombre)}</b>
-              <small class="mut" style="display:block">${session.rol === 'admin' ? 'Administrador' : 'Instructor'}</small>
+              <b>${h(session.nombre)}</b>
+              <small>${session.rol==='admin'?'Administrador':'Instructor'}</small>
             </div>
           </div>
-          <div class="row" style="gap:6px">
-            <button class="btn ghost sm grow" onclick="resetDemo()">Reiniciar demo</button>
-            <button class="btn ghost sm" onclick="logout()">Salir</button>
+          <div class="side-actions">
+            <button class="btn ghost sm" onclick="resetDemo()" title="Reiniciar demo">${icon('refresh',14)}</button>
+            <button class="btn ghost sm grow" onclick="logout()">Salir</button>
           </div>
         </div>
       </aside>
       <main class="main">
         <header class="topbar">
-          <h2>${icon(NAV[state.view].icon, 18)} ${NAV[state.view].label}</h2>
-          <span class="mut sm">${new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <div class="topbar-left">
+            ${!isDash ? icon(NAV[state.view].icon,18) : ''}
+            <h2>${h(title)}</h2>
+          </div>
+          <div class="topbar-right">
+            <span class="date">${new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'})}</span>
+            ${avatarHTML({nombre:session.nombre},30)}
+          </div>
         </header>
         <div class="content">${VIEWS[state.view]()}</div>
       </main>
     </div>`;
-  if (MOUNTS[state.view]) MOUNTS[state.view]();
+  if(MOUNTS[state.view]) MOUNTS[state.view]();
+  scheduleLabel();
 }
-function resetDemo() {
-  if (!confirm('¿Borrar todos los datos y restaurar la demo inicial?')) return;
-  localStorage.removeItem(KEY); DB = seedData(); persist(); closeModal(); toast('Demo restaurada'); render();
+function resetDemo(){
+  if(!confirm('¿Borrar todos los datos y restaurar la demo inicial?')) return;
+  localStorage.removeItem(KEY); DB=seedData(); persist(); closeModal(); toast('Demo restaurada'); render();
 }
 
 /* ---------- Login ---------- */
-function renderLogin() {
-  document.getElementById('app').innerHTML = `
+function renderLogin(){
+  document.getElementById('app').innerHTML=`
     <div class="login-wrap">
       <div class="login-card">
-        <div class="brand"><span style="color:var(--acc);display:flex;align-items:center">${icon('sport', 28)}</span><div><b style="font-size:19px">DojoPro</b><small>Gestión de Academia</small></div></div>
+        <div class="brand" style="justify-content:center">
+          <span class="brand-mark">${icon('sport',32)}</span>
+          <div class="brand-text"><b style="font-size:20px">DojoPro</b><small>Gestión de Academia</small></div>
+        </div>
         <label>Usuario<input id="lg_user" value="admin" autocomplete="off"></label>
         <label>Contraseña<input id="lg_pass" type="password" value="admin123" onkeydown="if(event.key==='Enter')login()"></label>
         <button class="btn full" onclick="login()">Ingresar</button>
-        <div class="hint">Demo:<br><b>admin / admin123</b> (acceso total)<br><b>instructor / instructor123</b> (acceso restringido)</div>
+        <div class="hint">Demo:<br><b>admin / admin123</b> · acceso total<br><b>instructor / instructor123</b> · restringido</div>
       </div>
     </div>`;
 }
-function login() {
-  const u = v('lg_user').toLowerCase(), p = v('lg_pass');
-  const user = DB.users.find(x => x.usuario.toLowerCase() === u && x.password === p && x.activo);
-  if (!user) return toast('Credenciales incorrectas o usuario inactivo', 'bad');
-  setSession({ id: user.id, nombre: user.nombre, rol: user.rol, usuario: user.usuario });
-  state.view = 'dashboard'; closeModal(); toast('Bienvenido, ' + user.nombre); render();
+function login(){
+  const u=v('lg_user').toLowerCase(), p=v('lg_pass');
+  const user=DB.users.find(x=>x.usuario.toLowerCase()===u && x.password===p && x.activo);
+  if(!user) return toast('Credenciales incorrectas o usuario inactivo','bad');
+  setSession({id:user.id,nombre:user.nombre,rol:user.rol,usuario:user.usuario});
+  state.view='dashboard'; closeModal(); toast('Bienvenido, '+user.nombre); render();
 }
 
 /* =========================================================
    1) DASHBOARD
    ========================================================= */
-function viewDashboard() {
-  const periodo = today().slice(0, 7);
-  const activos = DB.students.filter(s => s.estado === 'activo');
-  const retirados = DB.students.filter(s => s.estado === 'retirado');
-  const pend = DB.payments.filter(p => p.estado === 'pendiente');
-  const vencidas = pend.filter(p => p.fechaVencimiento < today());
-  const deudores = new Set(vencidas.map(p => p.studentId));
-  const deuda = pend.reduce((a, p) => a + p.monto, 0);
-  const ing = DB.transactions.filter(t => t.tipo === 'ingreso' && t.fecha.slice(0, 7) === periodo).reduce((a, t) => a + t.monto, 0);
-  const egr = DB.transactions.filter(t => t.tipo === 'egreso' && t.fecha.slice(0, 7) === periodo).reduce((a, t) => a + t.monto, 0);
-  const ventas = DB.sales.filter(s => s.fecha.slice(0, 7) === periodo).reduce((a, s) => a + s.total, 0);
-  const attHoy = DB.attendance.filter(a => a.fecha === today());
-  let pres = 0, tot = 0;
-  attHoy.forEach(a => Object.values(a.registros).forEach(x => { tot++; if (x === 'presente' || x === 'tarde') pres++; }));
+function viewDashboard(){
+  const periodo=today().slice(0,7);
+  const activos=DB.students.filter(s=>s.estado==='activo');
+  const retirados=DB.students.filter(s=>s.estado==='retirado');
+  const pend=DB.payments.filter(p=>p.estado==='pendiente');
+  const vencidas=pend.filter(p=>p.fechaVencimiento<today());
+  const deudores=new Set(vencidas.map(p=>p.studentId));
+  const deuda=pend.reduce((a,p)=>a+p.monto,0);
+  const ing=DB.transactions.filter(t=>t.tipo==='ingreso'&&t.fecha.slice(0,7)===periodo).reduce((a,t)=>a+t.monto,0);
+  const egr=DB.transactions.filter(t=>t.tipo==='egreso'&&t.fecha.slice(0,7)===periodo).reduce((a,t)=>a+t.monto,0);
+  const ventas=DB.sales.filter(s=>s.fecha.slice(0,7)===periodo).reduce((a,s)=>a+s.total,0);
+  const attHoy=DB.attendance.filter(a=>a.fecha===today());
+  let pres=0,tot=0;
+  attHoy.forEach(a=>Object.values(a.registros).forEach(x=>{tot++;if(x==='presente'||x==='tarde') pres++;}));
+  const proximos=pend.slice().sort((a,b)=>a.fechaVencimiento.localeCompare(b.fechaVencimiento)).slice(0,6);
+  const movs=DB.transactions.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,6);
 
-  const proximos = pend.slice().sort((a, b) => a.fechaVencimiento.localeCompare(b.fechaVencimiento)).slice(0, 6);
-  const movs = DB.transactions.slice().sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 6);
-
-  const fin = (can('finance') || can('sales')) ? `
+  const fin=(can('finance')||can('sales'))?`
     <div class="cards mt">
       <div class="stat"><div class="k">Ingresos del mes</div><div class="v" style="color:#4ade80">${money(ing)}</div><div class="s">${monthLabel(periodo)}</div></div>
       <div class="stat"><div class="k">Egresos del mes</div><div class="v" style="color:#f87171">${money(egr)}</div><div class="s">${monthLabel(periodo)}</div></div>
-      <div class="stat"><div class="k">Balance</div><div class="v" style="color:${ing - egr >= 0 ? '#4ade80' : '#f87171'}">${money(ing - egr)}</div><div class="s">Ingresos − egresos</div></div>
-      <div class="stat"><div class="k">Ventas del mes</div><div class="v">${money(ventas)}</div><div class="s">${DB.sales.filter(s => s.fecha.slice(0, 7) === periodo).length} transacciones</div></div>
-    </div>` : '';
+      <div class="stat"><div class="k">Balance</div><div class="v" style="color:${ing-egr>=0?'#4ade80':'#f87171'}">${money(ing-egr)}</div><div class="s">Ingresos − egresos</div></div>
+      <div class="stat"><div class="k">Ventas del mes</div><div class="v">${money(ventas)}</div><div class="s">${DB.sales.filter(s=>s.fecha.slice(0,7)===periodo).length} transacciones</div></div>
+    </div>`:'';
 
   return `
     <div class="cards">
       <div class="stat"><div class="k">Estudiantes activos</div><div class="v">${activos.length}</div><div class="s">${retirados.length} retirados</div></div>
       <div class="stat"><div class="k">Cobros pendientes</div><div class="v" style="color:#fbbf24">${pend.length}</div><div class="s">${money(deuda)} por cobrar</div></div>
       <div class="stat"><div class="k">Deudores vencidos</div><div class="v" style="color:#f87171">${deudores.size}</div><div class="s">${vencidas.length} cuotas vencidas</div></div>
-      <div class="stat"><div class="k">Asistencia hoy</div><div class="v">${tot ? Math.round(pres / tot * 100) + '%' : '—'}</div><div class="s">${pres}/${tot} registros</div></div>
+      <div class="stat"><div class="k">Asistencia hoy</div><div class="v">${tot?Math.round(pres/tot*100)+'%':'—'}</div><div class="s">${pres}/${tot} registros</div></div>
     </div>
     ${fin}
     <div class="grid2 mt" style="align-items:start">
       <div class="card">
         <div class="sec-title" style="margin-top:0">Próximos vencimientos</div>
-        ${proximos.length ? `<table><thead><tr><th>Estudiante</th><th>Período</th><th>Vence</th><th>Monto</th></tr></thead><tbody>
-        ${proximos.map(p => {
-          const s = DB.students.find(x => x.id === p.studentId);
-          const venc = p.fechaVencimiento < today();
-          return `<tr><td>${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '—')}</td><td class="mut">${p.periodo}</td>
-          <td><span class="badge ${venc ? 'b-bad' : 'b-warn'}">${fmtDate(p.fechaVencimiento)}</span></td><td>${money(p.monto)}</td></tr>`;
-        }).join('')}</tbody></table>` : '<p class="empty">Sin cobros pendientes.</p>'}
+        ${proximos.length?`<div class="table-wrap"><table><thead><tr><th>Estudiante</th><th>Período</th><th>Vence</th><th>Monto</th></tr></thead><tbody>
+        ${proximos.map(p=>{
+          const s=DB.students.find(x=>x.id===p.studentId);
+          const venc=p.fechaVencimiento<today();
+          return `<tr><td>${h(nom(s)||'—')}</td><td class="mut hide-mobile">${p.periodo}</td>
+          <td><span class="badge ${venc?'b-bad':'b-warn'}">${fmtDate(p.fechaVencimiento)}</span></td><td>${money(p.monto)}</td></tr>`;
+        }).join('')}</tbody></table></div>`:emptyState('Sin cobros pendientes','Todos los pagos están al día','check')}
       </div>
       <div class="card">
         <div class="sec-title" style="margin-top:0">Últimos movimientos</div>
-        ${movs.length ? `<table><thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th></tr></thead><tbody>
-        ${movs.map(t => `<tr><td class="mut">${fmtDate(t.fecha)}</td><td>${h(t.descripcion)}<div class="mut sm">${h(t.categoria)}</div></td>
-        <td style="color:${t.tipo === 'ingreso' ? '#4ade80' : '#f87171'};white-space:nowrap">${t.tipo === 'ingreso' ? '+' : '−'} ${money(t.monto)}</td></tr>`).join('')}
-        </tbody></table>` : '<p class="empty">Sin movimientos</p>'}
+        ${movs.length?`<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th></tr></thead><tbody>
+        ${movs.map(t=>`<tr><td class="mut">${fmtDate(t.fecha)}</td><td>${h(t.descripcion)}<div class="mut sm">${h(t.categoria)}</div></td>
+        <td style="color:${t.tipo==='ingreso'?'#4ade80':'#f87171'};white-space:nowrap;font-weight:600">${t.tipo==='ingreso'?'+':'−'} ${money(t.monto)}</td></tr>`).join('')}
+        </tbody></table></div>`:emptyState('Sin movimientos','Aún no hay ingresos ni egresos','finance')}
       </div>
     </div>`;
 }
@@ -496,373 +829,339 @@ function viewDashboard() {
 /* =========================================================
    2) INSCRIPCIONES
    ========================================================= */
-function viewStudents() {
+function viewStudents(){
   return `
     <div class="toolbar">
-      <div class="search-wrap">
-        ${icon('search', 15)}
-        <input id="stuSearch" placeholder="Buscar por nombre, documento o código…" oninput="renderStuList()">
-      </div>
+      <div class="search-wrap">${icon('search',15)}<input id="stuSearch" placeholder="Buscar por nombre, documento o código…" oninput="renderStuList()"></div>
       <select id="stuFilter" style="width:auto" onchange="renderStuList()">
-        <option value="">Todos los estados</option><option value="activo">Activos</option><option value="retirado">Retirados</option>
+        <option value="">Todos</option><option value="activo">Activos</option><option value="retirado">Retirados</option>
       </select>
       <button class="btn" onclick="openStudent()">${icon('plus')} Nueva inscripción</button>
     </div>
     <div id="stuList"></div>`;
 }
-
-function renderStuList() {
-  const q = ($('#stuSearch')?.value || '').toLowerCase().trim();
-  const st = $('#stuFilter')?.value || '';
-  const list = DB.students.filter(s =>
-    (!st || s.estado === st) &&
-    (!q || `${s.nombres} ${s.apellidos} ${s.documento} ${s.codigo}`.toLowerCase().includes(q))
+function renderStuList(){
+  const q=($('#stuSearch')?.value||'').toLowerCase().trim();
+  const st=$('#stuFilter')?.value||'';
+  const list=DB.students.filter(s=>
+    (!st||s.estado===st) &&
+    (!q||`${s.nombres} ${s.apellidos} ${s.documento} ${s.codigo}`.toLowerCase().includes(q))
   );
-  const el = $('#stuList'); if (!el) return;
-  if (!list.length) { el.innerHTML = '<div class="card"><p class="empty">No hay estudiantes que coincidan.</p></div>'; return; }
-  el.innerHTML = `<div class="card" style="padding:0;overflow:auto"><table>
-    <thead><tr><th>Estudiante</th><th>Edad</th><th>Grupo</th><th>Cinturón</th><th>Tutor / Teléfono</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead>
-    <tbody>${list.map(s => {
-    const g = DB.groups.find(x => x.id === s.grupoId);
-    const nombre = ((s.nombres || '') + ' ' + (s.apellidos || '')).trim();
-    const bc = BELT_COLOR[s.cinturon] || '#94a3b8';
-    return `<tr>
-        <td>${avatarHTML(s, 34)}<b>${h(nombre)}</b><div class="mut sm">${h(s.codigo)} · Doc ${h(s.documento)}</div></td>
-        <td>${age(s.fechaNacimiento)}</td>
-        <td>${g ? h(g.nombre) : '<span class="mut">Sin grupo</span>'}</td>
-        <td><span class="badge b-mut" style="border-left:4px solid ${bc}">${h(s.cinturon)} ${s.grado ? '· ' + s.grado + 'º' : ''}</span></td>
-        <td>${h(s.tutor?.nombre || '—')}<div class="mut sm">${h(s.tutor?.telefono || s.telefono || '')}</div></td>
-        <td><span class="badge ${s.estado === 'activo' ? 'b-ok' : 'b-bad'}">${s.estado}</span></td>
+  const el=$('#stuList'); if(!el) return;
+  if(!list.length){ el.innerHTML=`<div class="card">${emptyState('Sin estudiantes','No se encontraron coincidencias','students')}</div>`; return; }
+  el.innerHTML=`<div class="card flush"><div class="table-wrap"><table>
+    <thead><tr><th>Estudiante</th><th>Edad</th><th>Grupo</th><th>Cinturón</th><th>Tutor</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead>
+    <tbody>${list.map(s=>{
+      const g=DB.groups.find(x=>x.id===s.grupoId);
+      const bc=BELT_COLOR[s.cinturon]||'#94a3b8';
+      return `<tr>
+        <td>${avatarHTML(s,34)}<b>${h(nom(s))}</b><div class="mut sm">${h(s.codigo)} · Doc ${h(s.documento)}</div></td>
+        <td class="hide-mobile">${age(s.fechaNacimiento)}</td>
+        <td>${g?h(g.nombre):'<span class="mut">Sin grupo</span>'}</td>
+        <td><span class="badge b-mut" style="border-left:4px solid ${bc}">${h(s.cinturon)}${s.grado?' · '+s.grado+'º':''}</span></td>
+        <td class="hide-mobile">${h(s.tutor?.nombre||'—')}<div class="mut sm">${h(s.tutor?.telefono||s.telefono||'')}</div></td>
+        <td><span class="badge ${s.estado==='activo'?'b-ok':'b-bad'}">${s.estado}</span></td>
         <td style="text-align:right;white-space:nowrap">
           <button class="btn ghost sm" onclick="viewStudent('${s.id}')">Ver</button>
           <button class="btn ghost sm" onclick="openStudent('${s.id}')">Editar</button>
-          <button class="btn danger sm" onclick="delStudent('${s.id}')">${icon('x', 14)}</button>
+          <button class="btn danger sm icon-only" onclick="delStudent('${s.id}')" title="Eliminar">${icon('x',14)}</button>
         </td></tr>`;
-  }).join('')}</tbody></table></div>`;
+    }).join('')}</tbody></table></div></div>`;
 }
-
-function openStudent(id) {
-  const s = id ? DB.students.find(x => x.id === id) : {
-    estado: 'activo', cinturon: 'Blanco', grado: 0, fechaInscripcion: today(), genero: 'Masculino', tutor: {}
-  };
-  const gopts = DB.groups.map(g => `<option value="${g.id}" ${s.grupoId === g.id ? 'selected' : ''}>${h(g.nombre)}</option>`).join('');
-  openModal(id ? 'Editar estudiante' : 'Nueva inscripción', `
+function openStudent(id){
+  const s=id?DB.students.find(x=>x.id===id):{estado:'activo',cinturon:'Blanco',grado:0,fechaInscripcion:today(),genero:'Masculino',tutor:{}};
+  const gopts=DB.groups.map(g=>`<option value="${g.id}" ${s.grupoId===g.id?'selected':''}>${h(g.nombre)}</option>`).join('');
+  openModal(id?'Editar estudiante':'Nueva inscripción',`
     <div class="row" style="align-items:flex-start;gap:16px">
-      <img id="f_photoPrev" class="photo-prev" src="${s.foto || PHOTO_PLACEHOLDER}">
-      <div style="flex:1">
-        <label>Fotografía del estudiante<input type="file" accept="image/*" onchange="pickPhoto(this)"></label>
-        <input type="hidden" id="f_foto" value="${h(s.foto || '')}">
-        <div class="mut sm" style="margin-top:6px">La imagen se comprime y se guarda en el navegador.</div>
+      <img id="f_photoPrev" class="photo-prev" src="${s.foto||PHOTO_PLACEHOLDER}">
+      <div style="flex:1;min-width:0">
+        <label>Fotografía<input type="file" accept="image/*" onchange="pickPhoto(this)"></label>
+        <input type="hidden" id="f_foto" value="${h(s.foto||'')}">
+        <div class="mut sm" style="margin-top:6px">Se comprime y se guarda en el navegador.</div>
       </div>
     </div>
     <div class="sec-title">Datos personales</div>
     <div class="grid2">
-      <label>Nombres *<input id="f_nombres" value="${h(s.nombres || '')}"></label>
-      <label>Apellidos *<input id="f_apellidos" value="${h(s.apellidos || '')}"></label>
-      <label>Documento<input id="f_documento" value="${h(s.documento || '')}"></label>
-      <label>Fecha de nacimiento<input type="date" id="f_fn" value="${h(s.fechaNacimiento || '')}"></label>
-      <label>Género<select id="f_genero">${opts(['Masculino', 'Femenino', 'Otro'], s.genero)}</select></label>
-      <label>Teléfono<input id="f_tel" value="${h(s.telefono || '')}"></label>
-      <label>Email<input id="f_email" value="${h(s.email || '')}"></label>
-      <label>Talla uniforme<input id="f_talla" value="${h(s.talla || '')}"></label>
-      <label style="grid-column:1/-1">Dirección<input id="f_dir" value="${h(s.direccion || '')}"></label>
-      <label style="grid-column:1/-1">EPS / Notas médicas<input id="f_eps" value="${h(s.eps || '')}"></label>
+      <label>Nombres *<input id="f_nombres" value="${h(s.nombres||'')}"></label>
+      <label>Apellidos *<input id="f_apellidos" value="${h(s.apellidos||'')}"></label>
+      <label>Documento<input id="f_documento" value="${h(s.documento||'')}"></label>
+      <label>Fecha nacimiento<input type="date" id="f_fn" value="${h(s.fechaNacimiento||'')}"></label>
+      <label>Género<select id="f_genero">${opts(['Masculino','Femenino','Otro'],s.genero)}</select></label>
+      <label>Teléfono<input id="f_tel" value="${h(s.telefono||'')}"></label>
+      <label>Email<input id="f_email" value="${h(s.email||'')}"></label>
+      <label>Talla<input id="f_talla" value="${h(s.talla||'')}"></label>
+      <label style="grid-column:1/-1">Dirección<input id="f_dir" value="${h(s.direccion||'')}"></label>
+      <label style="grid-column:1/-1">EPS / Notas<input id="f_eps" value="${h(s.eps||'')}"></label>
     </div>
-    <div class="sec-title">Contacto de padre o tutor</div>
+    <div class="sec-title">Contacto de tutor</div>
     <div class="grid2">
-      <label>Nombre del tutor<input id="f_tnombre" value="${h(s.tutor?.nombre || '')}"></label>
-      <label>Parentesco<input id="f_tparent" value="${h(s.tutor?.parentesco || '')}"></label>
-      <label>Teléfono tutor<input id="f_ttel" value="${h(s.tutor?.telefono || '')}"></label>
-      <label>Email tutor<input id="f_temail" value="${h(s.tutor?.email || '')}"></label>
+      <label>Nombre tutor<input id="f_tnombre" value="${h(s.tutor?.nombre||'')}"></label>
+      <label>Parentesco<input id="f_tparent" value="${h(s.tutor?.parentesco||'')}"></label>
+      <label>Teléfono<input id="f_ttel" value="${h(s.tutor?.telefono||'')}"></label>
+      <label>Email<input id="f_temail" value="${h(s.tutor?.email||'')}"></label>
     </div>
     <div class="sec-title">Información deportiva</div>
-    <div class="grid3">
+    <div class="grid2">
       <label>Grupo<select id="f_grupo"><option value="">Sin grupo</option>${gopts}</select></label>
-      <label>Cinturón<select id="f_cint">${opts(BELTS, s.cinturon)}</select></label>
-      <label>Grado<input type="number" id="f_grado" min="0" max="9" value="${s.grado || 0}"></label>
-      <label>Fecha de inscripción<input type="date" id="f_fi" value="${h(s.fechaInscripcion || today())}"></label>
-      <label>Estado<select id="f_estado">${opts(['activo', 'retirado'], s.estado)}</select></label>
+      <label>Cinturón<select id="f_cint">${opts(BELTS,s.cinturon)}</select></label>
+      <label>Grado<input type="number" id="f_grado" min="0" max="9" value="${s.grado||0}"></label>
+      <label>Fecha inscripción<input type="date" id="f_fi" value="${h(s.fechaInscripcion||today())}"></label>
+      <label>Estado<select id="f_estado">${opts(['activo','retirado'],s.estado)}</select></label>
     </div>
-    <label class="mt">Notas<input id="f_notas" value="${h(s.notas || '')}"></label>
+    <label class="mt">Notas<input id="f_notas" value="${h(s.notas||'')}"></label>
     <div class="row end mt">
       <button class="btn ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn" onclick="saveStudent('${id || ''}')">${id ? 'Guardar cambios' : 'Inscribir estudiante'}</button>
-    </div>`, true);
+      <button class="btn" onclick="saveStudent('${id||''}')">${id?'Guardar cambios':'Inscribir'}</button>
+    </div>`,true);
 }
-
-function pickPhoto(input) {
-  const file = input.files[0]; if (!file) return;
-  const fr = new FileReader();
-  fr.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const max = 220; let w = img.width, hh = img.height;
-      const sc = Math.min(1, max / Math.max(w, hh));
-      w = Math.round(w * sc); hh = Math.round(hh * sc);
-      const c = document.createElement('canvas'); c.width = w; c.height = hh;
-      c.getContext('2d').drawImage(img, 0, 0, w, hh);
-      const data = c.toDataURL('image/jpeg', 0.72);
-      $('#f_foto').value = data; $('#f_photoPrev').src = data;
+function pickPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  const fr=new FileReader();
+  fr.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=220; let w=img.width,hh=img.height;
+      const sc=Math.min(1,max/Math.max(w,hh));
+      w=Math.round(w*sc); hh=Math.round(hh*sc);
+      const c=document.createElement('canvas'); c.width=w; c.height=hh;
+      c.getContext('2d').drawImage(img,0,0,w,hh);
+      const data=c.toDataURL('image/jpeg',.72);
+      $('#f_foto').value=data; $('#f_photoPrev').src=data;
     };
-    img.src = e.target.result;
+    img.src=e.target.result;
   };
   fr.readAsDataURL(file);
 }
-
-function saveStudent(id) {
-  const data = {
-    nombres: v('f_nombres'), apellidos: v('f_apellidos'), documento: v('f_documento'),
-    fechaNacimiento: v('f_fn'), genero: v('f_genero'), telefono: v('f_tel'), email: v('f_email'),
-    direccion: v('f_dir'), talla: v('f_talla'), eps: v('f_eps'), notas: v('f_notas'),
-    grupoId: v('f_grupo'), cinturon: v('f_cint'), grado: +v('f_grado') || 0,
-    fechaInscripcion: v('f_fi') || today(), estado: v('f_estado'), foto: v('f_foto'),
-    tutor: { nombre: v('f_tnombre'), parentesco: v('f_tparent'), telefono: v('f_ttel'), email: v('f_temail') }
+function saveStudent(id){
+  const data={
+    nombres:v('f_nombres'),apellidos:v('f_apellidos'),documento:v('f_documento'),
+    fechaNacimiento:v('f_fn'),genero:v('f_genero'),telefono:v('f_tel'),email:v('f_email'),
+    direccion:v('f_dir'),talla:v('f_talla'),eps:v('f_eps'),notas:v('f_notas'),
+    grupoId:v('f_grupo'),cinturon:v('f_cint'),grado:+v('f_grado')||0,
+    fechaInscripcion:v('f_fi')||today(),estado:v('f_estado'),foto:v('f_foto'),
+    tutor:{nombre:v('f_tnombre'),parentesco:v('f_tparent'),telefono:v('f_ttel'),email:v('f_temail')}
   };
-  if (!data.nombres || !data.apellidos) return toast('Nombres y apellidos son obligatorios', 'bad');
-  if (id) {
-    Object.assign(DB.students.find(s => s.id === id), data);
-    toast('Estudiante actualizado');
-  } else {
-    data.id = uid('s');
-    data.codigo = 'EST-' + String(DB.students.length + 1).padStart(3, '0');
-    DB.students.push(data);
-    toast('Estudiante inscrito correctamente');
+  if(!data.nombres||!data.apellidos) return toast('Nombres y apellidos son obligatorios','bad');
+  if(id){ Object.assign(DB.students.find(s=>s.id===id),data); toast('Estudiante actualizado'); }
+  else {
+    data.id=uid('s'); data.codigo='EST-'+String(DB.students.length+1).padStart(3,'0');
+    DB.students.push(data); toast('Estudiante inscrito');
   }
   persist(); closeModal(); render();
 }
-
-/* FICHA DEL ESTUDIANTE */
-function viewStudent(id) {
-  const s = DB.students.find(x => x.id === id); if (!s) return;
-  const g = DB.groups.find(x => x.id === s.grupoId);
-  const pays = DB.payments.filter(p => p.studentId === id).sort((a, b) => b.periodo.localeCompare(a.periodo));
-  const deuda = pays.filter(p => p.estado === 'pendiente').reduce((a, p) => a + p.monto, 0);
-  const proms = DB.promotions.filter(p => p.studentId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
-  const att = DB.attendance.filter(a => a.registros[id]);
-  const pres = att.filter(a => a.registros[id] === 'presente' || a.registros[id] === 'tarde').length;
-  const nombre = ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() || 'Estudiante';
-  const bc = BELT_COLOR[s.cinturon] || '#94a3b8';
-
-  const headPhoto = s.foto
-    ? `<img src="${s.foto}" class="photo-prev" alt="">`
-    : avatarHTML(s, 88);
-
-  openModal('Ficha del estudiante', `
+function viewStudent(id){
+  const s=DB.students.find(x=>x.id===id); if(!s) return;
+  const g=DB.groups.find(x=>x.id===s.grupoId);
+  const pays=DB.payments.filter(p=>p.studentId===id).sort((a,b)=>b.periodo.localeCompare(a.periodo));
+  const deuda=pays.filter(p=>p.estado==='pendiente').reduce((a,p)=>a+p.monto,0);
+  const proms=DB.promotions.filter(p=>p.studentId===id).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const att=DB.attendance.filter(a=>a.registros[id]);
+  const pres=att.filter(a=>a.registros[id]==='presente'||a.registros[id]==='tarde').length;
+  const nombre=nom(s)||'Estudiante';
+  const bc=BELT_COLOR[s.cinturon]||'#94a3b8';
+  const headPhoto=s.foto?`<img src="${s.foto}" class="photo-prev" alt="">`:avatarHTML(s,88);
+  openModal('Ficha del estudiante',`
     <div class="profile-head">
       ${headPhoto}
       <div class="info">
         <h3>${h(nombre)}</h3>
-        <div class="mut sm">${h(s.codigo || '—')} · Doc ${h(s.documento || '—')} · ${age(s.fechaNacimiento)} años</div>
+        <div class="mut sm">${h(s.codigo||'—')} · Doc ${h(s.documento||'—')} · ${age(s.fechaNacimiento)} años</div>
         <div class="badges">
-          <span class="badge ${s.estado === 'activo' ? 'b-ok' : 'b-bad'}">${h(s.estado || '—')}</span>
-          <span class="badge" style="background:${bc}22;color:${bc};border-left:3px solid ${bc}">${h(s.cinturon || 'Blanco')}${s.grado ? ' · ' + s.grado + 'º grado' : ''}</span>
-          <span class="badge b-mut">${g ? h(g.nombre) : 'Sin grupo'}</span>
+          <span class="badge ${s.estado==='activo'?'b-ok':'b-bad'}">${h(s.estado||'—')}</span>
+          <span class="badge" style="background:${bc}22;color:${bc};border-left:3px solid ${bc}">${h(s.cinturon||'Blanco')}${s.grado?' · '+s.grado+'º':''}</span>
+          <span class="badge b-mut">${g?h(g.nombre):'Sin grupo'}</span>
         </div>
       </div>
     </div>
-
     <div class="profile-cards">
       <div class="profile-card">
         <div class="lbl">Contacto</div>
-        <div class="line"><b>Tel</b><span>${h(s.telefono || '—')}</span></div>
-        <div class="line"><b>Email</b><span>${h(s.email || '—')}</span></div>
-        <div class="line"><b>Dir</b><span>${h(s.direccion || '—')}</span></div>
-        <div class="line"><b>Talla</b><span>${h(s.talla || '—')}</span></div>
+        <div class="line"><b>Tel</b><span>${h(s.telefono||'—')}</span></div>
+        <div class="line"><b>Email</b><span>${h(s.email||'—')}</span></div>
+        <div class="line"><b>Dir</b><span>${h(s.direccion||'—')}</span></div>
+        <div class="line"><b>Talla</b><span>${h(s.talla||'—')}</span></div>
       </div>
       <div class="profile-card">
         <div class="lbl">Tutor</div>
-        <div class="line"><b>Nombre</b><span>${h(s.tutor?.nombre || '—')}</span></div>
-        <div class="line"><b>Vínculo</b><span>${h(s.tutor?.parentesco || '—')}</span></div>
-        <div class="line"><b>Tel</b><span>${h(s.tutor?.telefono || '—')}</span></div>
-        <div class="line"><b>Email</b><span>${h(s.tutor?.email || '—')}</span></div>
+        <div class="line"><b>Nombre</b><span>${h(s.tutor?.nombre||'—')}</span></div>
+        <div class="line"><b>Vínculo</b><span>${h(s.tutor?.parentesco||'—')}</span></div>
+        <div class="line"><b>Tel</b><span>${h(s.tutor?.telefono||'—')}</span></div>
+        <div class="line"><b>Email</b><span>${h(s.tutor?.email||'—')}</span></div>
       </div>
     </div>
-
     <div class="cards mt">
-      <div class="stat"><div class="k">Deuda</div><div class="v" style="color:${deuda ? '#f87171' : '#4ade80'}">${money(deuda)}</div></div>
-      <div class="stat"><div class="k">Asistencias</div><div class="v">${pres}/${att.length}</div><div class="s">${att.length ? Math.round(pres / att.length * 100) + '% de asistencia' : 'Sin registros'}</div></div>
+      <div class="stat"><div class="k">Deuda</div><div class="v" style="color:${deuda?'#f87171':'#4ade80'}">${money(deuda)}</div></div>
+      <div class="stat"><div class="k">Asistencias</div><div class="v">${pres}/${att.length}</div><div class="s">${att.length?Math.round(pres/att.length*100)+'%':'Sin registros'}</div></div>
       <div class="stat"><div class="k">Ascensos</div><div class="v">${proms.length}</div></div>
     </div>
-
-    <div class="sec-title">Historial de mensualidades</div>
-    ${pays.length ? `<div class="card" style="padding:0;overflow:auto"><table><thead><tr><th>Período</th><th>Monto</th><th>Vence</th><th>Estado</th><th>Pago</th></tr></thead><tbody>
-      ${pays.map(p => `<tr><td>${p.periodo}</td><td>${money(p.monto)}</td><td>${fmtDate(p.fechaVencimiento)}</td>
-      <td><span class="badge ${p.estado === 'pagado' ? 'b-ok' : (p.fechaVencimiento < today() ? 'b-bad' : 'b-warn')}">${p.estado}</span></td>
-      <td class="mut">${p.fechaPago ? fmtDate(p.fechaPago) : '—'}</td></tr>`).join('')}</tbody></table></div>` : '<div class="card"><p class="empty">Sin registros</p></div>'}
-
+    <div class="sec-title">Mensualidades</div>
+    ${pays.length?`<div class="card flush"><div class="table-wrap"><table><thead><tr><th>Período</th><th>Monto</th><th>Vence</th><th>Estado</th><th>Pago</th></tr></thead><tbody>
+      ${pays.map(p=>`<tr><td>${p.periodo}</td><td>${money(p.monto)}</td><td>${fmtDate(p.fechaVencimiento)}</td>
+      <td><span class="badge ${p.estado==='pagado'?'b-ok':(p.fechaVencimiento<today()?'b-bad':'b-warn')}">${p.estado}</span></td>
+      <td class="mut">${p.fechaPago?fmtDate(p.fechaPago):'—'}</td></tr>`).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin pagos','Aún no hay mensualidades','payments')}</div>`}
     <div class="sec-title">Historial deportivo</div>
-    ${proms.length ? `<div class="card" style="padding:0;overflow:auto"><table><thead><tr><th>Fecha</th><th>Cambio</th><th>Grado</th><th>Resultado</th></tr></thead><tbody>
-      ${proms.map(p => `<tr><td>${fmtDate(p.fecha)}</td><td>${h(p.cinturonAnterior)} → <b>${h(p.cinturonNuevo)}</b></td><td>${p.grado}º</td>
-      <td><span class="badge ${p.resultado === 'Aprobado' ? 'b-ok' : 'b-bad'}">${h(p.resultado)}</span></td></tr>`).join('')}</tbody></table></div>` : '<div class="card"><p class="empty">Sin ascensos registrados</p></div>'}
-
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button></div>`, true);
+    ${proms.length?`<div class="card flush"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Cambio</th><th>Grado</th><th>Resultado</th></tr></thead><tbody>
+      ${proms.map(p=>`<tr><td>${fmtDate(p.fecha)}</td><td>${h(p.cinturonAnterior)} → <b>${h(p.cinturonNuevo)}</b></td><td>${p.grado}º</td>
+      <td><span class="badge ${p.resultado==='Aprobado'?'b-ok':'b-bad'}">${h(p.resultado)}</span></td></tr>`).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin ascensos','Aún no hay exámenes registrados','sport')}</div>`}
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button></div>`,true);
 }
-
-function delStudent(id) {
-  const s = DB.students.find(x => x.id === id);
-  if (!confirm(`¿Eliminar a ${s.nombres} ${s.apellidos}? También se borrarán sus pagos y registros deportivos.`)) return;
-  DB.students = DB.students.filter(x => x.id !== id);
-  DB.payments = DB.payments.filter(p => p.studentId !== id);
-  DB.promotions = DB.promotions.filter(p => p.studentId !== id);
+function delStudent(id){
+  const s=DB.students.find(x=>x.id===id);
+  if(!confirm(`¿Eliminar a ${s.nombres} ${s.apellidos}? Se borrarán sus pagos y registros.`)) return;
+  DB.students=DB.students.filter(x=>x.id!==id);
+  DB.payments=DB.payments.filter(p=>p.studentId!==id);
+  DB.promotions=DB.promotions.filter(p=>p.studentId!==id);
   persist(); render(); toast('Estudiante eliminado');
 }
 
 /* =========================================================
    3) MENSUALIDADES
    ========================================================= */
-function viewPayments() {
+function viewPayments(){
   return `
     <div class="toolbar">
-      <input type="month" id="payMonth" value="${today().slice(0, 7)}" style="width:auto" onchange="renderPaymentsList()">
+      <input type="month" id="payMonth" value="${today().slice(0,7)}" style="width:auto" onchange="renderPaymentsList()">
       <select id="payStatus" style="width:auto" onchange="renderPaymentsList()">
         <option value="">Todos</option><option value="pendiente">Pendientes</option><option value="pagado">Pagados</option><option value="vencido">Vencidos</option>
       </select>
-      <button class="btn ghost" onclick="generateMonthly()">${icon('settings')} Generar mensualidades</button>
-      <button class="btn" onclick="openPaymentCreate()">${icon('plus')} Registrar cobro</button>
+      <button class="btn ghost" onclick="generateMonthly()">${icon('settings')} Generar</button>
+      <button class="btn" onclick="openPaymentCreate()">${icon('plus')} Cobro</button>
     </div>
     <div id="payList"></div>`;
 }
-
-function renderPaymentsList() {
-  const per = $('#payMonth')?.value || today().slice(0, 7);
-  const st = $('#payStatus')?.value || '';
-  let list = DB.payments.filter(p => p.periodo === per);
-  if (st === 'pendiente') list = list.filter(p => p.estado === 'pendiente');
-  if (st === 'pagado') list = list.filter(p => p.estado === 'pagado');
-  if (st === 'vencido') list = list.filter(p => p.estado === 'pendiente' && p.fechaVencimiento < today());
-  list.sort((a, b) => a.fechaVencimiento.localeCompare(b.fechaVencimiento));
-  const el = $('#payList'); if (!el) return;
-  const totalPag = DB.payments.filter(p => p.periodo === per && p.estado === 'pagado').reduce((a, p) => a + p.monto, 0);
-  const totalPend = DB.payments.filter(p => p.periodo === per && p.estado === 'pendiente').reduce((a, p) => a + p.monto, 0);
-  el.innerHTML = `
+function renderPaymentsList(){
+  const per=$('#payMonth')?.value||today().slice(0,7);
+  const st=$('#payStatus')?.value||'';
+  let list=DB.payments.filter(p=>p.periodo===per);
+  if(st==='pendiente') list=list.filter(p=>p.estado==='pendiente');
+  if(st==='pagado') list=list.filter(p=>p.estado==='pagado');
+  if(st==='vencido') list=list.filter(p=>p.estado==='pendiente'&&p.fechaVencimiento<today());
+  list.sort((a,b)=>a.fechaVencimiento.localeCompare(b.fechaVencimiento));
+  const el=$('#payList'); if(!el) return;
+  const totalPag=DB.payments.filter(p=>p.periodo===per&&p.estado==='pagado').reduce((a,p)=>a+p.monto,0);
+  const totalPend=DB.payments.filter(p=>p.periodo===per&&p.estado==='pendiente').reduce((a,p)=>a+p.monto,0);
+  el.innerHTML=`
     <div class="cards" style="margin-bottom:16px">
       <div class="stat"><div class="k">Recaudado</div><div class="v" style="color:#4ade80">${money(totalPag)}</div><div class="s">${monthLabel(per)}</div></div>
       <div class="stat"><div class="k">Pendiente</div><div class="v" style="color:#fbbf24">${money(totalPend)}</div></div>
-      <div class="stat"><div class="k">Registros</div><div class="v">${DB.payments.filter(p => p.periodo === per).length}</div></div>
+      <div class="stat"><div class="k">Registros</div><div class="v">${DB.payments.filter(p=>p.periodo===per).length}</div></div>
     </div>
-    <div class="card" style="padding:0;overflow:auto">
-    ${list.length ? `<table><thead><tr><th>Estudiante</th><th>Concepto</th><th>Monto</th><th>Vence</th><th>Estado</th><th>Pago</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
-    ${list.map(p => {
-    const s = DB.students.find(x => x.id === p.studentId);
-    const venc = p.estado === 'pendiente' && p.fechaVencimiento < today();
-    const nombre = s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '';
-    return `<tr>
-        <td>${s ? avatarHTML(s, 28) + h(nombre) : '<span class="mut">Eliminado</span>'}</td>
-        <td class="mut">${h(p.concepto)}</td>
+    ${list.length?`<div class="card flush"><div class="table-wrap"><table><thead><tr><th>Estudiante</th><th>Concepto</th><th>Monto</th><th>Vence</th><th>Estado</th><th>Pago</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
+    ${list.map(p=>{
+      const s=DB.students.find(x=>x.id===p.studentId);
+      const venc=p.estado==='pendiente'&&p.fechaVencimiento<today();
+      return `<tr>
+        <td>${s?avatarHTML(s,28)+h(nom(s)):'<span class="mut">Eliminado</span>'}</td>
+        <td class="mut hide-mobile">${h(p.concepto)}</td>
         <td><b>${money(p.monto)}</b></td>
         <td>${fmtDate(p.fechaVencimiento)}</td>
-        <td><span class="badge ${p.estado === 'pagado' ? 'b-ok' : (venc ? 'b-bad' : 'b-warn')}">${venc ? 'vencido' : p.estado}</span></td>
-        <td class="mut">${p.fechaPago ? fmtDate(p.fechaPago) + ' · ' + h(p.metodo) : '—'}</td>
+        <td><span class="badge ${p.estado==='pagado'?'b-ok':(venc?'b-bad':'b-warn')}">${venc?'vencido':p.estado}</span></td>
+        <td class="mut hide-mobile">${p.fechaPago?fmtDate(p.fechaPago)+' · '+h(p.metodo):'—'}</td>
         <td style="text-align:right;white-space:nowrap">
-          ${p.estado === 'pendiente' ? `<button class="btn sm" onclick="openPayRegister('${p.id}')">Cobrar</button>` : `<button class="btn ghost sm" onclick="showReceipt('${p.id}')">Recibo</button>`}
-          <button class="btn danger sm" onclick="delPayment('${p.id}')">${icon('x', 14)}</button>
+          ${p.estado==='pendiente'?`<button class="btn sm" onclick="openPayRegister('${p.id}')">Cobrar</button>`:`<button class="btn ghost sm" onclick="showReceipt('${p.id}')">Recibo</button>`}
+          <button class="btn danger sm icon-only" onclick="delPayment('${p.id}')" title="Eliminar">${icon('x',14)}</button>
         </td></tr>`;
-  }).join('')}</tbody></table>` : '<p class="empty">No hay registros para este período. Usa «Generar mensualidades».</p>'}
-    </div>`;
+    }).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin registros para este período','Usa «Generar» para crear las mensualidades','payments')}</div>`}`;
 }
-
-function generateMonthly() {
-  const per = $('#payMonth')?.value || today().slice(0, 7);
-  const activos = DB.students.filter(s => s.estado === 'activo');
-  let creados = 0;
-  activos.forEach(s => {
-    if (DB.payments.some(p => p.studentId === s.id && p.periodo === per)) return;
-    const g = DB.groups.find(x => x.id === s.grupoId);
+function generateMonthly(){
+  const per=$('#payMonth')?.value||today().slice(0,7);
+  const activos=DB.students.filter(s=>s.estado==='activo');
+  let creados=0;
+  activos.forEach(s=>{
+    if(DB.payments.some(p=>p.studentId===s.id&&p.periodo===per)) return;
+    const g=DB.groups.find(x=>x.id===s.grupoId);
     DB.payments.push({
-      id: uid('p'), studentId: s.id, concepto: 'Mensualidad', periodo: per,
-      monto: g ? g.mensualidad : 60000, estado: 'pendiente',
-      fechaVencimiento: per + '-10', fechaPago: '', metodo: '',
-      recibo: 'REC-' + String(DB.payments.length + 1 + creados).padStart(4, '0')
+      id:uid('p'),studentId:s.id,concepto:'Mensualidad',periodo:per,
+      monto:g?g.mensualidad:60000,estado:'pendiente',
+      fechaVencimiento:per+'-10',fechaPago:'',metodo:'',
+      recibo:'REC-'+String(DB.payments.length+1+creados).padStart(4,'0')
     });
     creados++;
   });
-  persist(); renderPaymentsList(); render();
-  toast(creados ? `${creados} mensualidades generadas` : 'Todos los estudiantes ya tenían su mensualidad');
+  persist(); renderPaymentsList();
+  toast(creados?`${creados} mensualidades generadas`:'Todos ya tenían mensualidad');
 }
-
-function openPaymentCreate() {
-  const activos = DB.students.filter(s => s.estado === 'activo');
-  openModal('Registrar cobro', `
+function openPaymentCreate(){
+  const activos=DB.students.filter(s=>s.estado==='activo');
+  openModal('Registrar cobro',`
     <div class="grid2">
-      <label>Estudiante<select id="pc_stu">${activos.map(s => `<option value="${s.id}">${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</option>`).join('')}</select></label>
-      <label>Concepto<select id="pc_concepto">${opts(['Mensualidad', 'Inscripción', 'Examen', 'Uniforme', 'Otro'], 'Mensualidad')}</select></label>
-      <label>Período<input type="month" id="pc_periodo" value="${today().slice(0, 7)}"></label>
+      <label>Estudiante<select id="pc_stu">${activos.map(s=>`<option value="${s.id}">${h(nom(s))}</option>`).join('')}</select></label>
+      <label>Concepto<select id="pc_concepto">${opts(['Mensualidad','Inscripción','Examen','Uniforme','Otro'],'Mensualidad')}</select></label>
+      <label>Período<input type="month" id="pc_periodo" value="${today().slice(0,7)}"></label>
       <label>Monto<input type="number" id="pc_monto" value="60000" min="0"></label>
-      <label>Fecha de pago<input type="date" id="pc_fecha" value="${today()}"></label>
-      <label>Método<select id="pc_metodo">${opts(['Efectivo', 'Transferencia', 'Tarjeta', 'Nequi', 'Daviplata'], 'Efectivo')}</select></label>
+      <label>Fecha<input type="date" id="pc_fecha" value="${today()}"></label>
+      <label>Método<select id="pc_metodo">${opts(['Efectivo','Transferencia','Tarjeta','Nequi','Daviplata'],'Efectivo')}</select></label>
     </div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="savePaymentCreate()">Registrar pago</button></div>`);
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="savePaymentCreate()">Registrar</button></div>`);
 }
-function savePaymentCreate() {
-  const sid = v('pc_stu'); if (!sid) return toast('Selecciona un estudiante', 'bad');
-  const per = v('pc_periodo');
-  const p = {
-    id: uid('p'), studentId: sid, concepto: v('pc_concepto'), periodo: per,
-    monto: +v('pc_monto') || 0, estado: 'pagado', fechaVencimiento: per + '-10',
-    fechaPago: v('pc_fecha') || today(), metodo: v('pc_metodo'),
-    recibo: 'REC-' + String(DB.payments.length + 1).padStart(4, '0')
+function savePaymentCreate(){
+  const sid=v('pc_stu'); if(!sid) return toast('Selecciona un estudiante','bad');
+  const per=v('pc_periodo');
+  const p={
+    id:uid('p'),studentId:sid,concepto:v('pc_concepto'),periodo:per,
+    monto:+v('pc_monto')||0,estado:'pagado',fechaVencimiento:per+'-10',
+    fechaPago:v('pc_fecha')||today(),metodo:v('pc_metodo'),
+    recibo:'REC-'+String(DB.payments.length+1).padStart(4,'0')
   };
-  DB.payments.push(p);
-  syncPaymentTx(p);
+  DB.payments.push(p); syncPaymentTx(p);
   persist(); closeModal(); render(); toast('Pago registrado');
 }
-
-function openPayRegister(id) {
-  const p = DB.payments.find(x => x.id === id); if (!p) return;
-  const s = DB.students.find(x => x.id === p.studentId);
-  openModal('Registrar pago', `
+function openPayRegister(id){
+  const p=DB.payments.find(x=>x.id===id); if(!p) return;
+  const s=DB.students.find(x=>x.id===p.studentId);
+  openModal('Registrar pago',`
     <div class="card" style="margin-bottom:14px">
-      <b>${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '')}</b>
+      <b>${h(s?nom(s):'')}</b>
       <div class="mut sm">${h(p.concepto)} · Período ${p.periodo}</div>
     </div>
     <div class="grid2">
-      <label>Monto a cobrar<input type="number" id="pr_monto" value="${p.monto}"></label>
-      <label>Fecha de pago<input type="date" id="pr_fecha" value="${today()}"></label>
-      <label>Método<select id="pr_metodo">${opts(['Efectivo', 'Transferencia', 'Tarjeta', 'Nequi', 'Daviplata'], 'Efectivo')}</select></label>
+      <label>Monto<input type="number" id="pr_monto" value="${p.monto}"></label>
+      <label>Fecha<input type="date" id="pr_fecha" value="${today()}"></label>
+      <label>Método<select id="pr_metodo">${opts(['Efectivo','Transferencia','Tarjeta','Nequi','Daviplata'],'Efectivo')}</select></label>
     </div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="confirmPay('${id}')">Confirmar pago</button></div>`);
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="confirmPay('${id}')">Confirmar</button></div>`);
 }
-function confirmPay(id) {
-  const p = DB.payments.find(x => x.id === id); if (!p) return;
-  p.monto = +v('pr_monto') || p.monto;
-  p.fechaPago = v('pr_fecha') || today();
-  p.metodo = v('pr_metodo');
-  p.estado = 'pagado';
+function confirmPay(id){
+  const p=DB.payments.find(x=>x.id===id); if(!p) return;
+  p.monto=+v('pr_monto')||p.monto;
+  p.fechaPago=v('pr_fecha')||today();
+  p.metodo=v('pr_metodo');
+  p.estado='pagado';
   syncPaymentTx(p);
-  persist(); closeModal(); render(); toast('Pago registrado correctamente');
-  setTimeout(() => showReceipt(id), 200);
+  persist(); closeModal(); render(); toast('Pago registrado');
+  setTimeout(()=>showReceipt(id),200);
 }
-function syncPaymentTx(p) {
-  DB.transactions = DB.transactions.filter(t => t.refId !== p.id);
-  if (p.estado === 'pagado') {
-    const s = DB.students.find(x => x.id === p.studentId);
+function syncPaymentTx(p){
+  DB.transactions=DB.transactions.filter(t=>t.refId!==p.id);
+  if(p.estado==='pagado'){
+    const s=DB.students.find(x=>x.id===p.studentId);
     DB.transactions.push({
-      id: uid('t'), fecha: p.fechaPago, tipo: 'ingreso', categoria: p.concepto,
-      descripcion: `${p.concepto} ${p.periodo} — ${s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : ''}`,
-      monto: p.monto, metodo: p.metodo, refId: p.id
+      id:uid('t'),fecha:p.fechaPago,tipo:'ingreso',categoria:p.concepto,
+      descripcion:`${p.concepto} ${p.periodo} — ${s?nom(s):''}`,
+      monto:p.monto,metodo:p.metodo,refId:p.id
     });
   }
 }
-function delPayment(id) {
-  if (!confirm('¿Eliminar este registro de pago?')) return;
-  DB.payments = DB.payments.filter(p => p.id !== id);
-  DB.transactions = DB.transactions.filter(t => t.refId !== id);
+function delPayment(id){
+  if(!confirm('¿Eliminar este pago?')) return;
+  DB.payments=DB.payments.filter(p=>p.id!==id);
+  DB.transactions=DB.transactions.filter(t=>t.refId!==id);
   persist(); render(); toast('Registro eliminado');
 }
-function showReceipt(id) {
-  const p = DB.payments.find(x => x.id === id); if (!p) return;
-  const s = DB.students.find(x => x.id === p.studentId);
-  const body = `
+function showReceipt(id){
+  const p=DB.payments.find(x=>x.id===id); if(!p) return;
+  const s=DB.students.find(x=>x.id===p.studentId);
+  const body=`
     <div style="text-align:center"><h3 style="margin:0">ACADEMIA DOJOPRO</h3><div>Recibo de pago</div></div><hr>
     <div>Recibo N°: <b>${p.recibo}</b></div>
-    <div>Fecha: ${fmtDate(p.fechaPago || today())}</div>
-    <div>Estudiante: ${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '—')}</div>
-    <div>Código: ${h(s ? s.codigo : '—')}</div>
+    <div>Fecha: ${fmtDate(p.fechaPago||today())}</div>
+    <div>Estudiante: ${h(s?nom(s):'—')}</div>
+    <div>Código: ${h(s?s.codigo:'—')}</div>
     <div>Concepto: ${h(p.concepto)} (${p.periodo})</div>
-    <div>Método: ${h(p.metodo || '—')}</div><hr>
+    <div>Método: ${h(p.metodo||'—')}</div><hr>
     <div style="font-size:18px"><b>TOTAL: ${money(p.monto)}</b></div><hr>
     <div style="text-align:center;font-size:11px">Gracias por su pago · DojoPro</div>`;
-  openModal('Recibo ' + p.recibo, `
+  openModal('Recibo '+p.recibo,`
     <div class="card" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.8">${body}</div>
     <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button><button class="btn" onclick='printHTML(${JSON.stringify(body)})'>${icon('printer')} Imprimir</button></div>`);
 }
@@ -870,355 +1169,333 @@ function showReceipt(id) {
 /* =========================================================
    4) ASISTENCIA
    ========================================================= */
-function viewAttendance() {
-  const gs = DB.groups.map(g => `<option value="${g.id}">${h(g.nombre)}</option>`).join('');
+function viewAttendance(){
+  const gs=DB.groups.map(g=>`<option value="${g.id}">${h(g.nombre)}</option>`).join('');
   return `
     <div class="toolbar">
-      <select id="attGroup" style="width:auto" onchange="renderAttSheet()">${gs || '<option value="">Sin grupos</option>'}</select>
+      <select id="attGroup" style="width:auto" onchange="renderAttSheet()">${gs||'<option value="">Sin grupos</option>'}</select>
       <input type="date" id="attDate" style="width:auto" value="${today()}" onchange="renderAttSheet()">
-      <button class="btn ghost" onclick="markAll('presente')">Marcar todos presentes</button>
-      <button class="btn" onclick="saveAttendance()">${icon('save')} Guardar asistencia</button>
+      <button class="btn ghost" onclick="markAll('presente')">Marcar presentes</button>
+      <button class="btn" onclick="saveAttendance()">${icon('save')} Guardar</button>
     </div>
     <div id="attSheet"></div>`;
 }
-
-function renderAttSheet() {
-  const gid = $('#attGroup')?.value, f = $('#attDate')?.value;
-  const el = $('#attSheet'); if (!el) return;
-  if (!gid) { el.innerHTML = '<div class="card"><p class="empty">Crea primero un grupo en «Horarios y grupos».</p></div>'; return; }
-  const g = DB.groups.find(x => x.id === gid);
-  const students = DB.students.filter(s => s.grupoId === gid && s.estado === 'activo');
-  const rec = DB.attendance.find(a => a.grupoId === gid && a.fecha === f);
-  const reg = rec ? rec.registros : {};
-  const st = ['presente', 'tarde', 'ausente', 'excusa'];
-
-  if (!students.length) {
-    el.innerHTML = `<div class="card"><p class="empty">El grupo <b>${h(g.nombre)}</b> no tiene estudiantes activos.</p></div>`;
+function renderAttSheet(){
+  const gid=$('#attGroup')?.value, f=$('#attDate')?.value;
+  const el=$('#attSheet'); if(!el) return;
+  if(!gid){ el.innerHTML=`<div class="card">${emptyState('Sin grupos','Crea primero un grupo','groups')}</div>`; return; }
+  const g=DB.groups.find(x=>x.id===gid);
+  const students=DB.students.filter(s=>s.grupoId===gid&&s.estado==='activo');
+  const rec=DB.attendance.find(a=>a.grupoId===gid&&a.fecha===f);
+  const reg=rec?rec.registros:{};
+  const st=['presente','tarde','ausente','excusa'];
+  if(!students.length){
+    el.innerHTML=`<div class="card">${emptyState('Sin estudiantes activos',`El grupo ${g.nombre} no tiene estudiantes`,'students')}</div>`;
     return;
   }
-  el.innerHTML = `
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Estudiante</th><th>Cinturón</th><th>Estado de asistencia</th></tr></thead><tbody>
-      ${students.map(s => `<tr>
-        <td>${avatarHTML(s, 30)}<b>${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</b><div class="mut sm">${h(s.codigo)}</div></td>
-        <td><span class="badge b-mut">${h(s.cinturon)}</span></td>
+  el.innerHTML=`
+    <div class="card flush">
+      <div class="table-wrap"><table><thead><tr><th>Estudiante</th><th>Cinturón</th><th>Estado</th></tr></thead><tbody>
+      ${students.map(s=>`<tr>
+        <td>${avatarHTML(s,30)}<b>${h(nom(s))}</b><div class="mut sm">${h(s.codigo)}</div></td>
+        <td class="hide-mobile"><span class="badge b-mut">${h(s.cinturon)}</span></td>
         <td><select class="attSel" data-stu="${s.id}" style="max-width:200px" onchange="updateAttStats()">
-          ${st.map(x => `<option value="${x}" ${(reg[s.id] || 'presente') === x ? 'selected' : ''}>${x}</option>`).join('')}
+          ${st.map(x=>`<option value="${x}" ${(reg[s.id]||'presente')===x?'selected':''}>${x}</option>`).join('')}
         </select></td></tr>`).join('')}
-      </tbody></table>
+      </tbody></table></div>
     </div>
     <div class="cards mt" id="attStats"></div>
     <p class="mut sm mt" style="display:flex;align-items:center;gap:6px">
-      ${rec
-        ? `${icon('check', 14)} Este día ya tiene asistencia guardada; puedes actualizarla.`
-        : `${icon('info', 14)} Aún no hay registro guardado para este día.`}
+      ${rec?`${icon('check',14)} Día guardado; puedes actualizarlo.`:`${icon('info',14)} Aún no hay registro guardado.`}
     </p>`;
   updateAttStats();
 }
-
-function updateAttStats() {
-  const sels = document.querySelectorAll('.attSel');
-  const c = { presente: 0, tarde: 0, ausente: 0, excusa: 0 };
-  sels.forEach(s => c[s.value]++);
-  const tot = sels.length || 1;
-  const el = $('#attStats'); if (!el) return;
-  el.innerHTML = `
-    <div class="stat"><div class="k">Presentes</div><div class="v" style="color:#4ade80">${c.presente + c.tarde}</div><div class="s">${Math.round((c.presente + c.tarde) / tot * 100)}% del grupo</div></div>
+function updateAttStats(){
+  const sels=document.querySelectorAll('.attSel');
+  const c={presente:0,tarde:0,ausente:0,excusa:0};
+  sels.forEach(s=>c[s.value]++);
+  const tot=sels.length||1;
+  const el=$('#attStats'); if(!el) return;
+  el.innerHTML=`
+    <div class="stat"><div class="k">Presentes</div><div class="v" style="color:#4ade80">${c.presente+c.tarde}</div><div class="s">${Math.round((c.presente+c.tarde)/tot*100)}%</div></div>
     <div class="stat"><div class="k">Ausentes</div><div class="v" style="color:#f87171">${c.ausente}</div></div>
     <div class="stat"><div class="k">Tarde</div><div class="v" style="color:#fbbf24">${c.tarde}</div></div>
-    <div class="stat"><div class="k">Con excusa</div><div class="v" style="color:#67e8f9">${c.excusa}</div></div>`;
+    <div class="stat"><div class="k">Excusa</div><div class="v" style="color:#67e8f9">${c.excusa}</div></div>`;
 }
-function markAll(val) { document.querySelectorAll('.attSel').forEach(s => s.value = val); updateAttStats(); }
-
-function saveAttendance() {
-  const gid = $('#attGroup')?.value, f = $('#attDate')?.value;
-  if (!gid || !f) return toast('Selecciona grupo y fecha', 'bad');
-  const registros = {};
-  document.querySelectorAll('.attSel').forEach(s => registros[s.dataset.stu] = s.value);
-  if (!Object.keys(registros).length) return toast('No hay estudiantes en el grupo', 'bad');
-  let rec = DB.attendance.find(a => a.grupoId === gid && a.fecha === f);
-  if (rec) rec.registros = registros;
-  else DB.attendance.push({ id: uid('att'), fecha: f, grupoId: gid, registros });
+function markAll(val){ document.querySelectorAll('.attSel').forEach(s=>s.value=val); updateAttStats(); }
+function saveAttendance(){
+  const gid=$('#attGroup')?.value, f=$('#attDate')?.value;
+  if(!gid||!f) return toast('Selecciona grupo y fecha','bad');
+  const registros={};
+  document.querySelectorAll('.attSel').forEach(s=>registros[s.dataset.stu]=s.value);
+  if(!Object.keys(registros).length) return toast('No hay estudiantes','bad');
+  let rec=DB.attendance.find(a=>a.grupoId===gid&&a.fecha===f);
+  if(rec) rec.registros=registros;
+  else DB.attendance.push({id:uid('att'),fecha:f,grupoId:gid,registros});
   persist(); renderAttSheet(); toast('Asistencia guardada');
 }
 
 /* =========================================================
    5) SEGUIMIENTO DEPORTIVO
    ========================================================= */
-function viewSport() {
-  const list = DB.students.filter(s => s.estado === 'activo');
-  const proms = DB.promotions.slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+function viewSport(){
+  const list=DB.students.filter(s=>s.estado==='activo');
+  const proms=DB.promotions.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha));
   return `
     <div class="cards">
       <div class="stat"><div class="k">Deportistas activos</div><div class="v">${list.length}</div></div>
-      <div class="stat"><div class="k">Ascensos registrados</div><div class="v">${DB.promotions.length}</div></div>
-      <div class="stat"><div class="k">Cinturones negros</div><div class="v">${list.filter(s => s.cinturon === 'Negro').length}</div></div>
-      <div class="stat"><div class="k">Aprobación en exámenes</div><div class="v">${DB.promotions.length ? Math.round(DB.promotions.filter(p => p.resultado === 'Aprobado').length / DB.promotions.length * 100) + '%' : '—'}</div></div>
+      <div class="stat"><div class="k">Ascensos</div><div class="v">${DB.promotions.length}</div></div>
+      <div class="stat"><div class="k">Cinturones negros</div><div class="v">${list.filter(s=>s.cinturon==='Negro').length}</div></div>
+      <div class="stat"><div class="k">Aprobación</div><div class="v">${DB.promotions.length?Math.round(DB.promotions.filter(p=>p.resultado==='Aprobado').length/DB.promotions.length*100)+'%':'—'}</div></div>
     </div>
-    <div class="toolbar mt"><button class="btn" onclick="openPromotion()">${icon('plus')} Registrar examen / ascenso</button></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Deportista</th><th>Cinturón actual</th><th>Grado</th><th>Último ascenso</th><th>Exámenes</th><th style="text-align:right">Acción</th></tr></thead><tbody>
-      ${list.map(s => {
-        const p = proms.filter(x => x.studentId === s.id);
-        const last = p[0];
-        const bc = BELT_COLOR[s.cinturon] || '#94a3b8';
+    <div class="toolbar mt"><button class="btn" onclick="openPromotion()">${icon('plus')} Nuevo examen</button></div>
+    <div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Deportista</th><th>Cinturón</th><th>Grado</th><th>Último ascenso</th><th>Exámenes</th><th style="text-align:right">Acción</th></tr></thead>
+      <tbody>${list.map(s=>{
+        const p=proms.filter(x=>x.studentId===s.id); const last=p[0];
+        const bc=BELT_COLOR[s.cinturon]||'#94a3b8';
         return `<tr>
-          <td>${avatarHTML(s, 30)}<b>${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</b><div class="mut sm">${h(s.codigo)}</div></td>
-          <td><span class="badge" style="background:${bc}22;color:${bc};border-left:4px solid ${bc}">${h(s.cinturon || 'Blanco')}</span></td>
-          <td>${s.grado || 0}º</td>
-          <td class="mut">${last ? fmtDate(last.fecha) : '—'}</td>
+          <td>${avatarHTML(s,30)}<b>${h(nom(s))}</b><div class="mut sm">${h(s.codigo)}</div></td>
+          <td><span class="badge" style="background:${bc}22;color:${bc};border-left:4px solid ${bc}">${h(s.cinturon||'Blanco')}</span></td>
+          <td>${s.grado||0}º</td>
+          <td class="mut hide-mobile">${last?fmtDate(last.fecha):'—'}</td>
           <td>${p.length}</td>
           <td style="text-align:right"><button class="btn ghost sm" onclick="openPromotion('${s.id}')">Ascender</button></td>
         </tr>`;
-      }).join('')}
-      </tbody></table>
-    </div>
-    <div class="sec-title">Historial de exámenes y ascensos</div>
-    <div class="card" style="padding:0;overflow:auto">
-    ${proms.length ? `<table><thead><tr><th>Fecha</th><th>Deportista</th><th>Cambio de cinturón</th><th>Grado</th><th>Resultado</th><th>Observaciones</th></tr></thead><tbody>
-      ${proms.map(p => {
-        const s = DB.students.find(x => x.id === p.studentId);
+      }).join('')}</tbody></table></div></div>
+    <div class="sec-title">Historial de exámenes</div>
+    ${proms.length?`<div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Fecha</th><th>Deportista</th><th>Cambio</th><th>Grado</th><th>Resultado</th><th>Notas</th></tr></thead><tbody>
+      ${proms.map(p=>{
+        const s=DB.students.find(x=>x.id===p.studentId);
         return `<tr><td>${fmtDate(p.fecha)}</td>
-        <td>${h(s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : '—')}</td>
+        <td>${h(s?nom(s):'—')}</td>
         <td>${h(p.cinturonAnterior)} → <b>${h(p.cinturonNuevo)}</b></td>
         <td>${p.grado}º</td>
-        <td><span class="badge ${p.resultado === 'Aprobado' ? 'b-ok' : 'b-bad'}">${h(p.resultado)}</span></td>
-        <td class="mut">${h(p.nota || '—')}</td></tr>`;
-      }).join('')}</tbody></table>` : '<p class="empty">Sin exámenes registrados</p>'}
-    </div>`;
+        <td><span class="badge ${p.resultado==='Aprobado'?'b-ok':'b-bad'}">${h(p.resultado)}</span></td>
+        <td class="mut hide-mobile">${h(p.nota||'—')}</td></tr>`;
+      }).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin exámenes','Registra el primer ascenso','sport')}</div>`}`;
 }
-
-function openPromotion(studentId) {
-  const list = DB.students.filter(s => s.estado === 'activo');
-  const sel = studentId || (list[0] && list[0].id);
-  const s = DB.students.find(x => x.id === sel) || {};
-  openModal('Registrar examen / ascenso', `
+function openPromotion(studentId){
+  const list=DB.students.filter(s=>s.estado==='activo');
+  const sel=studentId||(list[0]&&list[0].id);
+  const s=DB.students.find(x=>x.id===sel)||{};
+  openModal('Registrar examen',`
     <div class="grid2">
-      <label>Deportista<select id="pr_stu" onchange="refreshPromBelt()">${list.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${h(((x.nombres || '') + ' ' + (x.apellidos || '')).trim())}</option>`).join('')}</select></label>
-      <label>Fecha del examen<input type="date" id="pr_fecha" value="${today()}"></label>
-      <label>Cinturón actual<input id="pr_actual" value="${h(s.cinturon || 'Blanco')}" disabled></label>
-      <label>Nuevo cinturón<select id="pr_nuevo">${opts(BELTS, s.cinturon)}</select></label>
-      <label>Grado obtenido<input type="number" id="pr_grado" min="0" max="9" value="${(s.grado || 0) + 1}"></label>
-      <label>Resultado<select id="pr_resultado">${opts(['Aprobado', 'Reprobado'], 'Aprobado')}</select></label>
+      <label>Deportista<select id="pr_stu" onchange="refreshPromBelt()">${list.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${h(nom(x))}</option>`).join('')}</select></label>
+      <label>Fecha<input type="date" id="pr_fecha" value="${today()}"></label>
+      <label>Cinturón actual<input id="pr_actual" value="${h(s.cinturon||'Blanco')}" disabled></label>
+      <label>Nuevo cinturón<select id="pr_nuevo">${opts(BELTS,s.cinturon)}</select></label>
+      <label>Grado<input type="number" id="pr_grado" min="0" max="9" value="${(s.grado||0)+1}"></label>
+      <label>Resultado<select id="pr_resultado">${opts(['Aprobado','Reprobado'],'Aprobado')}</select></label>
     </div>
-    <label class="mt">Observaciones<input id="pr_nota" placeholder="Ej. Excelente técnica de combate"></label>
+    <label class="mt">Observaciones<input id="pr_nota" placeholder="Ej. Excelente técnica"></label>
     <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="savePromotion()">Guardar</button></div>`);
   refreshPromBelt();
 }
-function refreshPromBelt() {
-  const s = DB.students.find(x => x.id === $('#pr_stu')?.value);
-  if (s && $('#pr_actual')) { $('#pr_actual').value = s.cinturon; $('#pr_nuevo').value = s.cinturon; $('#pr_grado').value = (s.grado || 0) + 1; }
+function refreshPromBelt(){
+  const s=DB.students.find(x=>x.id===$('#pr_stu')?.value);
+  if(s&&$('#pr_actual')){ $('#pr_actual').value=s.cinturon; $('#pr_nuevo').value=s.cinturon; $('#pr_grado').value=(s.grado||0)+1; }
 }
-function savePromotion() {
-  const sid = v('pr_stu'); const s = DB.students.find(x => x.id === sid);
-  if (!s) return toast('Selecciona un deportista', 'bad');
-  const nuevo = v('pr_nuevo'), resultado = v('pr_resultado'), grado = +v('pr_grado') || 0;
+function savePromotion(){
+  const sid=v('pr_stu'); const s=DB.students.find(x=>x.id===sid);
+  if(!s) return toast('Selecciona un deportista','bad');
+  const nuevo=v('pr_nuevo'), resultado=v('pr_resultado'), grado=+v('pr_grado')||0;
   DB.promotions.push({
-    id: uid('pr'), studentId: sid, fecha: v('pr_fecha') || today(),
-    cinturonAnterior: s.cinturon, cinturonNuevo: nuevo, grado,
-    examen: 'Examen de ascenso', resultado, nota: v('pr_nota')
+    id:uid('pr'),studentId:sid,fecha:v('pr_fecha')||today(),
+    cinturonAnterior:s.cinturon,cinturonNuevo:nuevo,grado,
+    examen:'Examen de ascenso',resultado,nota:v('pr_nota')
   });
-  if (resultado === 'Aprobado') { s.cinturon = nuevo; s.grado = grado; }
-  persist(); closeModal(); render(); toast(resultado === 'Aprobado' ? 'Ascenso registrado correctamente' : 'Examen registrado');
+  if(resultado==='Aprobado'){ s.cinturon=nuevo; s.grado=grado; }
+  persist(); closeModal(); render(); toast(resultado==='Aprobado'?'Ascenso registrado':'Examen registrado');
 }
 
 /* =========================================================
    6) INVENTARIO
    ========================================================= */
-function viewInventory() {
-  const items = DB.inventory;
-  const bajo = items.filter(i => i.stock <= i.stockMin);
-  const valor = items.reduce((a, i) => a + i.stock * i.costo, 0);
+function viewInventory(){
+  const items=DB.inventory;
+  const bajo=items.filter(i=>i.stock<=i.stockMin);
+  const valor=items.reduce((a,i)=>a+i.stock*i.costo,0);
   return `
     <div class="cards">
-      <div class="stat"><div class="k">Ítems registrados</div><div class="v">${items.length}</div></div>
-      <div class="stat"><div class="k">Unidades en stock</div><div class="v">${items.reduce((a, i) => a + i.stock, 0)}</div></div>
-      <div class="stat"><div class="k">Valor del inventario</div><div class="v">${money(valor)}</div><div class="s">a costo</div></div>
-      <div class="stat"><div class="k">Stock bajo</div><div class="v" style="color:${bajo.length ? '#f87171' : '#4ade80'}">${bajo.length}</div><div class="s">requieren reposición</div></div>
+      <div class="stat"><div class="k">Productos</div><div class="v">${items.length}</div></div>
+      <div class="stat"><div class="k">Unidades</div><div class="v">${items.reduce((a,i)=>a+i.stock,0)}</div></div>
+      <div class="stat"><div class="k">Valor</div><div class="v">${money(valor)}</div><div class="s">a costo</div></div>
+      <div class="stat"><div class="k">Stock bajo</div><div class="v" style="color:${bajo.length?'#f87171':'#4ade80'}">${bajo.length}</div></div>
     </div>
     <div class="toolbar mt"><button class="btn" onclick="openItem()">${icon('plus')} Nuevo producto</button></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Producto</th><th>Categoría</th><th>Talla</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Margen</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
-      ${items.length ? items.map(i => `<tr>
+    ${items.length?`<div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Producto</th><th>Categoría</th><th>Talla</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Margen</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
+      ${items.map(i=>`<tr>
         <td><b>${h(i.nombre)}</b></td>
-        <td class="mut">${h(i.categoria)}</td>
-        <td class="mut">${h(i.talla || '—')}</td>
-        <td><span class="badge ${i.stock <= i.stockMin ? 'b-bad' : 'b-ok'}">${i.stock} u.</span> <span class="mut sm">mín ${i.stockMin}</span></td>
-        <td>${money(i.costo)}</td>
+        <td class="mut hide-mobile">${h(i.categoria)}</td>
+        <td class="mut hide-mobile">${h(i.talla||'—')}</td>
+        <td><span class="badge ${i.stock<=i.stockMin?'b-bad':'b-ok'}">${i.stock} u.</span></td>
+        <td class="hide-mobile">${money(i.costo)}</td>
         <td><b>${money(i.precio)}</b></td>
-        <td class="mut">${money(i.precio - i.costo)}</td>
+        <td class="mut hide-mobile">${money(i.precio-i.costo)}</td>
         <td style="text-align:right;white-space:nowrap">
-          <button class="btn ghost sm" onclick="adjustStock('${i.id}')">±Stock</button>
+          <button class="btn ghost sm" onclick="adjustStock('${i.id}')">Stock</button>
           <button class="btn ghost sm" onclick="openItem('${i.id}')">Editar</button>
-          <button class="btn danger sm" onclick="delItem('${i.id}')">${icon('x', 14)}</button>
-        </td></tr>`).join('') : '<tr><td colspan="8"><p class="empty">Sin productos registrados</p></td></tr>'}
-      </tbody></table>
-    </div>`;
+          <button class="btn danger sm icon-only" onclick="delItem('${i.id}')" title="Eliminar">${icon('x',14)}</button>
+        </td></tr>`).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin productos','Agrega el primer producto al inventario','inventory')}</div>`}`;
 }
-
-function openItem(id) {
-  const it = id ? DB.inventory.find(x => x.id === id) : { categoria: 'Uniforme', stock: 0, stockMin: 3, costo: 0, precio: 0 };
-  openModal(id ? 'Editar producto' : 'Nuevo producto', `
+function openItem(id){
+  const it=id?DB.inventory.find(x=>x.id===id):{categoria:'Uniforme',stock:0,stockMin:3,costo:0,precio:0};
+  openModal(id?'Editar producto':'Nuevo producto',`
     <div class="grid2">
-      <label>Nombre<input id="it_nombre" value="${h(it.nombre || '')}"></label>
-      <label>Categoría<select id="it_cat">${opts(['Uniforme', 'Cinturón', 'Protector', 'Material deportivo', 'Otros'], it.categoria)}</select></label>
-      <label>Talla<input id="it_talla" value="${h(it.talla || '')}"></label>
-      <label>Stock actual<input type="number" id="it_stock" min="0" value="${it.stock}"></label>
+      <label>Nombre<input id="it_nombre" value="${h(it.nombre||'')}"></label>
+      <label>Categoría<select id="it_cat">${opts(['Uniforme','Cinturón','Protector','Material deportivo','Otros'],it.categoria)}</select></label>
+      <label>Talla<input id="it_talla" value="${h(it.talla||'')}"></label>
+      <label>Stock<input type="number" id="it_stock" min="0" value="${it.stock}"></label>
       <label>Stock mínimo<input type="number" id="it_min" min="0" value="${it.stockMin}"></label>
-      <label>Costo unitario<input type="number" id="it_costo" min="0" value="${it.costo}"></label>
-      <label>Precio de venta<input type="number" id="it_precio" min="0" value="${it.precio}"></label>
+      <label>Costo<input type="number" id="it_costo" min="0" value="${it.costo}"></label>
+      <label>Precio<input type="number" id="it_precio" min="0" value="${it.precio}"></label>
     </div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveItem('${id || ''}')">Guardar</button></div>`);
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveItem('${id||''}')">Guardar</button></div>`);
 }
-function saveItem(id) {
-  const data = {
-    nombre: v('it_nombre'), categoria: v('it_cat'), talla: v('it_talla'),
-    stock: +v('it_stock') || 0, stockMin: +v('it_min') || 0,
-    costo: +v('it_costo') || 0, precio: +v('it_precio') || 0
+function saveItem(id){
+  const data={
+    nombre:v('it_nombre'),categoria:v('it_cat'),talla:v('it_talla'),
+    stock:+v('it_stock')||0,stockMin:+v('it_min')||0,
+    costo:+v('it_costo')||0,precio:+v('it_precio')||0
   };
-  if (!data.nombre) return toast('El nombre es obligatorio', 'bad');
-  if (id) Object.assign(DB.inventory.find(x => x.id === id), data);
-  else DB.inventory.push({ id: uid('i'), ...data });
+  if(!data.nombre) return toast('El nombre es obligatorio','bad');
+  if(id) Object.assign(DB.inventory.find(x=>x.id===id),data);
+  else DB.inventory.push({id:uid('i'),...data});
   persist(); closeModal(); render(); toast('Producto guardado');
 }
-function adjustStock(id) {
-  const it = DB.inventory.find(x => x.id === id); if (!it) return;
-  const n = prompt(`Ajustar stock de "${it.nombre}".\nStock actual: ${it.stock}\nIngresa el nuevo stock:`, it.stock);
-  if (n === null) return;
-  const val = parseInt(n, 10); if (isNaN(val) || val < 0) return toast('Valor inválido', 'bad');
-  it.stock = val; persist(); render(); toast('Stock actualizado');
+function adjustStock(id){
+  const it=DB.inventory.find(x=>x.id===id); if(!it) return;
+  const n=prompt(`Ajustar stock de "${it.nombre}".\nActual: ${it.stock}`,it.stock);
+  if(n===null) return;
+  const val=parseInt(n,10); if(isNaN(val)||val<0) return toast('Valor inválido','bad');
+  it.stock=val; persist(); render(); toast('Stock actualizado');
 }
-function delItem(id) {
-  if (!confirm('¿Eliminar este producto del inventario?')) return;
-  DB.inventory = DB.inventory.filter(x => x.id !== id); persist(); render(); toast('Producto eliminado');
+function delItem(id){
+  if(!confirm('¿Eliminar este producto?')) return;
+  DB.inventory=DB.inventory.filter(x=>x.id!==id); persist(); render(); toast('Producto eliminado');
 }
 
 /* =========================================================
    7) VENTAS
    ========================================================= */
-let saleDraft = [];
-function viewSales() {
-  const cur = today().slice(0, 7);
-  const mes = DB.sales.filter(s => s.fecha.slice(0, 7) === cur);
-  const total = mes.reduce((a, s) => a + s.total, 0);
-  const ventas = DB.sales.slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+let saleDraft=[];
+function viewSales(){
+  const cur=today().slice(0,7);
+  const mes=DB.sales.filter(s=>s.fecha.slice(0,7)===cur);
+  const total=mes.reduce((a,s)=>a+s.total,0);
+  const ventas=DB.sales.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha));
   return `
     <div class="cards">
       <div class="stat"><div class="k">Ventas del mes</div><div class="v" style="color:#4ade80">${money(total)}</div></div>
-      <div class="stat"><div class="k">Transacciones del mes</div><div class="v">${mes.length}</div></div>
-      <div class="stat"><div class="k">Ticket promedio</div><div class="v">${money(mes.length ? total / mes.length : 0)}</div></div>
-      <div class="stat"><div class="k">Ventas totales</div><div class="v">${DB.sales.length}</div></div>
+      <div class="stat"><div class="k">Transacciones</div><div class="v">${mes.length}</div></div>
+      <div class="stat"><div class="k">Ticket promedio</div><div class="v">${money(mes.length?total/mes.length:0)}</div></div>
+      <div class="stat"><div class="k">Total</div><div class="v">${DB.sales.length}</div></div>
     </div>
     <div class="toolbar mt"><button class="btn" onclick="openSale()">${icon('plus')} Nueva venta</button></div>
-    <div class="card" style="padding:0;overflow:auto">
-    ${ventas.length ? `<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Método</th><th>Total</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
-      ${ventas.map(s => `<tr>
+    ${ventas.length?`<div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Método</th><th>Total</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
+      ${ventas.map(s=>`<tr>
         <td>${fmtDate(s.fecha)}</td>
-        <td>${h(s.clienteNombre || 'Público general')}</td>
-        <td class="mut sm">${s.items.map(i => `${i.cantidad}× ${h(i.desc)}`).join('<br>')}</td>
-        <td>${h(s.metodo)}</td>
+        <td>${h(s.clienteNombre||'Público general')}</td>
+        <td class="mut sm hide-mobile">${s.items.map(i=>`${i.cantidad}× ${h(i.desc)}`).join('<br>')}</td>
+        <td class="hide-mobile">${h(s.metodo)}</td>
         <td><b>${money(s.total)}</b></td>
         <td style="text-align:right;white-space:nowrap">
           <button class="btn ghost sm" onclick="showSaleReceipt('${s.id}')">Recibo</button>
-          <button class="btn danger sm" onclick="delSale('${s.id}')">${icon('x', 14)}</button>
-        </td></tr>`).join('')}</tbody></table>` : '<p class="empty">Sin ventas registradas</p>'}
-    </div>`;
+          <button class="btn danger sm icon-only" onclick="delSale('${s.id}')" title="Eliminar">${icon('x',14)}</button>
+        </td></tr>`).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin ventas','Registra la primera venta','sales')}</div>`}`;
 }
-
-function openSale() {
-  saleDraft = [];
-  const prods = DB.inventory.filter(i => i.stock > 0)
-    .map(i => `<option value="${i.id}">${h(i.nombre)}${i.talla ? ' (' + h(i.talla) + ')' : ''} — ${money(i.precio)} · stock ${i.stock}</option>`).join('');
-  const stu = DB.students.filter(s => s.estado === 'activo').map(s => `<option value="${s.id}">${h(((s.nombres || '') + ' ' + (s.apellidos || '')).trim())}</option>`).join('');
-  openModal('Nueva venta', `
+function openSale(){
+  saleDraft=[];
+  const prods=DB.inventory.filter(i=>i.stock>0).map(i=>`<option value="${i.id}">${h(i.nombre)}${i.talla?' ('+h(i.talla)+')':''} — ${money(i.precio)} · stock ${i.stock}</option>`).join('');
+  const stu=DB.students.filter(s=>s.estado==='activo').map(s=>`<option value="${s.id}">${h(nom(s))}</option>`).join('');
+  openModal('Nueva venta',`
     <div class="grid2">
-      <label>Cliente / Estudiante<select id="saleClient"><option value="">— Público general —</option>${stu}</select></label>
-      <label>Método de pago<select id="saleMethod">${opts(['Efectivo', 'Transferencia', 'Tarjeta', 'Nequi', 'Daviplata'], 'Efectivo')}</select></label>
+      <label>Cliente<select id="saleClient"><option value="">— Público general —</option>${stu}</select></label>
+      <label>Método<select id="saleMethod">${opts(['Efectivo','Transferencia','Tarjeta','Nequi','Daviplata'],'Efectivo')}</select></label>
     </div>
     <div class="card mt">
-      <div class="sec-title" style="margin-top:0">Agregar producto del inventario</div>
+      <div class="sec-title" style="margin-top:0">Producto del inventario</div>
       <div class="row">
-        <select id="saleProd" class="grow">${prods || '<option value="">Sin productos con stock</option>'}</select>
-        <input id="saleQty" type="number" min="1" value="1" style="width:85px">
+        <select id="saleProd" class="grow">${prods||'<option value="">Sin stock</option>'}</select>
+        <input id="saleQty" type="number" min="1" value="1" style="width:80px">
         <button class="btn" onclick="addSaleItem()">Agregar</button>
       </div>
-      <div class="sec-title">Artículo libre (no inventariado)</div>
+      <div class="sec-title">Artículo libre</div>
       <div class="row">
-        <input id="freeDesc" class="grow" placeholder="Ej. Agua, examen, otro">
-        <input id="freePrice" type="number" min="0" placeholder="Precio" style="width:110px">
+        <input id="freeDesc" class="grow" placeholder="Ej. Agua, otro">
+        <input id="freePrice" type="number" min="0" placeholder="Precio" style="width:100px">
         <button class="btn ghost" onclick="addFreeItem()">Agregar</button>
       </div>
     </div>
     <div id="saleDraft" class="mt"></div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="confirmSale()">Registrar venta</button></div>`, true);
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="confirmSale()">Registrar</button></div>`,true);
   renderSaleDraft();
 }
-function addSaleItem() {
-  const id = v('saleProd'); if (!id) return toast('Selecciona un producto', 'bad');
-  const it = DB.inventory.find(x => x.id === id); if (!it) return;
-  const qty = Math.max(1, +v('saleQty') || 1);
-  const enCarrito = saleDraft.filter(d => d.invId === id).reduce((a, d) => a + d.cantidad, 0);
-  if (enCarrito + qty > it.stock) return toast(`Stock insuficiente (disponible: ${it.stock - enCarrito})`, 'bad');
-  saleDraft.push({ invId: id, desc: `${it.nombre}${it.talla ? ' (' + it.talla + ')' : ''}`, cantidad: qty, precio: it.precio });
+function addSaleItem(){
+  const id=v('saleProd'); if(!id) return toast('Selecciona producto','bad');
+  const it=DB.inventory.find(x=>x.id===id); if(!it) return;
+  const qty=Math.max(1,+v('saleQty')||1);
+  const enCarrito=saleDraft.filter(d=>d.invId===id).reduce((a,d)=>a+d.cantidad,0);
+  if(enCarrito+qty>it.stock) return toast(`Stock insuficiente (disponible: ${it.stock-enCarrito})`,'bad');
+  saleDraft.push({invId:id,desc:`${it.nombre}${it.talla?' ('+it.talla+')':''}`,cantidad:qty,precio:it.precio});
   renderSaleDraft();
 }
-function addFreeItem() {
-  const desc = v('freeDesc'), price = +v('freePrice') || 0;
-  if (!desc) return toast('Escribe una descripción', 'bad');
-  saleDraft.push({ invId: '', desc, cantidad: 1, precio: price });
-  $('#freeDesc').value = ''; $('#freePrice').value = '';
+function addFreeItem(){
+  const desc=v('freeDesc'), price=+v('freePrice')||0;
+  if(!desc) return toast('Escribe una descripción','bad');
+  saleDraft.push({invId:'',desc,cantidad:1,precio:price});
+  $('#freeDesc').value=''; $('#freePrice').value='';
   renderSaleDraft();
 }
-function removeSaleItem(i) { saleDraft.splice(i, 1); renderSaleDraft(); }
-function renderSaleDraft() {
-  const el = $('#saleDraft'); if (!el) return;
-  const total = saleDraft.reduce((a, d) => a + d.precio * d.cantidad, 0);
-  el.innerHTML = saleDraft.length ? `<div class="card" style="padding:0;overflow:auto">
-    <table><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead><tbody>
-    ${saleDraft.map((d, i) => `<tr><td>${h(d.desc)}</td><td>${d.cantidad}</td><td>${money(d.precio)}</td><td><b>${money(d.precio * d.cantidad)}</b></td>
-    <td style="text-align:right"><button class="btn danger sm" onclick="removeSaleItem(${i})">${icon('x', 14)}</button></td></tr>`).join('')}
-    <tr><td colspan="3" style="text-align:right"><b>TOTAL</b></td><td colspan="2"><b style="font-size:17px;color:#4ade80">${money(total)}</b></td></tr>
-    </tbody></table></div>` : '<p class="mut sm">Aún no has agregado productos a la venta.</p>';
+function removeSaleItem(i){ saleDraft.splice(i,1); renderSaleDraft(); }
+function renderSaleDraft(){
+  const el=$('#saleDraft'); if(!el) return;
+  const total=saleDraft.reduce((a,d)=>a+d.precio*d.cantidad,0);
+  el.innerHTML=saleDraft.length?`<div class="card flush"><div class="table-wrap"><table>
+    <thead><tr><th>Descripción</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead><tbody>
+    ${saleDraft.map((d,i)=>`<tr><td>${h(d.desc)}</td><td>${d.cantidad}</td><td>${money(d.precio)}</td><td><b>${money(d.precio*d.cantidad)}</b></td>
+    <td style="text-align:right"><button class="btn danger sm icon-only" onclick="removeSaleItem(${i})">${icon('x',14)}</button></td></tr>`).join('')}
+    <tr><td colspan="3" style="text-align:right"><b>TOTAL</b></td><td colspan="2"><b style="font-size:16px;color:#4ade80">${money(total)}</b></td></tr>
+    </tbody></table></div></div>`:'<p class="mut sm">Sin productos agregados.</p>';
 }
-function confirmSale() {
-  if (!saleDraft.length) return toast('Agrega al menos un producto', 'bad');
-  const cid = v('saleClient');
-  const s = DB.students.find(x => x.id === cid);
-  const total = saleDraft.reduce((a, d) => a + d.precio * d.cantidad, 0);
-  saleDraft.forEach(d => {
-    if (d.invId) { const it = DB.inventory.find(i => i.id === d.invId); if (it) it.stock -= d.cantidad; }
-  });
-  const sale = {
-    id: uid('sa'), fecha: today(), clienteId: cid,
-    clienteNombre: s ? ((s.nombres || '') + ' ' + (s.apellidos || '')).trim() : 'Público general',
-    metodo: v('saleMethod'), total, items: saleDraft.slice()
+function confirmSale(){
+  if(!saleDraft.length) return toast('Agrega al menos un producto','bad');
+  const cid=v('saleClient');
+  const s=DB.students.find(x=>x.id===cid);
+  const total=saleDraft.reduce((a,d)=>a+d.precio*d.cantidad,0);
+  saleDraft.forEach(d=>{ if(d.invId){ const it=DB.inventory.find(i=>i.id===d.invId); if(it) it.stock-=d.cantidad; } });
+  const sale={
+    id:uid('sa'),fecha:today(),clienteId:cid,
+    clienteNombre:s?nom(s):'Público general',
+    metodo:v('saleMethod'),total,items:saleDraft.slice()
   };
   DB.sales.push(sale);
-  DB.transactions.push({
-    id: uid('t'), fecha: sale.fecha, tipo: 'ingreso', categoria: 'Venta',
-    descripcion: 'Venta a ' + sale.clienteNombre, monto: total, metodo: sale.metodo, refId: sale.id
-  });
-  saleDraft = []; persist(); closeModal(); render(); toast('Venta registrada');
+  DB.transactions.push({id:uid('t'),fecha:sale.fecha,tipo:'ingreso',categoria:'Venta',descripcion:'Venta a '+sale.clienteNombre,monto:total,metodo:sale.metodo,refId:sale.id});
+  saleDraft=[]; persist(); closeModal(); render(); toast('Venta registrada');
 }
-function delSale(id) {
-  if (!confirm('¿Eliminar esta venta? Se devolverá el stock y se borrará el ingreso asociado.')) return;
-  const s = DB.sales.find(x => x.id === id); if (!s) return;
-  s.items.forEach(it => { if (it.invId) { const p = DB.inventory.find(i => i.id === it.invId); if (p) p.stock += it.cantidad; } });
-  DB.sales = DB.sales.filter(x => x.id !== id);
-  DB.transactions = DB.transactions.filter(t => t.refId !== id);
-  persist(); render(); toast('Venta eliminada y stock restaurado');
+function delSale(id){
+  if(!confirm('¿Eliminar esta venta? Se devolverá stock y se borrará el ingreso.')) return;
+  const s=DB.sales.find(x=>x.id===id); if(!s) return;
+  s.items.forEach(it=>{ if(it.invId){ const p=DB.inventory.find(i=>i.id===it.invId); if(p) p.stock+=it.cantidad; } });
+  DB.sales=DB.sales.filter(x=>x.id!==id);
+  DB.transactions=DB.transactions.filter(t=>t.refId!==id);
+  persist(); render(); toast('Venta eliminada');
 }
-function showSaleReceipt(id) {
-  const s = DB.sales.find(x => x.id === id); if (!s) return;
-  const body = `
+function showSaleReceipt(id){
+  const s=DB.sales.find(x=>x.id===id); if(!s) return;
+  const body=`
     <div style="text-align:center"><h3 style="margin:0">ACADEMIA DOJOPRO</h3><div>Comprobante de venta</div></div><hr>
     <div>Fecha: ${fmtDate(s.fecha)}</div>
     <div>Cliente: ${h(s.clienteNombre)}</div>
     <div>Método: ${h(s.metodo)}</div><hr>
-    ${s.items.map(i => `<div>${i.cantidad} × ${h(i.desc)} ....... ${money(i.precio * i.cantidad)}</div>`).join('')}
+    ${s.items.map(i=>`<div>${i.cantidad} × ${h(i.desc)} ....... ${money(i.precio*i.cantidad)}</div>`).join('')}
     <hr><div style="font-size:18px"><b>TOTAL: ${money(s.total)}</b></div><hr>
     <div style="text-align:center;font-size:11px">¡Gracias por tu compra!</div>`;
-  openModal('Comprobante de venta', `
+  openModal('Comprobante',`
     <div class="card" style="font-family:ui-monospace,monospace;font-size:13px;line-height:1.8">${body}</div>
     <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cerrar</button><button class="btn" onclick='printHTML(${JSON.stringify(body)})'>${icon('printer')} Imprimir</button></div>`);
 }
@@ -1226,15 +1503,15 @@ function showSaleReceipt(id) {
 /* =========================================================
    8) INGRESOS Y EGRESOS
    ========================================================= */
-function viewFinance() {
-  const cur = today().slice(0, 7);
-  const ing = DB.transactions.filter(t => t.tipo === 'ingreso' && t.fecha.slice(0, 7) === cur).reduce((a, t) => a + t.monto, 0);
-  const egr = DB.transactions.filter(t => t.tipo === 'egreso' && t.fecha.slice(0, 7) === cur).reduce((a, t) => a + t.monto, 0);
+function viewFinance(){
+  const cur=today().slice(0,7);
+  const ing=DB.transactions.filter(t=>t.tipo==='ingreso'&&t.fecha.slice(0,7)===cur).reduce((a,t)=>a+t.monto,0);
+  const egr=DB.transactions.filter(t=>t.tipo==='egreso'&&t.fecha.slice(0,7)===cur).reduce((a,t)=>a+t.monto,0);
   return `
     <div class="cards">
-      <div class="stat"><div class="k">Ingresos del mes</div><div class="v" style="color:#4ade80">${money(ing)}</div><div class="s">${monthLabel(cur)}</div></div>
-      <div class="stat"><div class="k">Egresos del mes</div><div class="v" style="color:#f87171">${money(egr)}</div><div class="s">${monthLabel(cur)}</div></div>
-      <div class="stat"><div class="k">Ganancia neta</div><div class="v" style="color:${ing - egr >= 0 ? '#4ade80' : '#f87171'}">${money(ing - egr)}</div></div>
+      <div class="stat"><div class="k">Ingresos mes</div><div class="v" style="color:#4ade80">${money(ing)}</div><div class="s">${monthLabel(cur)}</div></div>
+      <div class="stat"><div class="k">Egresos mes</div><div class="v" style="color:#f87171">${money(egr)}</div></div>
+      <div class="stat"><div class="k">Ganancia</div><div class="v" style="color:${ing-egr>=0?'#4ade80':'#f87171'}">${money(ing-egr)}</div></div>
       <div class="stat"><div class="k">Movimientos</div><div class="v">${DB.transactions.length}</div></div>
     </div>
     <div class="toolbar mt">
@@ -1247,280 +1524,262 @@ function viewFinance() {
     </div>
     <div id="finList"></div>`;
 }
-function renderFinList() {
-  const per = $('#finMonth')?.value || '';
-  const tipo = $('#finType')?.value || '';
-  let list = DB.transactions.filter(t => (!per || t.fecha.slice(0, 7) === per) && (!tipo || t.tipo === tipo));
-  list.sort((a, b) => b.fecha.localeCompare(a.fecha));
-  const ing = list.filter(t => t.tipo === 'ingreso').reduce((a, t) => a + t.monto, 0);
-  const egr = list.filter(t => t.tipo === 'egreso').reduce((a, t) => a + t.monto, 0);
-  const el = $('#finList'); if (!el) return;
-  el.innerHTML = `
+function renderFinList(){
+  const per=$('#finMonth')?.value||'';
+  const tipo=$('#finType')?.value||'';
+  let list=DB.transactions.filter(t=>(!per||t.fecha.slice(0,7)===per)&&(!tipo||t.tipo===tipo));
+  list.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const ing=list.filter(t=>t.tipo==='ingreso').reduce((a,t)=>a+t.monto,0);
+  const egr=list.filter(t=>t.tipo==='egreso').reduce((a,t)=>a+t.monto,0);
+  const el=$('#finList'); if(!el) return;
+  el.innerHTML=`
     <div class="cards" style="margin-bottom:14px">
-      <div class="stat"><div class="k">Total ingresos</div><div class="v" style="color:#4ade80">${money(ing)}</div></div>
-      <div class="stat"><div class="k">Total egresos</div><div class="v" style="color:#f87171">${money(egr)}</div></div>
-      <div class="stat"><div class="k">Balance</div><div class="v">${money(ing - egr)}</div></div>
+      <div class="stat"><div class="k">Ingresos</div><div class="v" style="color:#4ade80">${money(ing)}</div></div>
+      <div class="stat"><div class="k">Egresos</div><div class="v" style="color:#f87171">${money(egr)}</div></div>
+      <div class="stat"><div class="k">Balance</div><div class="v">${money(ing-egr)}</div></div>
     </div>
-    <div class="card" style="padding:0;overflow:auto">
-    ${list.length ? `<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th>Método</th><th>Monto</th><th></th></tr></thead><tbody>
-      ${list.map(t => `<tr>
-        <td>${fmtDate(t.fecha)}</td>
-        <td><span class="badge ${t.tipo === 'ingreso' ? 'b-ok' : 'b-bad'}">${t.tipo}</span></td>
-        <td class="mut">${h(t.categoria)}</td>
-        <td>${h(t.descripcion)}</td>
-        <td class="mut">${h(t.metodo || '—')}</td>
-        <td style="color:${t.tipo === 'ingreso' ? '#4ade80' : '#f87171'};font-weight:700;white-space:nowrap">${t.tipo === 'ingreso' ? '+' : '−'} ${money(t.monto)}</td>
-        <td style="text-align:right">${t.refId ? '' : `<button class="btn danger sm" onclick="delTx('${t.id}')">${icon('x', 14)}</button>`}</td>
-      </tr>`).join('')}</tbody></table>` : '<p class="empty">Sin movimientos para el filtro seleccionado</p>'}
-    </div>`;
+    ${list.length?`<div class="card flush"><div class="table-wrap"><table>
+    <thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Descripción</th><th>Método</th><th>Monto</th><th></th></tr></thead><tbody>
+    ${list.map(t=>`<tr>
+      <td>${fmtDate(t.fecha)}</td>
+      <td><span class="badge ${t.tipo==='ingreso'?'b-ok':'b-bad'}">${t.tipo}</span></td>
+      <td class="mut hide-mobile">${h(t.categoria)}</td>
+      <td>${h(t.descripcion)}</td>
+      <td class="mut hide-mobile">${h(t.metodo||'—')}</td>
+      <td style="color:${t.tipo==='ingreso'?'#4ade80':'#f87171'};font-weight:700;white-space:nowrap">${t.tipo==='ingreso'?'+':'−'} ${money(t.monto)}</td>
+      <td style="text-align:right">${t.refId?'':`<button class="btn danger sm icon-only" onclick="delTx('${t.id}')">${icon('x',14)}</button>`}</td>
+    </tr>`).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin movimientos','Ajusta los filtros o registra uno nuevo','finance')}</div>`}`;
 }
-function openTx(tipo) {
-  openModal(tipo === 'ingreso' ? 'Registrar ingreso' : 'Registrar egreso', `
+function openTx(tipo){
+  openModal(tipo==='ingreso'?'Registrar ingreso':'Registrar egreso',`
     <div class="grid2">
       <label>Fecha<input type="date" id="tx_fecha" value="${today()}"></label>
       <label>Monto<input type="number" id="tx_monto" min="0" value="0"></label>
-      <label>Categoría<select id="tx_cat">${opts(tipo === 'ingreso'
-    ? ['Mensualidad', 'Inscripción', 'Examen', 'Venta', 'Patrocinio', 'Otro']
-    : ['Arriendo', 'Servicios', 'Insumos', 'Nómina', 'Mantenimiento', 'Publicidad', 'Otro'], 'Otro')}</select></label>
-      <label>Método<select id="tx_metodo">${opts(['Efectivo', 'Transferencia', 'Tarjeta', 'Nequi', 'Daviplata'], 'Efectivo')}</select></label>
+      <label>Categoría<select id="tx_cat">${opts(tipo==='ingreso'
+        ?['Mensualidad','Inscripción','Examen','Venta','Patrocinio','Otro']
+        :['Arriendo','Servicios','Insumos','Nómina','Mantenimiento','Publicidad','Otro'],'Otro')}</select></label>
+      <label>Método<select id="tx_metodo">${opts(['Efectivo','Transferencia','Tarjeta','Nequi','Daviplata'],'Efectivo')}</select></label>
     </div>
     <label class="mt">Descripción<input id="tx_desc" placeholder="Detalle del movimiento"></label>
     <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveTx('${tipo}')">Guardar</button></div>`);
 }
-function saveTx(tipo) {
-  const monto = +v('tx_monto') || 0;
-  if (monto <= 0) return toast('El monto debe ser mayor a cero', 'bad');
+function saveTx(tipo){
+  const monto=+v('tx_monto')||0;
+  if(monto<=0) return toast('El monto debe ser mayor a cero','bad');
   DB.transactions.push({
-    id: uid('t'), fecha: v('tx_fecha') || today(), tipo, categoria: v('tx_cat'),
-    descripcion: v('tx_desc') || v('tx_cat'), monto, metodo: v('tx_metodo'), refId: ''
+    id:uid('t'),fecha:v('tx_fecha')||today(),tipo,categoria:v('tx_cat'),
+    descripcion:v('tx_desc')||v('tx_cat'),monto,metodo:v('tx_metodo'),refId:''
   });
   persist(); closeModal(); render(); toast('Movimiento registrado');
 }
-function delTx(id) {
-  if (!confirm('¿Eliminar este movimiento?')) return;
-  DB.transactions = DB.transactions.filter(t => t.id !== id); persist(); render(); toast('Movimiento eliminado');
+function delTx(id){
+  if(!confirm('¿Eliminar este movimiento?')) return;
+  DB.transactions=DB.transactions.filter(t=>t.id!==id); persist(); render(); toast('Movimiento eliminado');
 }
 
 /* =========================================================
    9) REPORTES
    ========================================================= */
-function viewReports() {
-  const cur = today().slice(0, 7);
-  const activos = DB.students.filter(s => s.estado === 'activo');
-  const retirados = DB.students.filter(s => s.estado === 'retirado');
-  const nuevos = DB.students.filter(s => (s.fechaInscripcion || '').slice(0, 7) === cur);
-  const pend = DB.payments.filter(p => p.estado === 'pendiente');
-  const vencidas = pend.filter(p => p.fechaVencimiento < today());
-  const deudoresMap = {};
-  vencidas.forEach(p => { deudoresMap[p.studentId] = (deudoresMap[p.studentId] || 0) + p.monto; });
-  const deudores = Object.entries(deudoresMap).map(([id, monto]) => ({ s: DB.students.find(x => x.id === id), monto })).filter(x => x.s);
-
-  const lim = new Date(); lim.setDate(lim.getDate() - 30); const limStr = lim.toISOString().slice(0, 10);
-  const att = DB.attendance.filter(a => a.fecha >= limStr);
-  const porGrupo = DB.groups.map(g => {
-    const recs = att.filter(a => a.grupoId === g.id);
-    let p = 0, t = 0;
-    recs.forEach(r => Object.values(r.registros).forEach(x => { t++; if (x === 'presente' || x === 'tarde') p++; }));
-    return { g, p, t, pct: t ? Math.round(p / t * 100) : 0 };
+function viewReports(){
+  const cur=today().slice(0,7);
+  const activos=DB.students.filter(s=>s.estado==='activo');
+  const retirados=DB.students.filter(s=>s.estado==='retirado');
+  const nuevos=DB.students.filter(s=>(s.fechaInscripcion||'').slice(0,7)===cur);
+  const pend=DB.payments.filter(p=>p.estado==='pendiente');
+  const vencidas=pend.filter(p=>p.fechaVencimiento<today());
+  const deudoresMap={};
+  vencidas.forEach(p=>{ deudoresMap[p.studentId]=(deudoresMap[p.studentId]||0)+p.monto; });
+  const deudores=Object.entries(deudoresMap).map(([id,monto])=>({s:DB.students.find(x=>x.id===id),monto})).filter(x=>x.s);
+  const lim=new Date(); lim.setDate(lim.getDate()-30); const limStr=lim.toISOString().slice(0,10);
+  const att=DB.attendance.filter(a=>a.fecha>=limStr);
+  const porGrupo=DB.groups.map(g=>{
+    const recs=att.filter(a=>a.grupoId===g.id);
+    let p=0,t=0;
+    recs.forEach(r=>Object.values(r.registros).forEach(x=>{t++;if(x==='presente'||x==='tarde') p++;}));
+    return {g,p,t,pct:t?Math.round(p/t*100):0};
   });
-
-  const prodMap = {};
-  DB.sales.forEach(s => s.items.forEach(i => {
-    const k = i.desc; if (!prodMap[k]) prodMap[k] = { cant: 0, total: 0 };
-    prodMap[k].cant += i.cantidad; prodMap[k].total += i.cantidad * i.precio;
+  const prodMap={};
+  DB.sales.forEach(s=>s.items.forEach(i=>{
+    const k=i.desc; if(!prodMap[k]) prodMap[k]={cant:0,total:0};
+    prodMap[k].cant+=i.cantidad; prodMap[k].total+=i.cantidad*i.precio;
   }));
-  const topProds = Object.entries(prodMap).sort((a, b) => b[1].total - a[1].total).slice(0, 8);
-
-  const meses = [];
-  for (let i = 5; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); meses.push(d.toISOString().slice(0, 7)); }
-  const finMes = meses.map(m => {
-    const i = DB.transactions.filter(t => t.tipo === 'ingreso' && t.fecha.slice(0, 7) === m).reduce((a, t) => a + t.monto, 0);
-    const e = DB.transactions.filter(t => t.tipo === 'egreso' && t.fecha.slice(0, 7) === m).reduce((a, t) => a + t.monto, 0);
-    return { m, i, e, b: i - e };
+  const topProds=Object.entries(prodMap).sort((a,b)=>b[1].total-a[1].total).slice(0,8);
+  const meses=[];
+  for(let i=5;i>=0;i--){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); meses.push(d.toISOString().slice(0,7)); }
+  const finMes=meses.map(m=>{
+    const i=DB.transactions.filter(t=>t.tipo==='ingreso'&&t.fecha.slice(0,7)===m).reduce((a,t)=>a+t.monto,0);
+    const e=DB.transactions.filter(t=>t.tipo==='egreso'&&t.fecha.slice(0,7)===m).reduce((a,t)=>a+t.monto,0);
+    return {m,i,e,b:i-e};
   });
-
   return `
-    <div class="row" style="justify-content:flex-end;margin-bottom:14px">
-      <button class="btn ghost" onclick="window.print()">${icon('printer')} Imprimir reporte</button>
-    </div>
-
+    <div class="row end" style="margin-bottom:14px"><button class="btn ghost" onclick="window.print()">${icon('printer')} Imprimir</button></div>
     <div class="sec-title" style="margin-top:0">Estudiantes</div>
     <div class="cards">
       <div class="stat"><div class="k">Activos</div><div class="v" style="color:#4ade80">${activos.length}</div></div>
-      <div class="stat"><div class="k">Inscritos este mes</div><div class="v">${nuevos.length}</div></div>
+      <div class="stat"><div class="k">Nuevos este mes</div><div class="v">${nuevos.length}</div></div>
       <div class="stat"><div class="k">Retirados</div><div class="v" style="color:#f87171">${retirados.length}</div></div>
-      <div class="stat"><div class="k">Deudores</div><div class="v" style="color:#fbbf24">${deudores.length}</div><div class="s">${money(vencidas.reduce((a, p) => a + p.monto, 0))} vencido</div></div>
+      <div class="stat"><div class="k">Deudores</div><div class="v" style="color:#fbbf24">${deudores.length}</div><div class="s">${money(vencidas.reduce((a,p)=>a+p.monto,0))} vencido</div></div>
     </div>
-
     <div class="sec-title">Reporte de deudores</div>
-    <div class="card" style="padding:0;overflow:auto">
-    ${deudores.length ? `<table><thead><tr><th>Estudiante</th><th>Grupo</th><th>Tutor</th><th>Contacto</th><th>Deuda</th><th>Cuotas vencidas</th></tr></thead><tbody>
-      ${deudores.map(d => {
-        const g = DB.groups.find(x => x.id === d.s.grupoId);
-        const n = vencidas.filter(p => p.studentId === d.s.id).length;
-        return `<tr><td>${avatarHTML(d.s, 28)}<b>${h(((d.s.nombres || '') + ' ' + (d.s.apellidos || '')).trim())}</b></td>
-        <td class="mut">${g ? h(g.nombre) : '—'}</td>
-        <td class="mut">${h(d.s.tutor?.nombre || '—')}</td>
-        <td class="mut">${h(d.s.tutor?.telefono || d.s.telefono || '—')}</td>
+    ${deudores.length?`<div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Estudiante</th><th>Grupo</th><th>Tutor</th><th>Contacto</th><th>Deuda</th><th>Cuotas</th></tr></thead><tbody>
+      ${deudores.map(d=>{
+        const g=DB.groups.find(x=>x.id===d.s.grupoId);
+        const n=vencidas.filter(p=>p.studentId===d.s.id).length;
+        return `<tr><td>${avatarHTML(d.s,28)}<b>${h(nom(d.s))}</b></td>
+        <td class="mut hide-mobile">${g?h(g.nombre):'—'}</td>
+        <td class="mut hide-mobile">${h(d.s.tutor?.nombre||'—')}</td>
+        <td class="mut hide-mobile">${h(d.s.tutor?.telefono||d.s.telefono||'—')}</td>
         <td style="color:#f87171;font-weight:700">${money(d.monto)}</td><td>${n}</td></tr>`;
-      }).join('')}</tbody></table>` : '<p class="empty">No hay deudores vencidos.</p>'}
-    </div>
-
-    <div class="sec-title">Asistencia por grupo (últimos 30 días)</div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Grupo</th><th>Horario</th><th>Registros</th><th>Asistencias</th><th>% Asistencia</th></tr></thead><tbody>
-      ${porGrupo.map(r => `<tr>
+      }).join('')}</tbody></table></div></div>`:`<div class="card">${emptyState('Sin deudores','Todos al día','check')}</div>`}
+    <div class="sec-title">Asistencia por grupo (30 días)</div>
+    <div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Grupo</th><th>Horario</th><th>Registros</th><th>Asistencias</th><th>%</th></tr></thead><tbody>
+      ${porGrupo.map(r=>`<tr>
         <td><b>${h(r.g.nombre)}</b></td>
-        <td class="mut">${h(r.g.dias.join(', '))} · ${h(r.g.horaInicio)}-${h(r.g.horaFin)}</td>
+        <td class="mut hide-mobile">${h(r.g.dias.join(', '))} · ${h(r.g.horaInicio)}-${h(r.g.horaFin)}</td>
         <td>${r.t}</td><td>${r.p}</td>
-        <td><span class="badge ${r.pct >= 80 ? 'b-ok' : r.pct >= 60 ? 'b-warn' : 'b-bad'}">${r.pct}%</span></td>
-      </tr>`).join('')}</tbody></table>
-    </div>
-
+        <td><span class="badge ${r.pct>=80?'b-ok':r.pct>=60?'b-warn':'b-bad'}">${r.pct}%</span></td>
+      </tr>`).join('')}</tbody></table></div></div>
     <div class="sec-title">Productos más vendidos</div>
-    <div class="card" style="padding:0;overflow:auto">
-    ${topProds.length ? `<table><thead><tr><th>Producto</th><th>Unidades</th><th>Total vendido</th></tr></thead><tbody>
-      ${topProds.map(([k, d]) => `<tr><td>${h(k)}</td><td>${d.cant}</td><td><b>${money(d.total)}</b></td></tr>`).join('')}
-      </tbody></table>` : '<p class="empty">Sin ventas registradas</p>'}
-    </div>
-
-    <div class="sec-title">Informe financiero (últimos 6 meses)</div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Mes</th><th>Ingresos</th><th>Egresos</th><th>Balance</th></tr></thead><tbody>
-      ${finMes.map(r => `<tr>
+    ${topProds.length?`<div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Producto</th><th>Unidades</th><th>Total</th></tr></thead><tbody>
+      ${topProds.map(([k,d])=>`<tr><td>${h(k)}</td><td>${d.cant}</td><td><b>${money(d.total)}</b></td></tr>`).join('')}
+      </tbody></table></div></div>`:`<div class="card">${emptyState('Sin ventas','Aún no hay datos','sales')}</div>`}
+    <div class="sec-title">Informe financiero (6 meses)</div>
+    <div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Mes</th><th>Ingresos</th><th>Egresos</th><th>Balance</th></tr></thead><tbody>
+      ${finMes.map(r=>`<tr>
         <td>${monthLabel(r.m)}</td>
         <td style="color:#4ade80">${money(r.i)}</td>
         <td style="color:#f87171">${money(r.e)}</td>
-        <td style="color:${r.b >= 0 ? '#4ade80' : '#f87171'};font-weight:700">${money(r.b)}</td>
-      </tr>`).join('')}
-      </tbody></table>
-    </div>`;
+        <td style="color:${r.b>=0?'#4ade80':'#f87171'};font-weight:700">${money(r.b)}</td>
+      </tr>`).join('')}</tbody></table></div></div>`;
 }
 
 /* =========================================================
    10) HORARIOS Y GRUPOS
    ========================================================= */
-const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-function viewGroups() {
+const DIAS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+function viewGroups(){
   return `
     <div class="toolbar"><button class="btn" onclick="openGroup()">${icon('plus')} Nuevo grupo</button></div>
-    <div class="cards">
-    ${DB.groups.map(g => {
-      const n = DB.students.filter(s => s.grupoId === g.id && s.estado === 'activo').length;
-      const ins = DB.users.find(u => u.id === g.instructorId);
-      const lleno = n >= g.cupo;
+    ${DB.groups.length?`<div class="cards">
+    ${DB.groups.map(g=>{
+      const n=DB.students.filter(s=>s.grupoId===g.id&&s.estado==='activo').length;
+      const ins=DB.users.find(u=>u.id===g.instructorId);
+      const lleno=n>=g.cupo;
       return `<div class="card">
-        <div class="row" style="justify-content:space-between">
-          <h3 style="font-size:16px">${h(g.nombre)}</h3>
-          <span class="badge ${lleno ? 'b-bad' : 'b-info'}">${n}/${g.cupo}</span>
+        <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+          <h3 style="font-size:15px;min-width:0;overflow-wrap:break-word">${h(g.nombre)}</h3>
+          <span class="badge ${lleno?'b-bad':'b-info'}" style="flex:none">${n}/${g.cupo}</span>
         </div>
         <div class="mut sm mt">${h(g.categoria)} · ${g.edadMin}-${g.edadMax} años</div>
         <div class="mt"><b>${h(g.horaInicio)} – ${h(g.horaFin)}</b></div>
         <div class="mut sm">${h(g.dias.join(' · '))}</div>
-        <div class="mut sm mt">Instructor: ${ins ? h(ins.nombre) : '—'}</div>
-        <div class="mt"><span class="badge b-mut">Mensualidad ${money(g.mensualidad)}</span></div>
+        <div class="mut sm mt">Instructor: ${ins?h(ins.nombre):'—'}</div>
+        <div class="mt"><span class="badge b-mut">${money(g.mensualidad)}</span></div>
         <div class="row mt">
           <button class="btn ghost sm" onclick="openGroup('${g.id}')">Editar</button>
           <button class="btn danger sm" onclick="delGroup('${g.id}')">Eliminar</button>
         </div>
       </div>`;
-    }).join('') || '<div class="card"><p class="empty">No hay grupos creados</p></div>'}
-    </div>`;
+    }).join('')}</div>`:`<div class="card">${emptyState('Sin grupos','Crea el primer grupo','groups')}</div>`}`;
 }
-function openGroup(id) {
-  const g = id ? DB.groups.find(x => x.id === id) : { categoria: 'Infantil', edadMin: 5, edadMax: 10, dias: [], horaInicio: '16:00', horaFin: '17:00', cupo: 15, mensualidad: 60000, instructorId: 'u2' };
-  openModal(id ? 'Editar grupo' : 'Nuevo grupo', `
+function openGroup(id){
+  const g=id?DB.groups.find(x=>x.id===id):{categoria:'Infantil',edadMin:5,edadMax:10,dias:[],horaInicio:'16:00',horaFin:'17:00',cupo:15,mensualidad:60000,instructorId:'u2'};
+  openModal(id?'Editar grupo':'Nuevo grupo',`
     <div class="grid2">
-      <label>Nombre del grupo<input id="g_nombre" value="${h(g.nombre || '')}"></label>
-      <label>Categoría<select id="g_cat">${opts(['Infantil', 'Juvenil', 'Adulto', 'Competencia', 'Mixto'], g.categoria)}</select></label>
-      <label>Edad mínima<input type="number" id="g_emin" value="${g.edadMin}" min="0"></label>
-      <label>Edad máxima<input type="number" id="g_emax" value="${g.edadMax}" min="0"></label>
+      <label>Nombre<input id="g_nombre" value="${h(g.nombre||'')}"></label>
+      <label>Categoría<select id="g_cat">${opts(['Infantil','Juvenil','Adulto','Competencia','Mixto'],g.categoria)}</select></label>
+      <label>Edad mín.<input type="number" id="g_emin" value="${g.edadMin}" min="0"></label>
+      <label>Edad máx.<input type="number" id="g_emax" value="${g.edadMax}" min="0"></label>
       <label>Hora inicio<input type="time" id="g_hi" value="${h(g.horaInicio)}"></label>
       <label>Hora fin<input type="time" id="g_hf" value="${h(g.horaFin)}"></label>
-      <label>Cupo máximo<input type="number" id="g_cupo" value="${g.cupo}" min="1"></label>
+      <label>Cupo<input type="number" id="g_cupo" value="${g.cupo}" min="1"></label>
       <label>Mensualidad<input type="number" id="g_mens" value="${g.mensualidad}" min="0"></label>
-      <label style="grid-column:1/-1">Instructor<select id="g_inst">${DB.users.filter(u => u.rol === 'instructor' || u.rol === 'admin').map(u => `<option value="${u.id}" ${g.instructorId === u.id ? 'selected' : ''}>${h(u.nombre)}</option>`).join('')}</select></label>
+      <label style="grid-column:1/-1">Instructor<select id="g_inst">${DB.users.filter(u=>u.rol==='instructor'||u.rol==='admin').map(u=>`<option value="${u.id}" ${g.instructorId===u.id?'selected':''}>${h(u.nombre)}</option>`).join('')}</select></label>
     </div>
-    <label class="mt">Días de entrenamiento</label>
-    <div class="row">${DIAS.map(d => `<label style="flex-direction:row;gap:6px;align-items:center;color:var(--txt)">
-      <input type="checkbox" class="g_dia" value="${d}" ${g.dias.includes(d) ? 'checked' : ''} style="width:auto"> ${d}</label>`).join('')}</div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveGroup('${id || ''}')">Guardar</button></div>`);
+    <label class="mt">Días</label>
+    <div class="row">${DIAS.map(d=>`<label style="flex-direction:row;gap:6px;align-items:center;color:var(--txt);font-size:13px">
+      <input type="checkbox" class="g_dia" value="${d}" ${g.dias.includes(d)?'checked':''} style="width:auto;min-height:auto"> ${d}</label>`).join('')}</div>
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveGroup('${id||''}')">Guardar</button></div>`);
 }
-function saveGroup(id) {
-  const dias = [...document.querySelectorAll('.g_dia:checked')].map(c => c.value);
-  const data = {
-    nombre: v('g_nombre'), categoria: v('g_cat'), edadMin: +v('g_emin') || 0, edadMax: +v('g_emax') || 0,
-    horaInicio: v('g_hi'), horaFin: v('g_hf'), cupo: +v('g_cupo') || 10,
-    mensualidad: +v('g_mens') || 0, instructorId: v('g_inst'), dias
+function saveGroup(id){
+  const dias=[...document.querySelectorAll('.g_dia:checked')].map(c=>c.value);
+  const data={
+    nombre:v('g_nombre'),categoria:v('g_cat'),edadMin:+v('g_emin')||0,edadMax:+v('g_emax')||0,
+    horaInicio:v('g_hi'),horaFin:v('g_hf'),cupo:+v('g_cupo')||10,
+    mensualidad:+v('g_mens')||0,instructorId:v('g_inst'),dias
   };
-  if (!data.nombre) return toast('El nombre es obligatorio', 'bad');
-  if (id) Object.assign(DB.groups.find(x => x.id === id), data);
-  else DB.groups.push({ id: uid('g'), ...data });
+  if(!data.nombre) return toast('El nombre es obligatorio','bad');
+  if(id) Object.assign(DB.groups.find(x=>x.id===id),data);
+  else DB.groups.push({id:uid('g'),...data});
   persist(); closeModal(); render(); toast('Grupo guardado');
 }
-function delGroup(id) {
-  const n = DB.students.filter(s => s.grupoId === id).length;
-  if (n) return toast(`No se puede eliminar: ${n} estudiantes asignados`, 'bad');
-  if (!confirm('¿Eliminar este grupo?')) return;
-  DB.groups = DB.groups.filter(g => g.id !== id); persist(); render(); toast('Grupo eliminado');
+function delGroup(id){
+  const n=DB.students.filter(s=>s.grupoId===id).length;
+  if(n) return toast(`No se puede: ${n} estudiantes asignados`,'bad');
+  if(!confirm('¿Eliminar este grupo?')) return;
+  DB.groups=DB.groups.filter(g=>g.id!==id); persist(); render(); toast('Grupo eliminado');
 }
 
 /* =========================================================
    11) USUARIOS Y PERMISOS
    ========================================================= */
-function viewUsers() {
+function viewUsers(){
   return `
     <div class="card" style="margin-bottom:16px">
       <div class="sec-title" style="margin-top:0">Matriz de permisos</div>
-      <table><thead><tr><th>Módulo</th><th>Administrador</th><th>Instructor</th></tr></thead><tbody>
-      ${Object.keys(NAV).map(k => `<tr>
-        <td><span style="display:inline-flex;align-items:center;gap:7px">${icon(NAV[k].icon, 15)} ${NAV[k].label}</span></td>
-        <td>${PERMS.admin.includes(k) ? '<span class="badge b-ok">Acceso</span>' : '<span class="badge b-mut">—</span>'}</td>
-        <td>${PERMS.instructor.includes(k) ? '<span class="badge b-ok">Acceso</span>' : '<span class="badge b-mut">—</span>'}</td>
-      </tr>`).join('')}</tbody></table>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Módulo</th><th>Admin</th><th>Instructor</th></tr></thead>
+        <tbody>
+        ${Object.keys(NAV).map(k=>`<tr>
+          <td><span style="display:inline-flex;align-items:center;gap:7px">${icon(NAV[k].icon,14)} ${NAV[k].label}</span></td>
+          <td>${PERMS.admin.includes(k)?'<span class="badge b-ok">Sí</span>':'<span class="badge b-mut">—</span>'}</td>
+          <td>${PERMS.instructor.includes(k)?'<span class="badge b-ok">Sí</span>':'<span class="badge b-mut">—</span>'}</td>
+        </tr>`).join('')}</tbody></table></div>
     </div>
     <div class="toolbar"><button class="btn" onclick="openUser()">${icon('plus')} Nuevo usuario</button></div>
-    <div class="card" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
-      ${DB.users.map(u => `<tr>
-        <td>${avatarHTML({ nombre: u.nombre }, 30)} <b>${h(u.nombre)}</b></td>
-        <td class="mut">${h(u.usuario)}</td>
-        <td><span class="badge ${u.rol === 'admin' ? 'b-info' : 'b-mut'}">${u.rol}</span></td>
-        <td><span class="badge ${u.activo ? 'b-ok' : 'b-bad'}">${u.activo ? 'activo' : 'inactivo'}</span></td>
+    <div class="card flush"><div class="table-wrap"><table>
+      <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
+      ${DB.users.map(u=>`<tr>
+        <td>${avatarHTML({nombre:u.nombre},30)} <b>${h(u.nombre)}</b></td>
+        <td class="mut hide-mobile">${h(u.usuario)}</td>
+        <td><span class="badge ${u.rol==='admin'?'b-info':'b-mut'}">${u.rol}</span></td>
+        <td><span class="badge ${u.activo?'b-ok':'b-bad'}">${u.activo?'activo':'inactivo'}</span></td>
         <td style="text-align:right;white-space:nowrap">
           <button class="btn ghost sm" onclick="openUser('${u.id}')">Editar</button>
-          ${u.id !== session.id ? `<button class="btn danger sm" onclick="delUser('${u.id}')">${icon('x', 14)}</button>` : '<span class="mut sm"> (tú)</span>'}
-        </td></tr>`).join('')}
-      </tbody></table>
-    </div>`;
+          ${u.id!==session.id?`<button class="btn danger sm icon-only" onclick="delUser('${u.id}')">${icon('x',14)}</button>`:'<span class="mut sm">(tú)</span>'}
+        </td></tr>`).join('')}</tbody></table></div></div>`;
 }
-function openUser(id) {
-  const u = id ? DB.users.find(x => x.id === id) : { rol: 'instructor', activo: true };
-  openModal(id ? 'Editar usuario' : 'Nuevo usuario', `
+function openUser(id){
+  const u=id?DB.users.find(x=>x.id===id):{rol:'instructor',activo:true};
+  openModal(id?'Editar usuario':'Nuevo usuario',`
     <div class="grid2">
-      <label>Nombre completo<input id="u_nombre" value="${h(u.nombre || '')}"></label>
-      <label>Usuario<input id="u_user" value="${h(u.usuario || '')}"></label>
-      <label>Contraseña<input id="u_pass" value="${h(u.password || '')}"></label>
-      <label>Rol<select id="u_rol">${opts(['admin', 'instructor'], u.rol)}</select></label>
-      <label>Estado<select id="u_activo"><option value="1" ${u.activo ? 'selected' : ''}>Activo</option><option value="0" ${!u.activo ? 'selected' : ''}>Inactivo</option></select></label>
+      <label>Nombre<input id="u_nombre" value="${h(u.nombre||'')}"></label>
+      <label>Usuario<input id="u_user" value="${h(u.usuario||'')}"></label>
+      <label>Contraseña<input id="u_pass" value="${h(u.password||'')}"></label>
+      <label>Rol<select id="u_rol">${opts(['admin','instructor'],u.rol)}</select></label>
+      <label>Estado<select id="u_activo"><option value="1" ${u.activo?'selected':''}>Activo</option><option value="0" ${!u.activo?'selected':''}>Inactivo</option></select></label>
     </div>
-    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveUser('${id || ''}')">Guardar</button></div>`);
+    <div class="row end mt"><button class="btn ghost" onclick="closeModal()">Cancelar</button><button class="btn" onclick="saveUser('${id||''}')">Guardar</button></div>`);
 }
-function saveUser(id) {
-  const data = { nombre: v('u_nombre'), usuario: v('u_user'), password: v('u_pass'), rol: v('u_rol'), activo: v('u_activo') === '1' };
-  if (!data.nombre || !data.usuario || !data.password) return toast('Todos los campos son obligatorios', 'bad');
-  if (DB.users.some(u => u.usuario.toLowerCase() === data.usuario.toLowerCase() && u.id !== id))
-    return toast('Ese nombre de usuario ya existe', 'bad');
-  if (id) {
-    Object.assign(DB.users.find(u => u.id === id), data);
-    if (id === session.id) setSession({ ...session, nombre: data.nombre, rol: data.rol });
-  } else DB.users.push({ id: uid('u'), ...data });
+function saveUser(id){
+  const data={nombre:v('u_nombre'),usuario:v('u_user'),password:v('u_pass'),rol:v('u_rol'),activo:v('u_activo')==='1'};
+  if(!data.nombre||!data.usuario||!data.password) return toast('Todos los campos son obligatorios','bad');
+  if(DB.users.some(u=>u.usuario.toLowerCase()===data.usuario.toLowerCase()&&u.id!==id))
+    return toast('Ese usuario ya existe','bad');
+  if(id){
+    Object.assign(DB.users.find(u=>u.id===id),data);
+    if(id===session.id) setSession({...session,nombre:data.nombre,rol:data.rol});
+  } else DB.users.push({id:uid('u'),...data});
   persist(); closeModal(); render(); toast('Usuario guardado');
 }
-function delUser(id) {
-  if (id === session.id) return toast('No puedes eliminar tu propio usuario', 'bad');
-  if (!confirm('¿Eliminar este usuario?')) return;
-  DB.users = DB.users.filter(u => u.id !== id); persist(); render(); toast('Usuario eliminado');
+function delUser(id){
+  if(id===session.id) return toast('No puedes eliminar tu propio usuario','bad');
+  if(!confirm('¿Eliminar este usuario?')) return;
+  DB.users=DB.users.filter(u=>u.id!==id); persist(); render(); toast('Usuario eliminado');
 }
 
 /* =========================================================
