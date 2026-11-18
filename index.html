@@ -410,8 +410,9 @@ tbody tr:hover td{background:var(--surface-soft)}
     <div class="user-box">
       <div class="user-avatar" id="avatarIni">A</div>
       <div class="user-info">
-        <select id="usuarioSel" onchange="cambiarUsuario(this.value)"></select>
+        <select id="usuarioSel" onchange="solicitarCambioUsuario(this.value)"></select>
         <div class="user-role" id="rolLbl">Administrador</div>
+        <button onclick="abrirCambioMiClave()" style="display:none;background:none;border:none;color:var(--muted);font-size:10.5px;cursor:pointer;padding:0;margin-top:4px;text-decoration:underline;font-family:inherit" id="btnCambiarClave">Cambiar contraseña</button>
         <button onclick="cerrarSesionGlobal()" style="display:none;background:none;border:none;color:var(--muted);font-size:10.5px;cursor:pointer;padding:0;margin-top:4px;text-decoration:underline;font-family:inherit" id="btnLogoutSidebar">Cerrar sesión</button>
       </div>
     </div>
@@ -494,6 +495,8 @@ function mostrarLogin(){
     document.getElementById('btnLogoutTop').style.display = 'none';
   const btnSide = document.getElementById('btnLogoutSidebar');
   if(btnSide) btnSide.style.display = 'none';
+  const btnClave = document.getElementById('btnCambiarClave');
+  if(btnClave) btnClave.style.display = 'none';
   ocultarAuthError();
 }
     
@@ -600,6 +603,7 @@ async function cerrarSesionGlobal(){
   if(!sb) return;
   if(!confirm('¿Cerrar sesión?')) return;
   desuscribirRealtime();
+  limpiarSesionesPerfil();
   await sb.auth.signOut();
 }
 
@@ -681,6 +685,8 @@ async function sincronizarUsuariosRelacionales(){
     if(btn) btn.style.display = 'inline-flex';
     const btnSide = document.getElementById('btnLogoutSidebar');
     if(btnSide) btnSide.style.display = 'inline';
+    const btnClave = document.getElementById('btnCambiarClave');
+    if(btnClave) btnClave.style.display = 'inline';
   }catch(e){
     console.error(e);
     mostrarAuthError('Error al cargar datos: ' + e.message);
@@ -1614,6 +1620,84 @@ const TIPOS_BOLSA = { paso:'Recargas al paso', paquete:'Recargas de paquetes' };
 const $ = id => document.getElementById(id);
 const HOY = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const horaActual = () => { const d=new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+
+/* ================================================================
+   CONTRASEÑAS DE PERFIL (PBKDF2-SHA256)
+   Se guarda solo el hash + salt en el estado del negocio.
+   ================================================================ */
+const CLAVE_ITERACIONES = 210000;
+const CLAVE_MIN_LEN = 6;
+
+function claveBytesABase64(bytes){
+  let bin='';
+  const arr=new Uint8Array(bytes);
+  for(let i=0;i<arr.length;i++) bin+=String.fromCharCode(arr[i]);
+  return btoa(bin);
+}
+function claveBase64ABytes(b64){
+  const bin=atob(String(b64||''));
+  const out=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+  return out;
+}
+async function claveDerivar(clave, salt, iteraciones){
+  if(!window.crypto || !window.crypto.subtle){
+    throw new Error('WebCrypto no disponible. Se requiere HTTPS o localhost.');
+  }
+  const material=await window.crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(String(clave)), 'PBKDF2', false, ['deriveBits']
+  );
+  const bits=await window.crypto.subtle.deriveBits(
+    {name:'PBKDF2', salt, iterations:iteraciones, hash:'SHA-256'}, material, 256
+  );
+  return new Uint8Array(bits);
+}
+async function crearRegistroClave(clave){
+  const salt=window.crypto.getRandomValues(new Uint8Array(16));
+  const iter=CLAVE_ITERACIONES;
+  const hash=await claveDerivar(clave, salt, iter);
+  return {
+    v:1,
+    alg:'PBKDF2-SHA256',
+    iter,
+    salt:claveBytesABase64(salt),
+    hash:claveBytesABase64(hash),
+    actualizado:new Date().toISOString()
+  };
+}
+async function verificarClaveUsuario(clave, registro){
+  if(!clave || !registro || !registro.salt || !registro.hash) return false;
+  try{
+    const salt=claveBase64ABytes(registro.salt);
+    const iter=Number(registro.iter)||CLAVE_ITERACIONES;
+    const obtenido=await claveDerivar(clave, salt, iter);
+    const esperado=claveBase64ABytes(registro.hash);
+    if(obtenido.length!==esperado.length) return false;
+    let diff=0;
+    for(let i=0;i<obtenido.length;i++) diff|=obtenido[i]^esperado[i];
+    return diff===0;
+  }catch(e){
+    console.error('[SIMGest] Error al verificar contraseña:',e);
+    return false;
+  }
+}
+function usuarioTieneClave(u){ return !!(u && u.clave && u.clave.hash && u.clave.salt); }
+function _claveSesionKey(u){ return 'simgest_perfil_ok:'+(sbNegocioId||'local')+':'+(u?.id||''); }
+function marcarSesionPerfil(u){
+  try{
+    if(!u) return;
+    // Solo un perfil puede quedar validado por pestaña. Al cambiar de usuario
+    // se borra la validación anterior para que volver atrás también pida clave.
+    limpiarSesionesPerfil();
+    sessionStorage.setItem(_claveSesionKey(u),'1');
+  }catch(e){}
+}
+function sesionPerfilValida(u){ try{ return usuarioTieneClave(u) ? sessionStorage.getItem(_claveSesionKey(u))==='1' : true; }catch(e){ return false; } }
+function limpiarSesionesPerfil(){
+  try{
+    Object.keys(sessionStorage).filter(k=>k.indexOf('simgest_perfil_ok:')===0).forEach(k=>sessionStorage.removeItem(k));
+  }catch(e){}
+}
 const money = n => 'Bs ' + (Number(n)||0).toLocaleString('es-BO',{minimumFractionDigits:2,maximumFractionDigits:2});
 
 function copiarResumenDeuda(clienteId){
@@ -2167,6 +2251,7 @@ function renderUsuarioSelector(){
 }
 function cambiarUsuario(id){
   const u=userById(id); if(!u) return;
+  marcarSesionPerfil(u);
   usuarioActual=u; state.usuarioActualId=u.id;
   try{ localStorage.setItem(USER_SESSION_KEY_PREFIX + (sbNegocioId || 'local'), String(u.id)); }catch(e){}
   const disponibles=tabsDisponibles().map(t=>t.id);
@@ -2184,6 +2269,158 @@ function cambiarUsuario(id){
   $('rolLbl').textContent=u.rol==='admin'?'Administrador':u.rol==='cajero'?'Cajero':'Cobrador';
   save(); render();
   toast('Sesión iniciada: '+u.nombre,'ok');
+}
+
+/* ---------- BLOQUEO POR CONTRASEÑA DE PERFIL ---------- */
+function solicitarCambioUsuario(id){
+  const u=userById(id);
+  if(!u || u.activo===false || (usuarioActual && String(u.id)===String(usuarioActual.id))){
+    renderUsuarioSelector();
+    return;
+  }
+  if(sesionPerfilValida(u)){
+    cambiarUsuario(u.id);
+    return;
+  }
+  abrirClavePerfil(u, ()=>cambiarUsuario(u.id), {onCancel:()=>renderUsuarioSelector()});
+}
+
+function abrirClavePerfil(usuario, onSuccess, opciones={}){
+  if(!usuario) return;
+  if(!usuarioTieneClave(usuario)){
+    try{ if(typeof onSuccess==='function') onSuccess(); }catch(e){ console.error(e); }
+    return;
+  }
+  const anterior=document.getElementById('simgest-clave-perfil');
+  if(anterior) anterior.remove();
+
+  const overlay=document.createElement('div');
+  overlay.id='simgest-clave-perfil';
+  overlay.style.cssText='position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,18,32,.78);backdrop-filter:blur(6px);';
+  const rol=usuario.rol==='admin'?'Administrador':usuario.rol==='cajero'?'Cajero':'Cobrador';
+  const puedeRecuperar=usuario.rol==='admin' && sb && sbUser && sbUser.email;
+  overlay.innerHTML=`<div style="width:min(100%,430px);background:#fff;border-radius:18px;padding:26px;box-shadow:0 24px 80px rgba(0,0,0,.3);color:#182230">
+    <div style="font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#64748b">SIMGest · Acceso al perfil</div>
+    <div style="display:flex;align-items:center;gap:12px;margin:14px 0 20px">
+      <span style="width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:${esc(usuario.color||'#1c3d5a')};color:#fff;font-weight:700;flex-shrink:0">${esc(iniciales(usuario.nombre))}</span>
+      <div style="min-width:0"><div style="font-size:17px;font-weight:700;line-height:1.2">${esc(usuario.nombre||usuario.id)}</div><div style="font-size:12px;color:#637083;margin-top:3px">${rol} · Código ${esc(usuario.id)}</div></div>
+    </div>
+    <form id="simgest-clave-form" novalidate>
+      <label for="simgest-clave-input" style="display:block;font-size:12px;font-weight:600;color:#344054;margin-bottom:6px">Contraseña del perfil</label>
+      <input id="simgest-clave-input" type="password" autocomplete="current-password" placeholder="Ingresá tu contraseña" style="width:100%;padding:11px 13px;border:1px solid #d0d5dd;border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:#182230;background:#fff">
+      <div id="simgest-clave-error" style="display:none;background:#fef3f2;border:1px solid #fecdca;color:#b42318;border-radius:9px;padding:9px 11px;font-size:12.5px;line-height:1.45;margin-top:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+        <button type="button" id="simgest-clave-cancelar" class="btn btn-outline">Cancelar</button>
+        <button type="submit" id="simgest-clave-entrar" class="btn btn-primary">Entrar</button>
+      </div>
+      ${puedeRecuperar
+        ? `<div style="text-align:center;margin-top:14px"><button type="button" id="simgest-clave-recuperar" style="background:none;border:none;color:#1c3d5a;font-size:11.5px;text-decoration:underline;cursor:pointer;font-family:inherit">¿Olvidaste la contraseña del perfil?</button></div>`
+        : `<div style="text-align:center;color:#8a94a6;font-size:11px;line-height:1.45;margin-top:14px">Si no la recordás, pedile al administrador que la restablezca.</div>`}
+    </form>
+    ${puedeRecuperar?`<form id="simgest-clave-recuperacion" novalidate style="display:none">
+      <div style="background:#f2f6fa;border:1px solid #dbe5ee;border-radius:10px;padding:11px 13px;font-size:12px;line-height:1.5;color:#475467;margin-bottom:14px">
+        Para restablecer la contraseña del perfil vas a verificar la cuenta Supabase <b>${esc(sbUser.email)}</b>.
+      </div>
+      <label for="simgest-clave-admin" style="display:block;font-size:12px;font-weight:600;color:#344054;margin-bottom:6px">Contraseña de la cuenta Supabase</label>
+      <input id="simgest-clave-admin" type="password" autocomplete="current-password" placeholder="Contraseña de la cuenta" style="width:100%;padding:11px 13px;border:1px solid #d0d5dd;border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:#182230;background:#fff">
+      <div id="simgest-clave-admin-error" style="display:none;background:#fef3f2;border:1px solid #fecdca;color:#b42318;border-radius:9px;padding:9px 11px;font-size:12.5px;line-height:1.45;margin-top:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+        <button type="button" id="simgest-clave-volver" class="btn btn-outline">Volver</button>
+        <button type="submit" id="simgest-clave-admin-btn" class="btn btn-primary">Verificar y restablecer</button>
+      </div>
+    </form>`:''}
+  </div>`;
+  document.body.appendChild(overlay);
+
+  const form=overlay.querySelector('#simgest-clave-form');
+  const input=overlay.querySelector('#simgest-clave-input');
+  const error=overlay.querySelector('#simgest-clave-error');
+  const btn=overlay.querySelector('#simgest-clave-entrar');
+  const cancelar=overlay.querySelector('#simgest-clave-cancelar');
+  const mostrarError=msg=>{ error.textContent=msg; error.style.display='block'; };
+  const cerrar=()=>overlay.remove();
+  const cancelarFn=()=>{
+    cerrar();
+    if(typeof opciones.onCancel==='function') opciones.onCancel();
+  };
+  setTimeout(()=>input.focus(),40);
+  cancelar.addEventListener('click',cancelarFn);
+  overlay.addEventListener('keydown',ev=>{
+    if(ev.key==='Escape'){ ev.preventDefault(); cancelarFn(); }
+  });
+  form.addEventListener('submit',async ev=>{
+    ev.preventDefault();
+    const valor=input.value;
+    if(!valor){ mostrarError('Ingresá la contraseña.'); input.focus(); return; }
+    error.style.display='none';
+    const texto=btn.textContent;
+    btn.disabled=true; btn.textContent='Verificando...';
+    try{
+      const ok=await verificarClaveUsuario(valor,usuario.clave);
+      if(!ok){
+        mostrarError('Contraseña incorrecta. Intentá de nuevo.');
+        input.value=''; input.focus();
+        return;
+      }
+      cerrar();
+      if(typeof onSuccess==='function') onSuccess();
+    }finally{
+      btn.disabled=false; btn.textContent=texto;
+    }
+  });
+
+  const recuperar=overlay.querySelector('#simgest-clave-recuperar');
+  const recuperacion=overlay.querySelector('#simgest-clave-recuperacion');
+  const adminInput=overlay.querySelector('#simgest-clave-admin');
+  const adminBtn=overlay.querySelector('#simgest-clave-admin-btn');
+  const adminError=overlay.querySelector('#simgest-clave-admin-error');
+  const volver=overlay.querySelector('#simgest-clave-volver');
+  if(recuperar && recuperacion){
+    recuperar.addEventListener('click',()=>{
+      form.style.display='none';
+      recuperacion.style.display='block';
+      setTimeout(()=>adminInput.focus(),40);
+    });
+  }
+  if(volver && recuperacion){
+    volver.addEventListener('click',()=>{
+      recuperacion.style.display='none';
+      form.style.display='block';
+      setTimeout(()=>input.focus(),40);
+    });
+  }
+  if(recuperacion){
+    recuperacion.addEventListener('submit',async ev=>{
+      ev.preventDefault();
+      const clave=adminInput.value;
+      if(!clave){
+        adminError.textContent='Ingresá la contraseña de la cuenta.';
+        adminError.style.display='block';
+        adminInput.focus();
+        return;
+      }
+      adminError.style.display='none';
+      const texto=adminBtn.textContent;
+      adminBtn.disabled=true; adminBtn.textContent='Verificando...';
+      try{
+        const { error }=await sb.auth.signInWithPassword({email:sbUser.email,password:clave});
+        if(error) throw error;
+        delete usuario.clave;
+        if(usuarioActual && String(usuarioActual.id)===String(usuario.id)) usuarioActual=usuario;
+        save();
+        overlay.remove();
+        marcarSesionPerfil(usuario);
+        toast('Contraseña del perfil restablecida. Podés asignar una nueva en Usuarios.','ok');
+        if(typeof onSuccess==='function') onSuccess();
+      }catch(e){
+        console.error('[SIMGest] Error restableciendo contraseña de perfil:',e);
+        adminError.textContent='No se pudo verificar la cuenta: '+(traducirError(e.message)||e.message);
+        adminError.style.display='block';
+        adminInput.value=''; adminInput.focus();
+        adminBtn.disabled=false; adminBtn.textContent=texto;
+      }
+    });
+  }
 }
 
 /* ================================================================
@@ -2214,6 +2451,7 @@ function renderModal(){
   else if(tipo==='nuevoProveedor'||tipo==='editarProveedor') contenido=modalProveedor(id);
   else if(tipo==='nuevoCliente'||tipo==='editarCliente') contenido=modalCliente(id);
   else if(tipo==='nuevoUsuario'||tipo==='editarUsuario') contenido=modalUsuario(id);
+  else if(tipo==='cambiarClave') contenido=modalCambiarClave();
   else if(tipo==='agregarDinero') contenido=modalDinero('aporte');
   else if(tipo==='retirarDinero') contenido=modalDinero('retiro');
   else if(tipo==='reponerBolsa') contenido=modalReponerBolsa(id,extra);
@@ -2726,7 +2964,7 @@ function modalUsuario(id){
   const countCobradores=state.usuarios.filter(x=>x.rol==='cobrador').length;
   return `
     <div class="modal-head"><div><div class="modal-title">${u?'Editar usuario':'Nuevo usuario'}</div>
-    <div class="card-subtitle">${u?'Cambia el nombre.':`Cajeros: ${countCajeros}/${MAX_CAJEROS} · Cobradores: ${countCobradores}/${MAX_COBRADORES}`}</div></div>
+    <div class="card-subtitle">${u?'Cambiá el nombre, el estado o la contraseña.':`Cajeros: ${countCajeros}/${MAX_CAJEROS} · Cobradores: ${countCobradores}/${MAX_COBRADORES}`}</div></div>
       <button class="modal-close" onclick="cerrarModal()">×</button></div>
     <div class="field"><label>Nombre completo *</label>
       <input id="m-u-nombre" value="${u?esc(u.nombre):''}" autofocus></div>
@@ -2745,6 +2983,17 @@ function modalUsuario(id){
         <input type="hidden" id="m-u-color" value="${COLORES_CAJERO[0]}">
       </div>
     `:''}
+    <div class="field"><label>${u&&usuarioTieneClave(u)?'Nueva contraseña de acceso (opcional)':'Contraseña de acceso *'}</label>
+      <input id="m-u-clave" type="password" autocomplete="new-password" placeholder="${u&&usuarioTieneClave(u)?'Dejar vacío para conservar la actual':'Mínimo 6 caracteres'}">
+    </div>
+    <div class="field"><label>Confirmar contraseña</label>
+      <input id="m-u-clave2" type="password" autocomplete="new-password" placeholder="Repetí la contraseña">
+    </div>
+    <div class="hint">${u
+      ? (usuarioTieneClave(u)
+        ? 'Este perfil ya tiene contraseña. Si no escribís una nueva, se conserva.'
+        : 'Este perfil todavía no tiene contraseña. Asigná una para proteger su acceso.')
+      : 'El usuario deberá ingresarla al iniciar sesión o al cambiar de perfil.'}</div>
     ${esAdminU&&id?`<div class="alert alert-info"><div>El usuario es administrador.</div></div>`:''}
     ${!esAdminU&&id?`<div class="field"><label>Estado</label>
       <select id="m-u-activo">
@@ -3964,14 +4213,32 @@ function accionEliminarCliente(id){
     }
   });
 }
-function guardarUsuario(id){
+async function guardarUsuario(id){
   const n=$('m-u-nombre').value.trim();
   if(!n) return toast('Ingresa nombre','err');
+  const clave=$('m-u-clave')?.value||'';
+  const clave2=$('m-u-clave2')?.value||'';
+  if(clave || clave2){
+    if(clave.length<CLAVE_MIN_LEN) return toast(`La contraseña debe tener al menos ${CLAVE_MIN_LEN} caracteres`,'err');
+    if(clave!==clave2) return toast('Las contraseñas no coinciden','err');
+  }else if(!id){
+    return toast('Asigná una contraseña de acceso','err');
+  }
+  let registroClave=null;
+  if(clave){
+    try{
+      registroClave=await crearRegistroClave(clave);
+    }catch(e){
+      console.error('[SIMGest] Error al cifrar contraseña:',e);
+      return toast('No se pudo cifrar la contraseña. Verificá que la app use HTTPS.','err');
+    }
+  }
   if(id){
     const u=userById(id); if(!u) return toast('Usuario no encontrado','err');
     u.nombre=n;
     if(u.rol!=='admin'&&$('m-u-activo')) u.activo=$('m-u-activo').value==='true';
-    toast('Actualizado','ok'); cerrarModal();
+    if(registroClave) u.clave=registroClave;
+    toast(registroClave?'Usuario y contraseña actualizados':'Usuario actualizado','ok'); cerrarModal();
     if(usuarioActual.id===id){ usuarioActual=u; $('avatarIni').textContent=iniciales(u.nombre); }
     renderUsuarioSelector(); render();
     if(sb && sbNegocioId) sincronizarUsuarioRelacional(u).catch(e=>{
@@ -3984,7 +4251,7 @@ function guardarUsuario(id){
   const color=$('m-u-color').value||COLORES_CAJERO[0];
   if(rol==='cajero'&&state.usuarios.filter(u=>u.rol==='cajero').length>=MAX_CAJEROS) return toast(`Máx ${MAX_CAJEROS} cajeros`,'err');
   if(rol==='cobrador'&&state.usuarios.filter(u=>u.rol==='cobrador').length>=MAX_COBRADORES) return toast(`Máx ${MAX_COBRADORES} cobradores`,'err');
-  const nuevo={id:'U'+(state.seq.usuario++),nombre:n,rol,color,activo:true,creado:HOY()};
+  const nuevo={id:'U'+(state.seq.usuario++),nombre:n,rol,color,activo:true,creado:HOY(),clave:registroClave};
   state.usuarios.push(nuevo);
   toast('Usuario creado','ok');
   cerrarModal(); renderUsuarioSelector(); render();
@@ -3994,6 +4261,62 @@ function guardarUsuario(id){
     console.error('[SIMGest] Error guardando usuario en Supabase:',e);
     toast('Se creó localmente, pero Supabase rechazó el registro: '+(e.message||e),'err');
   });
+}
+
+/* ---------- CAMBIO DE CONTRASEÑA DEL USUARIO ACTUAL ---------- */
+function abrirCambioMiClave(){
+  if(!usuarioActual) return;
+  ui.modal={tipo:'cambiarClave'};
+  renderModal();
+}
+function modalCambiarClave(){
+  const u=usuarioActual;
+  if(!u) return '<div class="empty">Sin usuario</div>';
+  const tiene=usuarioTieneClave(u);
+  return `
+    <div class="modal-head"><div><div class="modal-title">Cambiar mi contraseña</div>
+      <div class="card-subtitle">${esc(u.nombre)} · ${rolNombre()}</div></div>
+      <button class="modal-close" onclick="cerrarModal()">×</button></div>
+    ${tiene?`<div class="field"><label>Contraseña actual *</label>
+      <input id="m-clave-actual" type="password" autocomplete="current-password" placeholder="Tu contraseña actual"></div>`:''}
+    <div class="field"><label>Nueva contraseña *</label>
+      <input id="m-clave-nueva" type="password" autocomplete="new-password" placeholder="Mínimo ${CLAVE_MIN_LEN} caracteres"></div>
+    <div class="field"><label>Confirmar nueva contraseña *</label>
+      <input id="m-clave-nueva2" type="password" autocomplete="new-password" placeholder="Repetí la nueva contraseña"></div>
+    <div class="hint">Es la contraseña de tu perfil en SIMGest, no la de la cuenta Supabase. Se guarda cifrada y se sincroniza con el negocio.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarMiClave" onclick="guardarCambioMiClave()">Guardar contraseña</button>
+    </div>`;
+}
+async function guardarCambioMiClave(){
+  const u=usuarioActual; if(!u) return;
+  const actual=$('m-clave-actual')?.value||'';
+  const nueva=$('m-clave-nueva')?.value||'';
+  const nueva2=$('m-clave-nueva2')?.value||'';
+  if(usuarioTieneClave(u)){
+    if(!actual) return toast('Ingresá tu contraseña actual','err');
+    const ok=await verificarClaveUsuario(actual,u.clave);
+    if(!ok) return toast('La contraseña actual no es correcta','err');
+  }
+  if(nueva.length<CLAVE_MIN_LEN) return toast(`La nueva contraseña debe tener al menos ${CLAVE_MIN_LEN} caracteres`,'err');
+  if(nueva!==nueva2) return toast('Las contraseñas no coinciden','err');
+  if(usuarioTieneClave(u) && nueva===actual) return toast('La nueva contraseña debe ser diferente a la actual','err');
+  setCargando('btnGuardarMiClave',true,'Guardar contraseña');
+  try{
+    u.clave=await crearRegistroClave(nueva);
+    marcarSesionPerfil(u);
+    state.usuarioActualId=u.id;
+    save();
+    cerrarModal();
+    toast('Contraseña actualizada','ok');
+    if(sb && sbNegocioId) sincronizarUsuarioRelacional(u).catch(e=>console.warn('[SIMGest] No se pudo sincronizar el usuario:',e));
+  }catch(e){
+    console.error('[SIMGest] Error al cambiar contraseña:',e);
+    toast('No se pudo guardar la contraseña. Verificá que la app use HTTPS.','err');
+  }finally{
+    setCargando('btnGuardarMiClave',false,'Guardar contraseña');
+  }
 }
 function eliminarUsuario(id){
   const u=userById(id); if(!u) return;
@@ -6556,6 +6879,7 @@ function viewUsuarios(){
             <div class="user-card-name">${esc(u.nombre)} ${esElActual?'<span class="badge badge-success" style="margin-left:6px">Sesión actual</span>':''}</div>
             <div class="user-card-meta">
               <span class="badge ${rolCls}">${rolLbl}</span>
+              ${usuarioTieneClave(u)?'<span class="badge badge-success" style="margin-left:6px">Con contraseña</span>':'<span class="badge badge-warning" style="margin-left:6px">Sin contraseña</span>'}
               ${u.activo===false?'<span class="badge badge-danger" style="margin-left:6px">Inactivo</span>':''}
               ${u.rol==='cajero'?`<span style="margin-left:8px">${ventas} venta(s)</span>`:''}
               ${u.rol==='cobrador'?`<span style="margin-left:8px">${cobros} cobro(s)</span>`:''}
@@ -6563,8 +6887,8 @@ function viewUsuarios(){
           </div>
         </div>
         <div style="display:flex;gap:6px">
-          ${esElActual?'':`<button class="btn btn-outline btn-sm" onclick="cambiarUsuario('${u.id}')">Usar</button>`}
-          <button class="btn-ghost" style="font-size:12px" onclick="abrirModal('editarUsuario','${u.id}')">Editar</button>
+          ${esElActual?'':`<button class="btn btn-outline btn-sm" onclick="solicitarCambioUsuario('${u.id}')">Usar</button>`}
+          <button class="btn-ghost" style="font-size:12px" onclick="abrirModal('editarUsuario','${u.id}')">${usuarioTieneClave(u)?'Editar / contraseña':'Asignar contraseña'}</button>
           ${u.rol!=='admin'?`<button class="btn-ghost" style="font-size:12px;color:var(--danger)" onclick="eliminarUsuario('${u.id}')">Eliminar</button>`:''}
         </div>
       </div>`;
@@ -6843,9 +7167,10 @@ function solicitarUsuarioDeEquipo(){
   overlay.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,18,32,.78);backdrop-filter:blur(6px);';
   const tarjetas=usuarios.map(u=>{
     const rol=u.rol==='admin'?'Administrador':u.rol==='cajero'?'Cajero':'Cobrador';
+    const protegido=usuarioTieneClave(u);
     return `<button type="button" data-simgest-user="${esc(String(u.id))}" style="display:flex;align-items:center;gap:12px;width:100%;padding:14px;border:1px solid #dce3ec;border-radius:12px;background:#fff;color:#182230;text-align:left;cursor:pointer;margin-top:9px;">
       <span style="width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:${esc(u.color||'#1c3d5a')};color:#fff;font-weight:700;flex-shrink:0">${esc(iniciales(u.nombre))}</span>
-      <span style="display:block;min-width:0"><strong style="display:block;font-size:14px">${esc(u.nombre||u.id)}</strong><span style="display:block;font-size:12px;color:#637083;margin-top:3px">${rol} · Código ${esc(u.id)}</span></span>
+      <span style="display:block;min-width:0"><strong style="display:block;font-size:14px">${esc(u.nombre||u.id)}</strong><span style="display:block;font-size:12px;color:#637083;margin-top:3px">${rol} · Código ${esc(u.id)}${protegido?' · 🔒 con contraseña':''}</span></span>
       <span style="margin-left:auto;color:#637083;font-size:20px">›</span>
     </button>`;
   }).join('');
@@ -6854,20 +7179,30 @@ function solicitarUsuarioDeEquipo(){
     <h2 style="font-size:24px;line-height:1.2;margin:9px 0 8px;color:#172033">¿Quién usará este equipo?</h2>
     <p style="font-size:13px;line-height:1.55;color:#5e6878;margin:0 0 12px">Selecciona el perfil que registrará las ventas en esta computadora. Cada venta quedará asociada a este usuario. Esta selección se guarda solo en este navegador.</p>
     ${tarjetas || '<p style="color:#b91c1c">No hay usuarios activos en el estado guardado. No registres ventas hasta recuperar los perfiles.</p>'}
-    <p style="font-size:11px;line-height:1.45;color:#64748b;margin:16px 0 0">Nota: esta selección identifica al operador, pero no sustituye una contraseña individual de acceso.</p>
+    <p style="font-size:11px;line-height:1.45;color:#64748b;margin:16px 0 0">Los perfiles protegidos piden su contraseña al iniciar o al cambiar de usuario. Si no la recordás, pedile al administrador que la restablezca.</p>
   </div>`;
   document.body.appendChild(overlay);
+
+  const finalizar=usuario=>{
+    try{ localStorage.setItem(USER_SESSION_KEY_PREFIX+(sbNegocioId||'local'),String(usuario.id)); }
+    catch(err){ console.error('[SIMGest] No se pudo guardar el perfil de este equipo:',err); }
+    window.__SIMGEST_SELECCION_INICIAL_REQUIRED=false;
+    marcarSesionPerfil(usuario);
+    overlay.remove();
+    cambiarUsuario(String(usuario.id));
+  };
+
   overlay.addEventListener('click',ev=>{
     const boton=ev.target.closest('[data-simgest-user]');
     if(!boton) return;
     const id=boton.getAttribute('data-simgest-user');
     const usuario=userById(id);
     if(!usuario || usuario.activo===false) return;
-    try{ localStorage.setItem(USER_SESSION_KEY_PREFIX+(sbNegocioId||'local'),String(usuario.id)); }
-    catch(err){ console.error('[SIMGest] No se pudo guardar el perfil de este equipo:',err); }
-    window.__SIMGEST_SELECCION_INICIAL_REQUIRED=false;
-    overlay.remove();
-    cambiarUsuario(String(usuario.id));
+    if(usuarioTieneClave(usuario)){
+      abrirClavePerfil(usuario, ()=>finalizar(usuario));
+    }else{
+      finalizar(usuario);
+    }
   });
 }
 
@@ -6984,10 +7319,14 @@ window.arrancarApp = async function(){
 
     const claveUsuarioLocal = USER_SESSION_KEY_PREFIX + (sbNegocioId || 'local');
     const usuarioLocalId = localStorage.getItem(claveUsuarioLocal);
-    const usuarioLocalValido = userById(usuarioLocalId) && userById(usuarioLocalId).activo !== false;
+    const usuarioRecordado = userById(usuarioLocalId);
+    const usuarioLocalValido = usuarioRecordado && usuarioRecordado.activo !== false;
     // No asignar automáticamente U1 en una computadora nueva. La selección explícita
     // evita que las ventas del puesto de un cajero queden registradas por error al admin.
-    window.__SIMGEST_SELECCION_INICIAL_REQUIRED = !usuarioLocalValido;
+    // Si el perfil recordado está protegido y esta pestaña todavía no validó su clave,
+    // se vuelve a pedir la selección + contraseña.
+    const requiereClaveRecordada = !!(usuarioRecordado && !sesionPerfilValida(usuarioRecordado));
+    window.__SIMGEST_SELECCION_INICIAL_REQUIRED = !usuarioLocalValido || requiereClaveRecordada;
     usuarioActual = usuarioLocalValido
       ? userById(usuarioLocalId)
       : (state.usuarios.find(u=>u.rol==='admin' && u.activo!==false) || state.usuarios.find(u=>u.activo!==false) || state.usuarios[0]);
@@ -6999,6 +7338,8 @@ window.arrancarApp = async function(){
     $('avatarIni').textContent=iniciales(usuarioActual.nombre);
     $('avatarIni').style.background=usuarioActual.color||'#8a6d3b';
     $('rolLbl').textContent=usuarioActual.rol==='admin'?'Administrador':usuarioActual.rol==='cajero'?'Cajero':'Cobrador';
+    const btnClave=document.getElementById('btnCambiarClave');
+    if(btnClave) btnClave.style.display='inline';
 
     // 🛡️ SANITY CHECK: nunca operar con state vacío si hay backup disponible
     if((state.ventas?.length || 0) === 0 && (state.caja?.movimientos?.length || 0) === 0){
