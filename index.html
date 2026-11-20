@@ -4224,6 +4224,12 @@ async function guardarUsuario(id){
   }else if(!id){
     return toast('Asigná una contraseña de acceso','err');
   }
+  if(id){
+    const u0=state.usuarios.find(x=>x.id===id);
+    if(u0 && u0.rol==='admin' && !usuarioTieneClave(u0) && !clave){
+      return toast('El administrador debe tener contraseña de acceso. Asígnale una.','err');
+    }
+  }
   let registroClave=null;
   if(clave){
     try{
@@ -6003,7 +6009,10 @@ function restablecerSistema(){
           <div class="card-title">Bonificaciones · ${nombreMes(mesBonif)}</div>
           <div class="card-subtitle">Tarjetas (margen) + Recargas (manuales)</div>
         </div>
-        <button class="btn btn-outline btn-sm" onclick="abrirModal('verBonificaciones')">Ver desglose completo</button>
+        <div class="btn-row" style="align-items:center;gap:8px">
+          <input type="month" value="${mesBonif}" onchange="ui.cajaBonifPeriodo=this.value; render()" style="width:auto;padding:6px 10px;font-size:12.5px">
+          <button class="btn btn-outline btn-sm" onclick="abrirModal('verBonificaciones')">Ver desglose completo</button>
+        </div>
       </div>
       <div class="grid-2" style="margin-bottom:16px">
         <div style="background:var(--info-soft);border-radius:10px;padding:16px;border:1px solid #d1e0ec">
@@ -8130,8 +8139,11 @@ function modalEditarVenta(id){
       <button class="modal-close" onclick="cerrarModal()">×</button>
     </div>
     <div class="alert alert-warning"><div>
-      <strong>Cambios impactan automáticamente:</strong> stock, saldo de bolsas, caja y deuda del cliente. La venta no cambia de fecha ni de número.
+      <strong>Cambios impactan automáticamente:</strong> stock, saldo de bolsas, caja y deuda del cliente. El número de venta no cambia, pero sí puedes corregir la fecha.
     </div></div>
+    <div class="field"><label>Fecha de la venta</label>
+      <input id="mev-fecha" type="date" value="${v.fecha}" max="${HOY()}">
+      <div class="hint">Si el cajero registró mal la fecha, corrígela aquí. La caja y los reportes usarán esta fecha.</div></div>
     <div class="field"><label>Cliente</label>
       <select id="mev-cliente">
         <option value="">Consumidor final</option>
@@ -8215,6 +8227,13 @@ function guardarEdicionVenta(id){
   const nuevoTipo = $('mev-tipo').value;
   const nuevoPlazo = nuevoTipo==='credito' ? (Number($('mev-plazo').value)||15) : null;
 
+  const nuevaFecha = $('mev-fecha')?.value || v.fecha;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(nuevaFecha) || Number.isNaN(Date.parse(nuevaFecha+'T12:00:00'))) return toast('Selecciona una fecha válida','err');
+  if(nuevaFecha > HOY()) return toast('La fecha de la venta no puede ser futura','err');
+  if(mesCerrado(mesDe(nuevaFecha)) && !mesCerrado(mesDe(v.fecha))){
+    if(!confirm(`El mes ${nombreMes(mesDe(nuevaFecha))} está cerrado. ¿Deseas guardar esta venta en el mes cerrado?`)) return;
+  }
+
   const eliminados = ui.ventaEliminarItems?.[id] || new Set();
   const itemsNuevos = [];
   v.items.forEach((it,ix)=>{
@@ -8263,6 +8282,7 @@ function guardarEdicionVenta(id){
   v.clienteId = nuevoClienteId;
   v.clienteNombre = nuevoCliente ? nuevoCliente.nombre : 'Consumidor final';
   v.tipoPago = nuevoTipo;
+  v.fecha = nuevaFecha;
   v.plazo = nuevoPlazo;
   v.vencimiento = nuevoTipo==='credito' ? addDias(v.fecha, nuevoPlazo) : null;
   v.items = itemsNuevos;
@@ -8286,6 +8306,7 @@ function guardarEdicionVenta(id){
 
   toast('Venta actualizada','ok');
   cerrarModal();
+  save();
   render();
 }
 
@@ -8455,6 +8476,7 @@ function guardarEdicionCompra(id){
 
   toast('Compra actualizada','ok');
   cerrarModal();
+  save();
   render();
 }
 
@@ -8512,7 +8534,9 @@ function guardarEdicionGasto(id){
   agregarMovimientoCaja('gasto', -monto, 'Gasto · '+cat+(desc?' · '+desc:''), id, fecha);
 
   toast('Gasto actualizado','ok');
-  cerrarModal(); render();
+  cerrarModal();
+  save();
+  render();
 }
 
 /* ---------- MOVIMIENTO DE CAJA MANUAL: EDITAR ---------- */
@@ -8580,7 +8604,9 @@ function guardarEdicionMovimientoCaja(id){
   m.descripcion = desc || m.descripcion;
 
   toast('Movimiento actualizado','ok');
-  cerrarModal(); render();
+  cerrarModal();
+  save();
+  render();
 }
 
 /* ---------- ABONO: DETALLE ---------- */
@@ -8634,7 +8660,9 @@ function guardarEdicionAbono(id){
     mov.metodoPago=metodo;
   }
   toast('Cobro actualizado','ok');
-  cerrarModal(); render();
+  cerrarModal();
+  save();
+  render();
 }
 function modalDetalleAbono(id){
   const a = state.abonos.find(x=>x.id===id);
